@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Capybara Ghibli Studio — Ambiance Apaisante</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#0a0a12;--bg2:#12121c;--bg3:#1a1a28;
+--panel:#16161f;--border:#2a2a3a;
+--ink:#e8e6e0;--dim:#8a8896;--faint:#4a4858;
+--acc:#e5c15a;--acc2:#e87b35;--ghibli:#7db87d;--ghibli2:#c8b0e0;
+--ok:#4a9d6a;--err:#c85a4a;--warn:#d4a017;
+--r:6px;--fs:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+--fm:ui-monospace,'SF Mono',Menlo,monospace;
+}
+html,body{background:var(--bg)}
+body{font-family:var(--fs);background:var(--bg);color:var(--ink);min-height:100vh;padding:1.5rem 1rem 24rem;font-size:15px;line-height:1.55;max-width:1000px;margin:0 auto}
+header{margin-bottom:1.2rem;text-align:center;padding:1rem 0 1.4rem;position:relative}
+header::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:180px;height:1px;background:linear-gradient(90deg,transparent,var(--ghibli),var(--acc),var(--ghibli2),transparent);opacity:.6}
+h1{font-size:1.8rem;font-weight:300;margin-bottom:.4rem;background:linear-gradient(135deg,var(--ghibli),var(--acc),var(--ghibli2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{font-size:.85rem;color:var(--dim);font-style:italic}
+.toast{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--bg3);color:var(--ink);border:1px solid var(--border);border-left:3px solid var(--acc);padding:.85rem 1.4rem;border-radius:var(--r);font-size:.85rem;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:1000;opacity:0;transition:transform .35s cubic-bezier(.2,.9,.3,1.2),opacity .35s;max-width:90vw;text-align:center;display:flex;align-items:center;gap:.6rem}
+.toast.visible{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{border-left-color:var(--ok)}.toast.error{border-left-color:var(--err)}.toast.warn{border-left-color:var(--warn)}
+.banner{background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--ghibli);padding:1rem 1.15rem;border-radius:var(--r);font-size:.8rem;color:var(--dim);margin-bottom:1.2rem;line-height:1.6}
+.banner strong{color:var(--ink)}.banner .hl{color:var(--ghibli)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.3rem;margin-bottom:1rem}
+.panel.ok{box-shadow:inset 3px 0 0 var(--ok)}
+input[type=password],input[type=text],textarea{width:100%;padding:.85rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--ink);font-family:var(--fm);font-size:.78rem;margin-bottom:.6rem}
+textarea{resize:vertical;min-height:76px;line-height:1.5;font-family:var(--fs);font-size:.88rem}
+input:focus,textarea:focus{outline:none;border-color:var(--ghibli)}
+.btn{width:100%;padding:.85rem 1.2rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--ink);font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:.7rem;transition:all .2s;font-family:inherit}
+.btn:hover:not(:disabled){background:var(--bg3);border-color:var(--ghibli)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{border-color:var(--ghibli);background:linear-gradient(135deg,rgba(125,184,125,.2),rgba(229,193,90,.15));color:var(--ghibli);font-size:1.05rem;padding:1.3rem;letter-spacing:.2em}
+.btn-stop{border-color:var(--err);color:var(--err);background:transparent;display:none}
+.btn-stop.visible{display:block}
+.status{font-size:.75rem;padding:.6rem .9rem;border-radius:var(--r);margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;background:var(--bg2);color:var(--dim);border:1px solid var(--border)}
+.status.ok{background:rgba(74,157,106,.08);color:var(--ok);border-color:rgba(74,157,106,.3)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex-shrink:0}
+.status.ok .dot{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.hint{font-size:.72rem;color:var(--dim);margin-top:.5rem}
+.hint a{color:var(--ghibli);text-decoration:none}
+.section{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);margin-bottom:1rem;overflow:hidden}
+.section.hidden{display:none!important}
+.section-header{padding:1rem 1.2rem;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center}
+.section-title{font-size:.85rem;text-transform:uppercase;letter-spacing:.2em;color:var(--ink);font-weight:500;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.badge{display:inline-block;padding:.15rem .55rem;background:transparent;color:var(--ghibli);border:1px solid var(--border);border-radius:2px;font-size:.6rem;letter-spacing:.15em;font-weight:600}
+.chevron{font-size:.7rem;color:var(--faint);transition:transform .3s}
+.section.open .chevron{transform:rotate(180deg);color:var(--ghibli)}
+.section-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.section.open .section-body{max-height:12000px}
+.section-content{padding:0 1.2rem 1.2rem}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--panel);margin-bottom:1rem}
+.upload-zone:active{border-color:var(--ghibli);background:var(--bg2)}
+.upload-zone.loading{pointer-events:none;opacity:.6}
+.upload-zone input[type="file"]{display:none}
+.upload-zone .upload-icon{font-size:2rem;margin-bottom:.5rem;opacity:.6}
+.upload-zone .upload-text{font-size:.9rem;color:var(--ink);margin-bottom:.2rem}
+.upload-zone .upload-hint{font-size:.72rem;color:var(--dim)}
+.images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.6rem;margin-bottom:1rem}
+.image-card{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--bg2);position:relative}
+.image-card img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block}
+.image-card .remove-btn{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#fff;border:none;width:24px;height:24px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.palette-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem}
+.palette-btn{flex:1;min-width:80px;padding:.55rem .3rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--dim);font-size:.62rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center;font-family:inherit}
+.palette-btn:hover{border-color:var(--faint);color:var(--ink)}
+.palette-btn.active{border-color:var(--ghibli);color:var(--ghibli);background:rgba(125,184,125,.06)}
+.control-row{margin-bottom:.9rem}
+.control-label{display:block;font-size:.72rem;color:var(--dim);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.15em;font-weight:600}
+select{width:100%;padding:.8rem .95rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--ink);font-family:var(--fs);font-size:.88rem;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%237db87d' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right .95rem center;background-size:10px;cursor:pointer}
+select:focus{outline:none;border-color:var(--ghibli)}
+select option{background:var(--bg2);color:var(--ink)}
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:.8rem}
+.scene-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .3s;display:flex;flex-direction:column}
+.scene-card.generating{border-color:var(--acc)}
+.scene-card.done{border-color:var(--ok)}
+.scene-card.error{border-color:var(--err)}
+.scene-card-header{padding:.55rem .75rem;font-size:.7rem;font-family:var(--fm);color:var(--dim);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);gap:.5rem}
+.scene-card-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.scene-card-body{padding:.7rem}
+.scene-card-body video{width:100%;border-radius:2px;background:#000;display:block;aspect-ratio:9/16;object-fit:cover}
+.scene-placeholder{width:100%;aspect-ratio:9/16;background:#0a0a12;border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:.7rem;font-family:var(--fm);flex-direction:column;gap:.5rem;text-align:center;padding:.5rem}
+.scene-download{display:block;margin-top:.5rem;font-size:.72rem;color:var(--ghibli);text-decoration:none;text-align:center;padding:.4rem;border:1px solid var(--border);border-radius:3px;transition:all .2s}
+.scene-download:hover{background:rgba(125,184,125,.08);border-color:var(--ghibli)}
+.spinner-mini{width:14px;height:14px;border:2px solid rgba(125,184,125,.2);border-top-color:var(--ghibli);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.youtube-panel{background:linear-gradient(135deg,rgba(125,184,125,.08),rgba(200,176,224,.06));border:1px solid var(--ghibli);border-left:3px solid var(--ghibli);border-radius:var(--r);padding:1.2rem 1.3rem;margin-top:1rem;display:none}
+.youtube-panel.visible{display:block}
+.youtube-title{font-size:.9rem;color:var(--ghibli);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.8rem}
+.yt-field{margin-bottom:.9rem}
+.yt-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:.3rem;font-weight:600}
+.yt-value{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:.7rem .9rem;font-family:var(--fm);font-size:.78rem;color:var(--ink);line-height:1.6;white-space:pre-wrap;word-break:break-word;position:relative}
+.yt-copy{position:absolute;top:.4rem;right:.4rem;background:var(--bg2);border:1px solid var(--border);color:var(--dim);font-size:.6rem;padding:.2rem .5rem;border-radius:2px;cursor:pointer;font-family:inherit}
+.yt-copy:hover{color:var(--ghibli);border-color:var(--ghibli)}
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg3);border-top:1px solid var(--border);color:var(--ink);padding:.75rem 1.1rem;font-size:.78rem;display:flex;align-items:center;gap:.7rem;transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.9,.3,1);z-index:100;font-family:var(--fm);box-shadow:0 -4px 20px rgba(0,0,0,.4)}
+.status-bar.visible{transform:translateY(0)}
+.spinner{width:12px;height:12px;border:2px solid rgba(125,184,125,.2);border-top-color:var(--ghibli);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+.debug-panel{position:fixed;bottom:0;left:0;right:0;height:220px;background:#05050a;border-top:2px solid var(--ghibli);z-index:200;display:flex;flex-direction:column;font-family:var(--fm);box-shadow:0 -8px 32px rgba(0,0,0,.7);transition:height .3s ease}
+.debug-panel.collapsed{height:40px}
+.debug-header{display:flex;justify-content:space-between;align-items:center;padding:.4rem .7rem;background:linear-gradient(90deg,#0f0f18,#1a1a28);border-bottom:1px solid var(--border);flex-shrink:0;user-select:none}
+.debug-tabs{display:flex;gap:.25rem}
+.debug-tab{background:transparent;border:1px solid var(--border);color:var(--dim);font-size:.68rem;padding:.35rem .7rem;border-radius:3px;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;font-family:inherit}
+.debug-tab.active{color:var(--ghibli);border-color:var(--ghibli);background:rgba(125,184,125,.08)}
+.debug-actions{display:flex;gap:.3rem}
+.debug-actions button{background:transparent;border:1px solid var(--border);color:var(--dim);font-size:.62rem;padding:.28rem .55rem;border-radius:2px;cursor:pointer;font-family:inherit}
+.debug-actions button:hover{color:var(--ghibli);border-color:var(--ghibli)}
+.debug-body{flex:1;overflow-y:auto;padding:.6rem .8rem 1rem;font-size:.72rem;line-height:1.5;color:#c8c8d0}
+.debug-body.hidden{display:none}
+.journal-body{font-size:.78rem;line-height:1.55}
+.journal-body .j-entry{display:flex;gap:.6rem;padding:.25rem 0;align-items:flex-start;border-bottom:1px dashed rgba(255,255,255,.04)}
+.journal-body .j-entry:last-child{border-bottom:none}
+.journal-body .j-time{font-family:var(--fm);font-size:.7rem;color:var(--faint);flex-shrink:0;min-width:64px;padding-top:.15rem}
+.journal-body .j-icon{flex-shrink:0}
+.journal-body .j-msg{color:#d8d8e0;flex:1;word-break:break-word}
+.journal-body .j-entry.highlight .j-msg{color:var(--ghibli);font-weight:600}
+.journal-body .j-entry.success .j-msg{color:var(--ok)}
+.journal-body .j-entry.warn .j-msg{color:var(--warn)}
+.journal-body .j-entry.error .j-msg{color:var(--err)}
+.debug-entry{margin-bottom:.3rem;padding:.25rem .4rem;border-left:2px solid transparent;border-radius:2px;word-break:break-word}
+.debug-entry.info{border-left-color:var(--faint)}
+.debug-entry.success{border-left-color:var(--ok);background:rgba(74,157,106,.04)}
+.debug-entry.warn{border-left-color:var(--warn);background:rgba(212,160,23,.04)}
+.debug-entry.error{border-left-color:var(--err);background:rgba(200,90,74,.06);color:#f0a0a0}
+.debug-entry.api{border-left-color:var(--ghibli)}
+.debug-entry.response{border-left-color:var(--acc2)}
+.debug-time{color:var(--faint);margin-right:.5rem;font-size:.65rem}
+.debug-cat{color:var(--ghibli);font-weight:600;margin-right:.4rem;font-size:.65rem}
+.debug-msg{color:#d8d8e0}
+.debug-data{margin-top:.3rem;padding:.4rem .5rem;background:#0a0a12;border:1px solid var(--border);border-radius:2px;font-size:.68rem;color:#a8d8b0;max-height:160px;overflow:auto;white-space:pre-wrap;word-break:break-all;line-height:1.4}
+.hidden{display:none!important}
+@media(max-width:480px){h1{font-size:1.4rem}.videos-grid{grid-template-columns:1fr}body{padding-bottom:26rem}.debug-panel{height:200px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Capybara Ghibli Studio</h1>
+<p class="subtitle">Tes photos → vidéos d'ambiance apaisante style Ghibli · Mascotte capybara · Titre & description YouTube</p>
+</header>
+
+<div class="banner">
+<strong>Principe :</strong> ajoute tes photos, choisis un sous-style Ghibli, un mouvement doux et une palette. L'IA transforme chaque image en <span class="hl">vidéo d'ambiance cozy</span> avec un <span class="hl">capybara mascotte</span>, puis te donne le <span class="hl">titre + description YouTube</span> pour maximiser les vues.
+</div>
+
+<!-- ═══════════ API ═══════════ -->
+<div class="panel" id="api-panel">
+<label class="label" style="display:block;font-size:.72rem;color:var(--dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.15em;font-weight:600;">Clés API Agnes — une par ligne (chaque clé = 1 worker vidéo)</label>
+<textarea id="api-keys-input" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx&#10;sk-yyyyyyyyyyyyyyyyyyyyyyyy" rows="2" spellcheck="false" autocomplete="off"></textarea>
+<button type="button" class="btn" id="api-save-btn">Enregistrer les clés</button>
+<div class="status" id="api-status-line"><span class="dot"></span><span id="api-status-text">Aucune clé API enregistrée</span></div>
+<div class="hint">Clés gratuites sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys</div>
+</div>
+
+<!-- ═══════════ PHOTOS ═══════════ -->
+<div class="section open" id="section-photos">
+<div class="section-header" data-toggle="section-photos">
+<span class="section-title">🖼️ Tes photos <span class="badge" id="photos-count-badge">0</span></span>
+<span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="upload-zone" id="upload-zone">
+<input type="file" id="file-input" accept="image/*" multiple>
+<div class="upload-icon">＋</div>
+<div class="upload-text">Ajoute tes photos</div>
+<div class="upload-hint">Chacune deviendra une vidéo d'ambiance Ghibli avec capybara</div>
+</div>
+<div class="images-grid" id="images-grid"></div>
+</div></div>
+</div>
+
+<!-- ═══════════ STYLE GHIBLI ═══════════ -->
+<div class="section open" id="section-style">
+<div class="section-header" data-toggle="section-style">
+<span class="section-title">🌿 Sous-style Ghibli <span class="badge">choisis-en un</span></span>
+<span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="control-row">
+<label class="control-label">Ambiance visuelle</label>
+<select id="ghibli-substyle">
+<option value="meadow">🌾 Prairie ensoleillée (Totoro) — herbes hautes, ciel d'été, lumière dorée</option>
+<option value="forest">🌲 Forêt mythique (Mononoke) — mousse, brume, verts profonds</option>
+<option value="cozy-interior">🏡 Intérieur chaleureux (Kiki) — bois, thé, lumière tamisée</option>
+<option value="seaside">🌊 Bord de mer (Ponyo) — vagues douces, ciel pastel, embruns</option>
+<option value="starry-night">🌙 Nuit étoilée (Nausicaä) — ciel profond, lucioles, silence</option>
+</select>
+</div>
+<div class="control-row">
+<label class="control-label">Palette douce</label>
+<div class="palette-row" id="palette-row"></div>
+</div>
+</div></div>
+</div>
+
+<!-- ═══════════ MOUVEMENT & DURÉE ═══════════ -->
+<div class="section" id="section-settings">
+<div class="section-header" data-toggle="section-settings">
+<span class="section-title">⚙️ Mouvement & durée</span>
+<span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="control-row">
+<label class="control-label">Mouvement de caméra</label>
+<select id="camera-move">
+<option value="slow-drift" selected>Dérive lente (drift horizontal)</option>
+<option value="gentle-pan">Panoramique doux</option>
+<option value="breeze">Brise dans les herbes / cheveux</option>
+<option value="breathing">Respiration (zoom très lent)</option>
+</select>
+</div>
+<div class="control-row">
+<label class="control-label">Durée par clip</label>
+<select id="duration-select">
+<option value="121">5 secondes</option>
+<option value="145" selected>6 secondes</option>
+<option value="169">7 secondes</option>
+<option value="241">10 secondes</option>
+</select>
+</div>
+</div></div>
+</div>
+
+<!-- ═══════════ LANCER ═══════════ -->
+<button type="button" class="btn btn-primary" id="generate-btn" disabled>
+🌿 Créer les vidéos d'ambiance
+</button>
+<button type="button" class="btn btn-stop" id="stop-btn">⏹ Arrêter</button>
+
+<!-- ═══════════ VIDÉOS ═══════════ -->
+<div class="section hidden" id="section-videos">
+<div class="section-header" data-toggle="section-videos">
+<span class="section-title">🎞️ Vidéos générées <span class="badge" id="videos-count">0</span></span>
+<span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="videos-grid" id="videos-grid"></div>
+</div></div>
+</div>
+
+<!-- ═══════════ YOUTUBE ═══════════ -->
+<div class="youtube-panel" id="youtube-panel">
+<div class="youtube-title">📺 Package YouTube — prêt à copier</div>
+<div class="yt-field">
+<div class="yt-label">Titre optimisé</div>
+<div class="yt-value" id="yt-title">—</div>
+</div>
+<div class="yt-field">
+<div class="yt-label">Description</div>
+<div class="yt-value" id="yt-desc">—</div>
+</div>
+<div class="yt-field">
+<div class="yt-label">Tags</div>
+<div class="yt-value" id="yt-tags">—</div>
+</div>
+</div>
+
+<div class="status-bar" id="status-bar"><div class="spinner"></div><span id="status-text">Préparation…</span></div>
+<div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-text">Message</span></div>
+
+<!-- ═══════════ DEBUG ═══════════ -->
+<div class="debug-panel" id="debug-panel">
+<div class="debug-header" id="debug-header">
+<div class="debug-tabs">
+<button type="button" class="debug-tab active" data-tab="journal" id="tab-journal">📻 Journal</button>
+<button type="button" class="debug-tab" data-tab="tech" id="tab-tech">🖥️ Technique</button>
+</div>
+<div class="debug-actions">
+<button type="button" id="debug-copy-btn">Copier</button>
+<button type="button" id="debug-clear-btn">Effacer</button>
+<button type="button" id="debug-collapse-btn">−</button>
+</div>
+</div>
+<div class="debug-body journal-body" id="journal-body"></div>
+<div class="debug-body hidden" id="tech-body"></div>
+</div>
+
+<canvas id="noSleepCanvas" width="2" height="2"></canvas>
+<video id="noSleepVideo" playsinline muted loop></video>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIG — INCHANGÉE
+// ══════════════════════════════════════════════════════════════════
+const API_BASE = 'https://apihub.agnes-ai.com/v1';
+const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
+const MODEL_TEXT = 'agnes-2.5-flash';
+const MODEL_IMAGE = 'agnes-image-2.1-flash';
+const MODEL_VIDEO = 'agnes-video-v2.0';
+const FRAME_RATE = 24;
+
+const VIDEO_FIRST_POLL_DELAY_SEC = 60;
+const VIDEO_POLL_INTERVALS = [8, 8, 12, 12, 20, 20, 25];
+const VIDEO_MAX_POLL_ATTEMPTS = 100;
+
+const API_KEYS_STORAGE = 'capybara_ghibli_keys_v1';
+const DEBUG_MAX = 600;
+
+// ══════════════════════════════════════════════════════════════════
+// PALETTES GHIBLI
+// ══════════════════════════════════════════════════════════════════
+const GHIBLI_PALETTES = [
+  { id:'totoro', label:'Totoro — Vert prairie', colors:['#7db87d','#a8d8a8','#f5f0e1','#e5c15a','#5a8a5a'] },
+  { id:'mononoke', label:'Mononoke — Forêt profonde', colors:['#3a5a3a','#6a8a6a','#c8d8c0','#8a7a5a','#2a3a2a'] },
+  { id:'kiki', label:'Kiki — Intérieur chaleureux', colors:['#d4a850','#e8c8a0','#8a6a4a','#f5e8d0','#6a4a2a'] },
+  { id:'ponyo', label:'Ponyo — Mer pastel', colors:['#a8d8e8','#c8e8f0','#f5f0e8','#e8b8c8','#6a9ab0'] },
+  { id:'nausicaa', label:'Nausicaä — Nuit bleutée', colors:['#4a6a8a','#7a9ab8','#c8d8e8','#e8d8a8','#2a3a4a'] }
+];
+
+const SUBSTYLE_PROMPTS = {
+  meadow: 'sunlit meadow with tall grass, warm golden hour, painterly cumulus clouds, gentle breeze through grass, soft watercolor washes, hand-drawn ink lines, muted earth tones, Hayao Miyazaki aesthetic',
+  forest: 'ancient mossy forest, misty morning light through cedars, deep desaturated greens, dappled shadows, painterly watercolor background, hand-drawn animation, Mononoke territory, quiet wonder',
+  'cozy-interior': 'cozy wooden interior, tatami room, soft diffused light through shoji doors, steaming tea, warm earth tones, hand-painted watercolor texture, gentle domestic stillness, Kiki aesthetic',
+  seaside: 'gentle seaside, soft pastel sky, small waves lapping shore, sea mist, warm afternoon light, painterly watercolor washes, hand-drawn line work, Ponyo aesthetic, serene and airy',
+  'starry-night': 'starry night sky, deep blue gradient, floating fireflies, soft moonlight, silent landscape, painterly watercolor texture, hand-drawn animation, Nausicaä aesthetic, peaceful and vast'
+};
+
+const CAMERA_MOVE_PROMPTS = {
+  'slow-drift': 'extremely slow horizontal camera drift, imperceptible movement, dreamlike pacing',
+  'gentle-pan': 'gentle slow pan, calm and steady, like a breath',
+  breeze: 'subtle breeze moving through grass and fur, leaves trembling softly, hair gently swaying',
+  breathing: 'very slow zoom in, breathing rhythm, meditative stillness'
+};
+
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
+const state = {
+  keyPool: [],
+  images: [],
+  videos: [],
+  isRunning: false,
+  stopRequested: false,
+  selectedPalette: 'totoro',
+  ghibliSubstyle: 'meadow',
+  cameraMove: 'slow-drift',
+  durationFrames: 145,
+  workingPollUrlBuilder: null,
+  youtubePackage: null
+};
+
+// ══════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function setStatus(text){const b=document.getElementById('status-bar');const t=document.getElementById('status-text');if(!b||!t)return;if(text){b.classList.add('visible');t.textContent=text}else b.classList.remove('visible')}
+
+let toastTimeout=null;
+function showToast(message,type='success',duration=2800){const t=document.getElementById('toast');const i=document.getElementById('toast-icon');const x=document.getElementById('toast-text');if(!t||!i||!x)return;t.classList.remove('visible','success','error','warn');void t.offsetWidth;const icons={success:'✓',error:'✕',warn:'⚠'};i.textContent=icons[type]||'✓';x.textContent=message;t.classList.add(type);requestAnimationFrame(()=>t.classList.add('visible'));if(toastTimeout)clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>t.classList.remove('visible'),duration)}
+
+function nowTime(){return new Date().toLocaleTimeString('fr-FR',{hour12:false})}
+
+// ══════════════════════════════════════════════════════════════════
+// JOURNAL & DEBUG
+// ══════════════════════════════════════════════════════════════════
+function journalLog(msg, level){
+  level = level || 'info';
+  const body = document.getElementById('journal-body');
+  if(!body) return;
+  const icons = { info:'·', highlight:'▶', success:'✅', warn:'⚠️', error:'❌', video:'🎥', image:'🖼️', key:'🔑', youtube:'📺' };
+  const icon = icons[level] || '·';
+  const entry = document.createElement('div');
+  entry.className = 'j-entry ' + level;
+  entry.innerHTML = '<span class="j-time">'+esc(nowTime())+'</span><span class="j-icon">'+icon+'</span><span class="j-msg">'+esc(msg)+'</span>';
+  body.appendChild(entry);
+  body.scrollTop = body.scrollHeight;
+  while(body.children.length > DEBUG_MAX) body.removeChild(body.firstChild);
+}
+
+let debugCount=0,debugEntries=[],debugCollapsed=false,currentTab='journal';
+function debugLog(level,category,message,data){const body=document.getElementById('tech-body');if(!body)return;const time=nowTime();const entry=document.createElement('div');entry.className='debug-entry '+level;let html='<span class="debug-time">'+time+'</span><span class="debug-cat">['+esc(category)+']</span><span class="debug-msg">'+esc(message)+'</span>';if(data!==undefined&&data!==null){let ds;if(typeof data==='string')ds=data;else{try{ds=JSON.stringify(data,null,2)}catch(e){ds=String(data)}}if(ds.length>3000)ds=ds.slice(0,3000)+'\n…[tronqué]';html+='<pre class="debug-data">'+esc(ds)+'</pre>'}entry.innerHTML=html;body.appendChild(entry);debugEntries.push({time,level,category,message});if(debugEntries.length>DEBUG_MAX)debugEntries.shift();while(body.children.length>DEBUG_MAX)body.removeChild(body.firstChild);body.scrollTop=body.scrollHeight;debugCount++;}
+function clearDebug(){const b=document.getElementById('tech-body');const j=document.getElementById('journal-body');if(b)b.innerHTML='';if(j)j.innerHTML='';debugEntries=[];debugCount=0;}
+function copyDebug(){const lines=debugEntries.map(e=>e.time+' ['+e.category+'] '+e.message).join('\n');const finish=(ok)=>showToast(ok?'Console copiée':'Copie impossible',ok?'success':'error');try{if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(lines).then(()=>finish(true)).catch(()=>legacyCopy(lines,finish));return}}catch(e){}legacyCopy(lines,finish)}
+function legacyCopy(text,cb){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);cb(ok)}
+function toggleDebugCollapse(){const p=document.getElementById('debug-panel');const b=document.getElementById('debug-collapse-btn');if(!p||!b)return;debugCollapsed=!debugCollapsed;p.classList.toggle('collapsed',debugCollapsed);b.textContent=debugCollapsed?'+':'−'}
+function switchTab(tab){currentTab=tab;const j=document.getElementById('journal-body');const t=document.getElementById('tech-body');const tj=document.getElementById('tab-journal');const tt=document.getElementById('tab-tech');if(!j||!t)return;if(tab==='journal'){j.classList.remove('hidden');t.classList.add('hidden');tj.classList.add('active');tt.classList.remove('active')}else{t.classList.remove('hidden');j.classList.add('hidden');tt.classList.add('active');tj.classList.remove('active');t.scrollTop=t.scrollHeight}}
+
+// ══════════════════════════════════════════════════════════════════
+// MULTI-CLÉS API — INCHANGÉ
+// ══════════════════════════════════════════════════════════════════
+function getStoredKeys(){try{const raw=localStorage.getItem(API_KEYS_STORAGE);if(!raw)return[];const arr=JSON.parse(raw);if(!Array.isArray(arr))return[];return arr.filter(k=>typeof k==='string'&&k.trim().length>0)}catch(e){return[]}}
+function setStoredKeys(keys){try{localStorage.setItem(API_KEYS_STORAGE,JSON.stringify(keys))}catch(e){}}
+function refreshKeyPool(){const stored=getStoredKeys();const old=state.keyPool||[];state.keyPool=stored.map(k=>{const existing=old.find(p=>p.key===k);return existing||{key:k,lastUsed:0,cooldownUntil:0,active:true,errorCount:0}})}
+function hasActiveKey(){return state.keyPool.some(k=>k.active)}
+function getReadyKey(){const now=Date.now();const active=state.keyPool.filter(k=>k.active);if(active.length===0)return{key:null,waitMs:0};const ready=active.filter(k=>!k.cooldownUntil||k.cooldownUntil<=now);if(ready.length===0){const soonest=active.reduce((a,b)=>(a.cooldownUntil||0)<(b.cooldownUntil||0)?a:b);return{key:null,waitMs:Math.max(1000,(soonest.cooldownUntil||0)-now)}}ready.sort((a,b)=>(a.lastUsed||0)-(b.lastUsed||0));return{key:ready[0],waitMs:0}}
+async function acquireKey(label){while(true){if(state.stopRequested)throw new Error('Arrêt demandé');const{key,waitMs}=getReadyKey();if(key){key.lastUsed=Date.now();return key}if(waitMs===0)throw new Error('Aucune clé API active');debugLog('warn',label,'Toutes les clés en cooldown — attente '+Math.round(waitMs/1000)+'s');setStatus('Toutes les clés en cooldown — attente '+Math.round(waitMs/1000)+'s');await sleep(waitMs)}}
+function saveKeysFromUI(){const input=document.getElementById('api-keys-input');if(!input)return;const raw=input.value||'';const keys=raw.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length>0);const valid=keys.filter(k=>k.startsWith('sk-'));const invalid=keys.filter(k=>!k.startsWith('sk-'));if(invalid.length>0){if(!confirm(invalid.length+' clé(s) ne commencent pas par "sk-". Les ignorer ?'))return}setStoredKeys(valid);refreshKeyPool();updateApiPanel();if(valid.length===0)showToast('Aucune clé valide enregistrée','warn');else showToast(valid.length+' clé(s) enregistrée(s) ✓','success');journalLog(valid.length+' clé(s) API active(s). Parallélisme vidéo : '+valid.length+'.','key')}
+function updateApiPanel(){const panel=document.getElementById('api-panel');const input=document.getElementById('api-keys-input');const line=document.getElementById('api-status-line');const text=document.getElementById('api-status-text');if(!panel||!input||!line||!text)return;refreshKeyPool();const n=state.keyPool.length;if(n>0){panel.classList.add('ok');line.classList.add('ok');text.textContent=n+' clé(s) active(s) · parallélisme : '+n;input.value=state.keyPool.map(k=>k.key).join('\n');input.placeholder=''}else{panel.classList.remove('ok');line.classList.remove('ok');text.textContent='Aucune clé API enregistrée';input.value='';input.placeholder='Collez vos clés API Agnes ici — une par ligne (sk-...)'}updateButtons()}
+
+// ══════════════════════════════════════════════════════════════════
+// API FETCH — INCHANGÉ
+// ══════════════════════════════════════════════════════════════════
+async function apiFetch(url, options, label, maxAttempts){
+  options=options||{};label=label||'API';maxAttempts=(typeof maxAttempts==='number'&&maxAttempts>0)?maxAttempts:6;let lastErr=null;
+  for(let attempt=0;attempt<maxAttempts;attempt++){
+    if(state.stopRequested)throw new Error('Arrêt demandé');
+    let keyObj=null;try{keyObj=await acquireKey(label)}catch(e){throw e}
+    const method=options.method||'GET';let bodyPreview=null;
+    if(options.body){try{const p=JSON.parse(options.body);const c=JSON.parse(JSON.stringify(p));const redact=(o)=>{if(Array.isArray(o)){o.forEach(redact);return}if(o&&typeof o==='object'){for(const k in o){if(typeof o[k]==='string'&&o[k].length>140)o[k]=o[k].slice(0,100)+'…[len '+o[k].length+']';else if(typeof o[k]==='object')redact(o[k])}}};redact(c);bodyPreview=c}catch(e){bodyPreview=String(options.body).slice(0,400)}}
+    debugLog('api','REQ '+label,method+' '+url+' · clé #'+(state.keyPool.indexOf(keyObj)+1)+' (essai '+(attempt+1)+'/'+maxAttempts+')',bodyPreview);
+    const headers=Object.assign({},options.headers||{},{'Authorization':'Bearer '+keyObj.key});
+    const finalOptions=Object.assign({},options,{headers});
+    try{
+      const t0=Date.now();const res=await fetch(url,finalOptions);const dt=Date.now()-t0;
+      let retryAfter=0;try{retryAfter=parseInt(res.headers.get('Retry-After')||'0',10)||0}catch(e){}
+      let errorText='';if(!res.ok){try{errorText=(await res.clone().text()).slice(0,1200)}catch(e){}}
+      debugLog('response','RÉP '+label,'HTTP '+res.status+' en '+dt+'ms',errorText||undefined);
+      if(res.ok){keyObj.errorCount=0;return res}
+      if([400,401,403,404].includes(res.status)){
+        if(res.status===401||res.status===403){keyObj.errorCount=(keyObj.errorCount||0)+1;debugLog('error','CLÉ','Clé '+keyObj.key.slice(-4)+' → HTTP '+res.status);if(keyObj.errorCount>=3){keyObj.active=false;debugLog('error','CLÉ','Clé désactivée')}}
+        const err=new Error('HTTP '+res.status+' — '+errorText.slice(0,400));err.status=res.status;err.body=errorText;throw err;
+      }
+      if(res.status===429){const wait=retryAfter>0?retryAfter:Math.min(120,20+attempt*15);keyObj.cooldownUntil=Date.now()+wait*1000;debugLog('warn','RATELIMIT','Clé → cooldown '+wait+'s');const{key:next}=getReadyKey();if(next&&next!==keyObj){debugLog('info','ROTATION','Nouvelle clé');continue}setStatus('Limite API — attente '+wait+'s');await sleep(Math.min(wait*1000,3000));continue}
+      if([500,502,503,504,520,522,524].includes(res.status)){const wait=Math.min(60,8+attempt*6);debugLog('warn','SERVICE','HTTP '+res.status+' — attente '+wait+'s');await sleep(wait*1000);continue}
+      const wait=Math.min(60,6+attempt*5);debugLog('warn','HTTP','HTTP '+res.status+' — retry '+wait+'s');await sleep(wait*1000);
+    }catch(e){
+      if(e.message==='Arrêt demandé')throw e;
+      if(e.status&&[400,401,403,404].includes(e.status))throw e;
+      lastErr=e;const wait=Math.min(45,4+attempt*4);debugLog('warn','NETWORK',e.message+' — retry '+wait+'s');await sleep(wait*1000);
+    }
+  }
+  throw lastErr||new Error('Tentatives épuisées pour '+label);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// JSON REPAIR — 5 STRATÉGIES (conservé)
+// ══════════════════════════════════════════════════════════════════
+function balanceJson(text){let ob=0,ok=0,inString=false,escape=false;for(let i=0;i<text.length;i++){const ch=text[i];if(escape){escape=false;continue}if(ch==='\\'){escape=true;continue}if(ch==='"'){inString=!inString;continue}if(inString)continue;if(ch==='{')ob++;else if(ch==='}')ob--;else if(ch==='[')ok++;else if(ch===']')ok--}let r=text;if(inString)r+='"';while(ok>0){r+=']';ok--}while(ob>0){r+='}';ob--}return r}
+function repairJson(text){if(!text)return null;let c=String(text).trim();const fm=c.match(/```(?:json)?\s*([\s\S]*?)```/);if(fm)c=fm[1].trim();const fb=c.indexOf('{');if(fb<0)return null;c=c.slice(fb);const lb=c.lastIndexOf('}');if(lb>0)c=c.slice(0,lb+1);let out='';let inString=false;let escape=false;for(let i=0;i<c.length;i++){const ch=c[i];if(escape){if('"\\/bfnrtu'.includes(ch)){out+='\\'+ch}else{out+=ch}escape=false;continue}if(ch==='\\'){escape=true;continue}if(ch==='"'){inString=!inString;out+=ch;continue}if(inString){if(ch==='\n'){out+='\\n';continue}if(ch==='\r'){out+='\\r';continue}if(ch==='\t'){out+='\\t';continue}const code=ch.charCodeAt(0);if(code<32){out+='\\u'+code.toString(16).padStart(4,'0');continue}}out+=ch}if(escape)out+='\\';if(inString)out+='"';out=out.replace(/,\s*([}\]])/g,'$1');return out}
+function extractJson(text){if(!text)return null;const repaired=repairJson(text);if(!repaired)return null;try{return JSON.parse(repaired)}catch(e1){try{return JSON.parse(balanceJson(repaired))}catch(e2){debugLog('error','PARSE','Échec parsing : '+e2.message);return null}}}
+
+// ══════════════════════════════════════════════════════════════════
+// IMAGE & VIDÉO — INCHANGÉ (protocoles Agnes)
+// ══════════════════════════════════════════════════════════════════
+async function generateImage(prompt){
+  const body={model:MODEL_IMAGE,prompt,n:1,size:'1K',ratio:'9:16'};
+  const res=await apiFetch(API_BASE+'/images/generations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},'Image',4);
+  const data=await res.json();const item=data.data&&data.data[0];if(!item)throw new Error('Pas d\'image');if(item.url)return item.url;if(item.b64_json)return 'data:image/png;base64,'+item.b64_json;throw new Error('Format inconnu');
+}
+
+function decodeCompositeId(composite){if(!composite||typeof composite!=='string')return null;if(!composite.startsWith('video_'))return null;let b64=composite.slice(6);while(b64.length%4)b64+='=';try{const decoded=atob(b64);const m=decoded.match(/video_id:([^;]+)/);if(m&&m[1])return m[1].trim()}catch(e){}return null}
+
+async function createVideoTask(prompt, imageUrl, duration){
+  const body={model:MODEL_VIDEO,prompt,num_frames:duration,frame_rate:FRAME_RATE};
+  if(imageUrl)body.image=imageUrl;
+  debugLog('ai','PROMPT VIDÉO','Envoyé ('+prompt.length+' chars)',prompt.slice(0,600)+'…');
+  const res=await apiFetch(API_BASE+'/videos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},'Video Task',4);
+  const data=await res.json();
+  const compositeId=data.video_id||data.id||data.task_id;
+  if(!compositeId)throw new Error('Pas de video_id');
+  const innerId=decodeCompositeId(compositeId);
+  return { compositeId, innerId, raw:data };
+}
+
+function buildIdCandidates(videoIdObj){
+  const ids=[];
+  if(typeof videoIdObj==='string'){ids.push({label:'composite',value:videoIdObj});const inner=decodeCompositeId(videoIdObj);if(inner&&inner!==videoIdObj)ids.push({label:'inner',value:inner})}
+  else if(videoIdObj&&typeof videoIdObj==='object'){if(videoIdObj.compositeId)ids.push({label:'composite',value:videoIdObj.compositeId});if(videoIdObj.innerId)ids.push({label:'inner',value:videoIdObj.innerId});const raw=videoIdObj.raw||{};for(const f of['id','task_id','request_id']){if(raw[f]&&!ids.some(x=>x.value===raw[f]))ids.push({label:'raw.'+f,value:raw[f]})}}
+  const seen=new Set();return ids.filter(x=>{if(seen.has(x.value))return false;seen.add(x.value);return true});
+}
+
+const POLL_URL_BUILDERS=[
+  {name:'agnesapi-composite',build:(id)=>POLL_BASE+'?video_id='+encodeURIComponent(id)+'&model_name='+encodeURIComponent(MODEL_VIDEO)},
+  {name:'v1-rest',build:(id)=>API_BASE+'/videos/'+encodeURIComponent(id)},
+  {name:'v1-rest-status',build:(id)=>API_BASE+'/videos/'+encodeURIComponent(id)+'/status'},
+  {name:'v1-rest-model',build:(id)=>API_BASE+'/videos/'+encodeURIComponent(id)+'?model_name='+encodeURIComponent(MODEL_VIDEO)},
+];
+
+async function pollVideo(videoIdObj, onProgress){
+  const candidates=buildIdCandidates(videoIdObj);if(candidates.length===0)throw new Error('Aucun ID exploitable');
+  const minWait=Math.min(VIDEO_FIRST_POLL_DELAY_SEC,Math.max(40,Math.floor(90*0.7)));
+  let rem=minWait;
+  while(rem>0){if(state.stopRequested)throw new Error('Arrêt demandé');onProgress('Préparation — '+rem+'s');await sleep(1000);rem--}
+  let working={builder:state.workingPollUrlBuilder||null,id:null};
+  for(let attempt=0;attempt<VIDEO_MAX_POLL_ATTEMPTS;attempt++){
+    if(state.stopRequested)throw new Error('Arrêt demandé');
+    if(attempt>0){const idx=Math.min(attempt-1,VIDEO_POLL_INTERVALS.length-1);let r=VIDEO_POLL_INTERVALS[idx];while(r>0){if(state.stopRequested)throw new Error('Arrêt demandé');onProgress('Création — '+r+'s');await sleep(1000);r--}}
+    const approaches=[];if(working.builder&&working.id){approaches.push({builder:working.builder,id:working.id,priority:true})}
+    for(const builder of POLL_URL_BUILDERS){for(const cand of candidates){if(!approaches.some(a=>a.builder===builder&&a.id===cand.value)){approaches.push({builder,id:cand.value,idLabel:cand.label})}}}
+    let gotSuccessResponse=false;let lastError=null;
+    for(const ap of approaches){
+      if(state.stopRequested)throw new Error('Arrêt demandé');
+      const url=ap.builder.build(ap.id);
+      try{
+        const res=await apiFetch(url,{method:'GET'},'Polling',2);
+        const d=await res.json();
+        if(!working.builder||!working.id){working.builder=ap.builder;working.id=ap.id;state.workingPollUrlBuilder=ap.builder;debugLog('success','POLLING','Endpoint validé : '+ap.builder.name)}
+        gotSuccessResponse=true;
+        const status=d.status||'unknown';const progress=d.progress||0;onProgress('Création — '+progress+'%');
+        if(status==='completed'||status==='succeeded'||status==='done'){const videoUrl=(d.metadata&&d.metadata.url)||d.url||(d.output&&d.output.url);if(!videoUrl)throw new Error('Terminé mais pas d\'URL');return videoUrl}
+        if(status==='failed'||status==='error'||status==='cancelled')throw new Error('Échec ('+status+')');
+        break;
+      }catch(e){
+        if(e.message==='Arrêt demandé')throw e;lastError=e;
+        if(e.status===404){debugLog('warn','POLLING','404 sur '+ap.builder.name);continue}
+        if(e.status===401||e.status===403){continue}
+        break;
+      }
+    }
+  }
+  throw new Error('Délai maximal dépassé');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PROMPTS CAPYBARA GHIBLI
+// ══════════════════════════════════════════════════════════════════
+function buildGhibliVideoPrompt(){
+  const sub = SUBSTYLE_PROMPTS[state.ghibliSubstyle] || SUBSTYLE_PROMPTS.meadow;
+  const cam = CAMERA_MOVE_PROMPTS[state.cameraMove] || CAMERA_MOVE_PROMPTS['slow-drift'];
+  const palette = GHIBLI_PALETTES.find(p=>p.id===state.selectedPalette) || GHIBLI_PALETTES[0];
+
+  return [
+    'STUDIO GHIBLI × HAYAO MIYAZAKI — HAND-DRAWN ANIMATION, WATERCOLOR BACKGROUND.',
+    '',
+    'STYLE LOCK : This MUST look and feel like hand-drawn Studio Ghibli animation — not live action, not photorealistic, not 3D render. Every frame painterly, soft watercolor washes, cel-shaded elements, hand-drawn ink line work, warm diffused lighting, muted earth tones, Hayao Miyazaki aesthetic.',
+    '',
+    'SUB-STYLE : ' + sub,
+    'PALETTE : ' + palette.label + ' → ' + palette.colors.join(', ') + '. All colors drawn from this palette. Soft and restrained, never saturated.',
+    '',
+    'MASCOT : A cozy capybara is present in the scene. The capybara is calm, sleepy, warm, peaceful — sitting or resting naturally in the environment. Soft brown fur, gentle eyes, relaxed posture. The capybara is the heart of the scene.',
+    '',
+    'CAMERA : ' + cam,
+    '',
+    'ATMOSPHERE : calm, cozy, relaxing, chill, soothing, peaceful, meditative. Slow gentle motion only. No fast action, no cuts, no sudden changes.',
+    '',
+    'AUDIO : ABSOLUTELY NO MUSIC. No soundtrack, no instruments, no melody. ONLY soft natural ambient sounds — gentle wind through grass, distant birds, soft breathing of the capybara, rustling leaves, quiet water. The scene must feel sonically still and safe.',
+    '',
+    'CONSTRAINTS : portrait 9:16 vertical, 24fps, no text, no subtitles, no watermarks, no dialogue, no on-screen graphics. The entire video is one continuous peaceful moment.',
+    '',
+    'NEGATIVE : photorealistic, live action, 3D render, hyperreal skin, shonen action anime, mecha, fast cuts, dynamic action, bright saturated colors, harsh lighting, urban noise, tension.'
+  ].join('\n');
+}
+
+function buildGhibliImagePrompt(){
+  const sub = SUBSTYLE_PROMPTS[state.ghibliSubstyle] || SUBSTYLE_PROMPTS.meadow;
+  const palette = GHIBLI_PALETTES.find(p=>p.id===state.selectedPalette) || GHIBLI_PALETTES[0];
+  return [
+    'Studio Ghibli × Hayao Miyazaki — hand-painted watercolor background painting, soft watercolor washes, hand-drawn ink lines.',
+    'SUB-STYLE : ' + sub,
+    'PALETTE : ' + palette.colors.join(', ') + '.',
+    'A cozy capybara rests peacefully in the scene, soft brown fur, gentle eyes, calm posture.',
+    'Portrait 9:16 vertical. No text, no watermarks. Soft, warm, peaceful, painterly.'
+  ].join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// YOUTUBE PACKAGE GENERATOR
+// ══════════════════════════════════════════════════════════════════
+const YT_TITLE_TEMPLATES = [
+  "Cozy Capybara Ambience 🌿 Ghibli-Style Relaxing Animation ({duration})",
+  "Capybara's Peaceful Day 🌾 Studio Ghibli Ambience for Sleep & Study",
+  "Ghibli Capybara Vibes 🌙 Soft Rain, Tea & Total Calm ({duration})",
+  "This Capybara Lives in a Ghibli World 🌿 Cozy Ambience",
+  "Capybara Chill 🌾 Miyazaki-Style Relaxing Background ({duration})",
+  "A Capybara's Ghibli Morning 🌅 Peaceful Animation for Anxiety Relief",
+  "Cozy Ghibli Capybara 🍵 Studio Ghibli Ambience for Deep Focus",
+  "Capybara in the Meadow 🌿 Hayao Miyazaki Style Relaxing Loop"
+];
+
+const YT_DESC_TEMPLATES = [
+  `Welcome to a calm moment with this cozy capybara, living inside a Studio Ghibli-inspired world. 🌿
+
+This animation is designed to help you:
+• Relax and slow down
+• Focus while studying or working
+• Fall asleep gently
+• Feel safe and warm
+
+Soft watercolor textures, hand-drawn animation, and a sleepy capybara companion. No music — only the gentle sounds of nature and a peaceful breath.
+
+Perfect for:
+🌾 Background ambience
+🌙 Sleep and nighttime routines
+📚 Study sessions
+🧘 Anxiety relief and mindfulness
+
+The capybara is always here, calm and unbothered. Let yourself breathe with it.
+
+#Ghibli #Capybara #Relaxing #Ambience #StudioGhibli #Miyazaki #Cozy #Sleep #Study #Anime`,
+
+  `Escape into a Studio Ghibli-inspired landscape with the world's calmest animal: a capybara. 🌿
+
+Hand-painted watercolor backgrounds. Gentle breeze. Soft light. A capybara that has nowhere to be.
+
+This video contains no music and no dialogue — just quiet nature sounds and the peaceful presence of a capybara. Use it as a background for work, study, sleep, or simply to slow down your breathing.
+
+If this helps you feel calmer, the capybara is happy.
+
+🌾 Ghibli aesthetic
+🌙 Cozy ambience
+🍵 Slow living
+📚 Focus companion
+🧘 Anxiety-friendly
+
+#Capybara #Ghibli #Ambience #Relaxing #StudioGhibli #Miyazaki #CozyVibes #SleepSounds #StudyWithMe`
+];
+
+const YT_TAGS = "#Ghibli #Capybara #StudioGhibli #Miyazaki #RelaxingVideo #CozyAmbience #SleepSounds #StudyAmbience #AnimeBackground #PeacefulAnimation #CalmVideo #SlowLiving #AnxietyRelief #NatureSounds #HandDrawn";
+
+function generateYoutubePackage(){
+  const duration = Math.round(state.durationFrames / 24);
+  const count = state.images.length;
+  const totalDuration = (count * duration);
+  const mins = Math.floor(totalDuration / 60);
+  const secs = totalDuration % 60;
+  const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+  const title = YT_TITLE_TEMPLATES[Math.floor(Math.random() * YT_TITLE_TEMPLATES.length)]
+    .replace('{duration}', durationStr);
+
+  const descTemplate = YT_DESC_TEMPLATES[Math.floor(Math.random() * YT_DESC_TEMPLATES.length)];
+  const desc = descTemplate + `\n\n🎬 ${count} scène${count > 1 ? 's' : ''} · ${durationStr} au total · Ambiance Ghibli × Capybara`;
+
+  return { title, description: desc, tags: YT_TAGS, duration: durationStr, count };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RENDU UI
+// ══════════════════════════════════════════════════════════════════
+function updateButtons(){
+  const genBtn=document.getElementById('generate-btn');
+  const stopBtn=document.getElementById('stop-btn');
+  const hasKey=hasActiveKey();
+  const hasImg=state.images.length>0;
+  if(genBtn){genBtn.disabled=!hasKey||!hasImg||state.isRunning;if(state.isRunning)genBtn.innerHTML='⏳ Génération en cours…';else if(!hasKey)genBtn.innerHTML='🔑 Ajoutez une clé API';else if(!hasImg)genBtn.innerHTML='🖼️ Ajoutez des photos';else genBtn.innerHTML='🌿 Créer les vidéos d\'ambiance ('+state.images.length+')'}
+  if(stopBtn)stopBtn.classList.toggle('visible',state.isRunning);
+}
+
+function renderImages(){
+  const grid=document.getElementById('images-grid');if(!grid)return;
+  grid.innerHTML=state.images.map(img=>'<div class="image-card"><img src="'+img.thumbnail+'" alt="" loading="lazy"><button class="remove-btn" data-rm="'+img.id+'">✕</button></div>').join('');
+  grid.querySelectorAll('[data-rm]').forEach(b=>{b.addEventListener('click',e=>{e.stopPropagation();state.images=state.images.filter(x=>String(x.id)!==b.dataset.rm);renderImages();updateButtons();document.getElementById('photos-count-badge').textContent=state.images.length})});
+  document.getElementById('photos-count-badge').textContent=state.images.length;
+}
+
+function renderPalettes(){
+  const row=document.getElementById('palette-row');if(!row)return;
+  row.innerHTML=GHIBLI_PALETTES.map(p=>'<button type="button" class="palette-btn'+(state.selectedPalette===p.id?' active':'')+'" data-palette="'+p.id+'"><span style="display:block;height:10px;border-radius:2px;background:linear-gradient(90deg,'+p.colors.join(',')+');margin-bottom:.25rem"></span>'+p.label+'</button>').join('');
+  row.querySelectorAll('.palette-btn').forEach(btn=>{btn.addEventListener('click',()=>{state.selectedPalette=btn.dataset.palette;renderPalettes()})});
+}
+
+function renderVideos(){
+  const grid=document.getElementById('videos-grid');if(!grid)return;
+  while(grid.children.length>state.videos.length)grid.removeChild(grid.lastChild);
+  for(let i=grid.children.length;i<state.videos.length;i++){const card=document.createElement('div');card.className='scene-card';card.innerHTML='<div class="scene-card-header"><span class="scene-card-title">🌿 Scène '+(i+1)+'</span><span class="scene-card-status"></span></div><div class="scene-card-body"></div>';grid.appendChild(card)}
+  state.videos.forEach((v,i)=>{const card=grid.children[i];if(!card)return;const bodyEl=card.querySelector('.scene-card-body');const statusEl=card.querySelector('.scene-card-status');const newClass='scene-card '+(v.status==='done'?'done':v.status==='error'?'error':'generating');if(card.className!==newClass)card.className=newClass;if(v.status==='done'&&v.url){if(!bodyEl.querySelector('video')){statusEl.innerHTML='<span style="color:var(--ok)">✓</span>';bodyEl.innerHTML='<video src="'+v.url+'" controls preload="metadata" playsinline></video><a class="scene-download" href="'+v.url+'" target="_blank" rel="noopener">⬇ Télécharger</a>'}}else if(v.status==='error'){statusEl.innerHTML='<span style="color:var(--err)">✕</span>';bodyEl.innerHTML='<div class="scene-placeholder" style="color:var(--err)">'+esc(v.error||'Erreur')+'</div>'}else{statusEl.innerHTML='<span class="spinner-mini"></span>';bodyEl.innerHTML='<div class="scene-placeholder"><div class="spinner-mini"></div><span>'+esc(v.progress||'En attente…')+'</span></div>'}});
+  document.getElementById('videos-count').textContent=state.videos.filter(v=>v.status==='done').length+'/'+state.videos.length;
+}
+
+function renderYoutubePackage(pkg){
+  const panel=document.getElementById('youtube-panel');
+  if(!panel||!pkg)return;
+  panel.classList.add('visible');
+  document.getElementById('yt-title').textContent=pkg.title;
+  document.getElementById('yt-desc').textContent=pkg.description;
+  document.getElementById('yt-tags').textContent=pkg.tags;
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  journalLog('📺 Titre YouTube : « '+pkg.title.slice(0,70)+'… »','youtube');
+  showToast('Package YouTube prêt ✓','success');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TRAITEMENT FICHIERS
+// ══════════════════════════════════════════════════════════════════
+function fileToDataUri(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.onerror=()=>reject(new Error('Erreur lecture'));reader.readAsDataURL(file)})}
+async function compressImage(dataUrl,maxSide){return new Promise((resolve)=>{const img=new Image();img.onload=()=>{let{width,height}=img;const scale=Math.min(1,maxSide/Math.max(width,height));width=Math.round(width*scale);height=Math.round(height*scale);const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,width,height);resolve(canvas.toDataURL('image/jpeg',0.85))};img.onerror=()=>resolve(dataUrl);img.src=dataUrl})}
+
+async function handleFiles(files){
+  const list=Array.from(files).filter(f=>f.type.startsWith('image/'));
+  if(!list.length)return;
+  const uploadZone=document.getElementById('upload-zone');
+  uploadZone.classList.add('loading');setStatus('Chargement de '+list.length+' image(s)…');
+  const BATCH=5;
+  for(let i=0;i<list.length;i+=BATCH){
+    const batch=list.slice(i,i+BATCH);
+    const results=await Promise.allSettled(batch.map(async(f)=>{
+      try{
+        const raw=await fileToDataUri(f);
+        const compressed=await compressImage(raw,1280);
+        const thumb=await compressImage(raw,200);
+        return{id:Date.now()+Math.random(),dataUri:compressed,thumbnail:thumb};
+      }catch(e){return null}
+    }));
+    for(const r of results){if(r.status==='fulfilled'&&r.value)state.images.push(r.value)}
+    renderImages();
+  }
+  uploadZone.classList.remove('loading');setStatus(null);updateButtons();
+  journalLog(state.images.length+' photo(s) chargée(s).','success');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PIPELINE PRINCIPAL
+// ══════════════════════════════════════════════════════════════════
+async function startGeneration(){
+  if(state.isRunning)return;
+  if(!hasActiveKey()){showToast('Ajoutez au moins une clé API','error');return}
+  if(!state.images.length){showToast('Ajoutez des photos','error');return}
+
+  state.isRunning=true;state.stopRequested=false;state.videos=[];state.youtubePackage=null;
+  document.getElementById('youtube-panel').classList.remove('visible');
+  document.getElementById('section-videos').classList.remove('hidden');
+  document.getElementById('section-videos').classList.add('open');
+  document.getElementById('videos-grid').innerHTML='';
+  document.getElementById('stop-btn').classList.add('visible');
+  updateButtons();
+
+  const total=state.images.length;
+  const workerCount=Math.max(1,state.keyPool.filter(k=>k.active).length);
+  journalLog('Génération de '+total+' vidéo(s) d\'ambiance Ghibli × Capybara avec '+workerCount+' worker(s).','highlight');
+
+  for(let i=0;i<total;i++)state.videos.push({status:'pending',url:null,progress:'En attente…'});
+  renderVideos();
+
+  const videoPrompt = buildGhibliVideoPrompt();
+  const queue = state.images.map((img,idx)=>({img,idx}));
+  const workers=[];
+
+  for(let w=0;w<workerCount;w++){
+    workers.push((async()=>{
+      while(queue.length>0&&!state.stopRequested){
+        const task=queue.shift();if(!task)break;
+        const {img,idx}=task;
+        state.videos[idx].status='loading';state.videos[idx].progress='Initialisation…';renderVideos();
+        try{
+          journalLog('Worker '+(w+1)+' → Scène '+(idx+1)+'/'+total+' — création…','video');
+          let videoIdObj=null;
+          try{videoIdObj=await createVideoTask(videoPrompt,null,state.durationFrames)}
+          catch(e){
+            if(e.status===400||/image/i.test(e.message||'')){
+              journalLog('Worker '+(w+1)+' : text-to-video refusé → image d\'ancrage Ghibli.','warn');
+              const imgUrl=await generateImage(buildGhibliImagePrompt());
+              videoIdObj=await createVideoTask(videoPrompt,imgUrl,state.durationFrames);
+            }else throw e;
+          }
+          const videoUrl=await pollVideo(videoIdObj,(prog)=>{state.videos[idx].progress=prog;renderVideos()});
+          state.videos[idx]={status:'done',url:videoUrl,progress:'Terminé'};
+          renderVideos();
+          journalLog('Worker '+(w+1)+' → Scène '+(idx+1)+' prête ✓','success');
+        }catch(e){
+          if(e.message==='Arrêt demandé')return;
+          state.videos[idx]={status:'error',url:null,error:e.message};renderVideos();
+          journalLog('Worker '+(w+1)+' → Scène '+(idx+1)+' échouée : '+e.message,'error');
+        }
+      }
+    })());
+  }
+
+  await Promise.all(workers);
+
+  state.isRunning=false;state.stopRequested=false;
+  document.getElementById('stop-btn').classList.remove('visible');
+  updateButtons();
+
+  const done=state.videos.filter(v=>v.status==='done').length;
+  journalLog('Bilan : '+done+'/'+total+' vidéos prêtes.',done>0?'success':'error');
+
+  if(done>0){
+    const pkg=generateYoutubePackage();
+    state.youtubePackage=pkg;
+    renderYoutubePackage(pkg);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+(function init(){
+  document.getElementById('api-save-btn').addEventListener('click',saveKeysFromUI);
+  document.getElementById('api-keys-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();saveKeysFromUI()}});
+
+  document.querySelectorAll('[data-toggle]').forEach(h=>{h.addEventListener('click',()=>{const el=document.getElementById(h.dataset.toggle);if(el)el.classList.toggle('open')})});
+
+  const uploadZone=document.getElementById('upload-zone');
+  const fileInput=document.getElementById('file-input');
+  if(uploadZone&&fileInput){uploadZone.addEventListener('click',()=>fileInput.click());fileInput.addEventListener('change',e=>{handleFiles(e.target.files);fileInput.value=''})}
+
+  document.getElementById('ghibli-substyle').addEventListener('change',e=>{state.ghibliSubstyle=e.target.value;journalLog('Sous-style : '+e.target.options[e.target.selectedIndex].text,'info')});
+  document.getElementById('camera-move').addEventListener('change',e=>{state.cameraMove=e.target.value});
+  document.getElementById('duration-select').addEventListener('change',e=>{state.durationFrames=parseInt(e.target.value,10)});
+
+  renderPalettes();
+  document.getElementById('generate-btn').addEventListener('click',startGeneration);
+  document.getElementById('stop-btn').addEventListener('click',()=>{state.stopRequested=true;journalLog('Arrêt demandé…','warn');setStatus('Arrêt en cours…')});
+
+  document.getElementById('tab-journal').addEventListener('click',()=>switchTab('journal'));
+  document.getElementById('tab-tech').addEventListener('click',()=>switchTab('tech'));
+  document.getElementById('debug-clear-btn').addEventListener('click',e=>{e.stopPropagation();clearDebug()});
+  document.getElementById('debug-copy-btn').addEventListener('click',e=>{e.stopPropagation();copyDebug()});
+  document.getElementById('debug-collapse-btn').addEventListener('click',e=>{e.stopPropagation();toggleDebugCollapse()});
+
+  refreshKeyPool();updateApiPanel();updateButtons();
+
+  debugLog('success','INIT','Capybara Ghibli Studio prêt');
+  debugLog('info','INIT','Modèles : '+MODEL_TEXT+' / '+MODEL_IMAGE+' / '+MODEL_VIDEO);
+  debugLog('info','INIT','Styles : 5 sous-styles Ghibli · 5 palettes · 4 mouvements de caméra');
+  debugLog('info','INIT','Mascotte : capybara cozy dans chaque scène');
+  debugLog('info','INIT','Pipeline : photos → prompt Ghibli verrouillé → vidéo → package YouTube');
+
+  journalLog('Prêt. Ajoutez vos clés, vos photos, puis lancez.','highlight');
+  journalLog('Chaque vidéo sera une ambiance Ghibli apaisante avec un capybara.','info');
+  journalLog('À la fin : titre + description YouTube optimisés.','youtube');
+})();
+</script>
+</body>
+</html>
