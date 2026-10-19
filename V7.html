@@ -6,22 +6,10 @@
   <title>Tableau vivant — animer une image par le texte</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔥%3C/text%3E%3C/svg%3E">
   <style>
-:root {
-  --bg: #141210; --bg-elev: #1e1a16; --bg-elev-2: #2a241d;
-  --line: rgba(243, 228, 206, 0.14); --text: #f6f0e6; --muted: #b6aa9b;
-  --accent: #e39a45; --accent-deep: #b8742e; --ink: #1a120c;
-  --danger: #e07a68; --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-  --sans: "Segoe UI", system-ui, sans-serif;
-  --serif: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
-  --radius: 16px;
-}
+:root { --bg: #141210; --bg-elev: #1e1a16; --bg-elev-2: #2a241d; --line: rgba(243, 228, 206, 0.14); --text: #f6f0e6; --muted: #b6aa9b; --accent: #e39a45; --accent-deep: #b8742e; --ink: #1a120c; --danger: #e07a68; --shadow: 0 18px 50px rgba(0,0,0,0.35); --sans: "Segoe UI", system-ui, sans-serif; --serif: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif; --radius: 16px; }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body {
-  color: var(--text); font-family: var(--sans);
-  background: radial-gradient(900px 420px at 0% -10%, rgba(227, 154, 69, 0.18), transparent 55%), radial-gradient(700px 380px at 100% 0%, rgba(92, 64, 38, 0.45), transparent 50%), var(--bg);
-  padding-bottom: 88px;
-}
+body { color: var(--text); font-family: var(--sans); background: radial-gradient(900px 420px at 0% -10%, rgba(227,154,69,0.18), transparent 55%), radial-gradient(700px 380px at 100% 0%, rgba(92,64,38,0.45), transparent 50%), var(--bg); padding-bottom: 88px; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 h1, h2, .eyebrow { font-family: var(--serif); font-weight: 600; }
@@ -32,14 +20,14 @@ h2 { margin: 0 0 14px; font-size: 1.25rem; }
 .lede { max-width: 420px; margin: 0; color: var(--muted); line-height: 1.45; }
 .progress { max-width: 1180px; margin: 18px auto 8px; padding: 0 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .progress-step { display: flex; align-items: center; gap: 10px; text-align: left; background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; color: var(--muted); }
-.progress-step.current, .progress-step.active { color: var(--text); border-color: rgba(227, 154, 69, 0.55); background: rgba(227, 154, 69, 0.08); }
+.progress-step.current, .progress-step.active { color: var(--text); border-color: rgba(227,154,69,0.55); background: rgba(227,154,69,0.08); }
 .progress-index { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-elev-2); font-size: 0.85rem; }
 .progress-step.current .progress-index { background: var(--accent); color: var(--ink); }
 main { max-width: 1180px; margin: 0 auto; padding: 12px 22px 24px; }
 .step { display: none; } .step.is-on { display: block; }
-.panel { background: rgba(30, 26, 22, 0.92); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
-.drop-zone { position: relative; min-height: 180px; border: 1.5px dashed rgba(227, 154, 69, 0.55); border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 18px; background: rgba(255, 244, 230, 0.03); }
-.drop-zone.is-over { background: rgba(227, 154, 69, 0.12); border-color: var(--accent); }
+.panel { background: rgba(30,26,22,0.92); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.drop-zone { position: relative; min-height: 180px; border: 1.5px dashed rgba(227,154,69,0.55); border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 18px; background: rgba(255,244,230,0.03); }
+.drop-zone.is-over { background: rgba(227,154,69,0.12); border-color: var(--accent); }
 .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .drop-copy { display: grid; gap: 6px; pointer-events: none; }
 .drop-copy span, .hint, .muted, .status-line { color: var(--muted); line-height: 1.45; }
@@ -50,15 +38,15 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
 .field-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 0.92rem; }
 .examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
 .example-btn, .add-grid button, .element-actions button, .styles-row button { background: var(--bg-elev-2); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; text-align: left; }
-.example-btn:hover, .add-grid button:hover, .element-actions button:hover, .styles-row button:hover, .progress-step:hover { border-color: rgba(227, 154, 69, 0.7); }
+.example-btn:hover, .add-grid button:hover, .element-actions button:hover, .styles-row button:hover, .progress-step:hover { border-color: rgba(227,154,69,0.7); }
 .styles-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .styles-row button { font-size: 0.9rem; padding: 8px 14px; }
 .btn { border: 0; border-radius: 999px; padding: 11px 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-primary { background: linear-gradient(180deg, #f0b56a, var(--accent-deep)); color: var(--ink); font-weight: 650; }
 .btn-ghost { background: transparent; border: 1px solid var(--line); }
-.btn-danger { background: transparent; color: #ffd0c8; border: 1px solid rgba(224, 122, 104, 0.55); margin-top: 8px; width: 100%; }
+.btn-danger { background: transparent; color: #ffd0c8; border: 1px solid rgba(224,122,104,0.55); margin-top: 8px; width: 100%; }
 .btn-small { padding: 6px 12px; font-size: 0.85rem; }
-.editor-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.editor-layout { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 16px; align-items: start; }
 .stage-wrap { min-height: 240px; }
 .stage { position: relative; margin: 0 auto; background: #000; border-radius: 12px; overflow: hidden; line-height: 0; box-shadow: var(--shadow); touch-action: none; }
 #backgroundImage { display: none; }
@@ -68,15 +56,15 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
 .check { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .side-panel .panel { margin-bottom: 12px; }
 .element-list { display: grid; gap: 6px; margin-bottom: 12px; max-height: 220px; overflow-y: auto; }
-.element-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); }
-.element-item.is-selected { outline: 1px solid var(--accent); background: rgba(227, 154, 69, 0.1); }
+.element-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 8px; border-radius: 10px; background: rgba(255,255,255,0.03); }
+.element-item.is-selected { outline: 1px solid var(--accent); background: rgba(227,154,69,0.1); }
 .element-item.is-off { opacity: 0.45; }
 .element-name { background: none; border: 0; padding: 6px 0; text-align: left; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .element-actions { display: flex; gap: 3px; }
 .element-actions button { width: 26px; height: 26px; padding: 0; border-radius: 8px; font-size: 0.85rem; }
 .list-actions { display: flex; gap: 6px; margin-bottom: 10px; }
 .list-actions button { flex: 1; background: var(--bg-elev-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; }
-.list-actions button:hover { border-color: rgba(227, 154, 69, 0.7); }
+.list-actions button:hover { border-color: rgba(227,154,69,0.7); }
 .add-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 .add-grid button { padding: 6px 10px; font-size: 0.88rem; }
 #propertyPanel { display: none; }
@@ -100,7 +88,7 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
 .preview-frame-wrap { background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; }
 #previewFrame { width: 100%; height: 100%; border: 0; background: #000; display: block; }
 .export-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 22px; background: rgba(20, 18, 16, 0.92); border-top: 1px solid var(--line); backdrop-filter: blur(10px); }
+.bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 22px; background: rgba(20,18,16,0.92); border-top: 1px solid var(--line); backdrop-filter: blur(10px); }
 .status-line { margin: 0; flex: 1; text-align: center; }
 .toast { position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%) translateY(8px); background: #f6f0e6; color: var(--ink); padding: 10px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; max-width: min(560px, calc(100% - 32px)); z-index: 5; text-align: center; font-size: 0.9rem; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -125,11 +113,8 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
 <body>
   <div id="bootError" role="alert"></div>
 <header class="topbar">
-    <div class="brand">
-      <p class="eyebrow">Studio d'ambiance</p>
-      <h1>Tableau vivant</h1>
-    </div>
-    <p class="lede">Décrivez la scène. Le feu, la lune, les caustiques d'eau, les papillons et tout le reste se placent seuls — vous n'avez plus qu'à les ajuster.</p>
+    <div class="brand"><p class="eyebrow">Studio d'ambiance</p><h1>Tableau vivant</h1></div>
+    <p class="lede">Décrivez la scène. Le feu, les caustiques d'eau, les papillons et tout le reste se placent seuls — vous n'avez plus qu'à les ajuster.</p>
   </header>
 
   <nav class="progress" aria-label="Étapes">
@@ -144,10 +129,7 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
         <h2>Image de fond</h2>
         <div id="dropZone" class="drop-zone">
           <input id="imageUpload" type="file" accept="image/*" aria-label="Choisir une image de fond">
-          <div class="drop-copy">
-            <strong>Déposez une image</strong>
-            <span>ou cliquez pour parcourir — JPG, PNG, WebP. Rien n'est envoyé sur un serveur.</span>
-          </div>
+          <div class="drop-copy"><strong>Déposez une image</strong><span>ou cliquez pour parcourir — JPG, PNG, WebP. Rien n'est envoyé sur un serveur.</span></div>
           <img id="uploadPreview" alt="Aperçu de l'image choisie" hidden>
         </div>
         <p id="imageFileName" class="hint" hidden></p>
@@ -156,9 +138,9 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
       <div class="panel">
         <h2>Description</h2>
         <label class="field-label" for="description">Ce que l'on doit voir bouger</label>
-        <textarea id="description" rows="6" placeholder="Une piscine turquoise avec des caustiques d'eau, des papillons, de l'herbe, des bulles et des rayons de lumière."></textarea>
-        <p class="hint">Mots reconnus : feu, bougie, plafonnier, fumée, fenêtre, lune, étoile, pluie, neige, aurore, piscine/eau, herbe, oiseau, papillon, bulles, rayon, poussière. Ajoutez « à gauche », « à droite », « en haut », « en bas », « au centre ».</p>
-        <div class="examples" aria-label="Exemples de descriptions">
+        <textarea id="description" rows="6" placeholder="Une piscine turquoise avec des caustiques d'eau, des papillons, des bulles et des rayons de lumière."></textarea>
+        <p class="hint">Mots reconnus : feu, bougie, plafonnier, fumée, fenêtre, lune, étoile, pluie, neige, aurore, piscine/eau, herbe, oiseau, papillon, bulles, rayon, poussière.</p>
+        <div class="examples">
           <button type="button" class="example-btn" data-example="Piscine turquoise avec caustiques d'eau, papillons, herbes et bulles">Piscine turquoise avec caustiques d'eau, papillons, herbes et bulles</button>
           <button type="button" class="example-btn" data-example="Jardin enchanté avec herbes, papillons, lucioles et brume">Jardin enchanté avec herbes, papillons, lucioles et brume</button>
           <button type="button" class="example-btn" data-example="Cabane lofi avec feu, bougies, plafonnier chaud et poussière">Cabane lofi avec feu, bougies, plafonnier chaud et poussière</button>
@@ -212,7 +194,6 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
               <button type="button" data-add="water_cells">💧 Caustiques</button>
               <button type="button" data-add="trees">🍂 Feuilles</button>
               <button type="button" data-add="birds">🐦 Oiseaux</button>
-              <button type="button" data-add="pet">🐈 Animal</button>
               <button type="button" data-add="bubbles">🔮 Bulles</button>
               <button type="button" data-add="god_rays">🌫️ Rayons</button>
               <button type="button" data-add="butterfly">🦋 Papillon</button>
@@ -275,24 +256,23 @@ try {
     constructor() {
       this._seq = 0;
       this.keywords = {
-        fire: ["feu", "feux", "flamme", "flammes", "cheminée", "cheminées", "foyer", "fire", "flame", "fireplace"],
-        candle: ["lanterne", "lanternes", "lantern", "lanterns", "bougie", "bougies", "chandelle", "chandelles", "candle", "candles", "lumière douce"],
-        ceiling_light: ["plafonnier", "plafonniers", "lustre", "lustres", "ampoule", "ampoules", "suspension", "ceiling", "chandelier", "lamp"],
-        smoke: ["fumée", "fumées", "vapeur", "brume", "brouillard", "smoke", "steam", "mist", "fog"],
-        window_light: ["fenêtre", "fenêtres", "window", "lune", "moon", "lumière extérieure", "clair de lune"],
-        stars: ["étoile", "étoiles", "star", "stars", "ciel étoilé", "starry sky", "starry"],
-        water_cells: ["eau", "water", "rivière", "river", "lac", "lake", "mer", "sea", "océan", "ocean", "ruisseau", "étang", "piscine", "caustique", "caustiques"],
-        trees: ["arbre", "arbres", "tree", "trees", "forêt", "forêts", "forest", "feuillage", "leaves", "sapin", "sapins", "feuilles", "feuille"],
-        birds: ["oiseau", "oiseaux", "bird", "birds", "vol", "vols", "hirondelle", "hirondelles", "corbeau", "corbeaux", "mouette", "mouettes"],
-        pet: ["chat", "chats", "chien", "chiens", "chatte", "chienne", "cat", "dog", "animal", "animaux", "chaton", "chiot", "félin", "canin"],
-        bubbles: ["bulle", "bulles", "bubble", "bubbles"],
-        god_rays: ["rayon", "rayons", "rayon de lumière", "rayons de lumière", "god rays", "lumière traversante", "faisceau", "faisceaux"],
-        butterfly: ["papillon", "papillons", "butterfly", "butterflies"],
-        grass: ["herbe", "herbes", "grass", "gazon", "pelouse"],
-        dust: ["poussière", "dust", "particule", "particules", "particles", "luciole", "lucioles", "firefl", "firefly", "fireflies"],
-        rain: ["pluie", "rain", "averse", "ondée", "storm", "orage", "orageux", "downpour"],
-        snow: ["neige", "snow", "flocon", "flocons", "snowflakes", "blizzard", "poudreuse"],
-        aurora: ["aurore", "aurores", "aurora", "boréale", "boreale", "borealis", "northern lights", "sakura", "pétale", "pétales"]
+        fire: ["feu","feux","flamme","flammes","cheminée","cheminées","foyer","fire","flame","fireplace"],
+        candle: ["lanterne","lanternes","lantern","lanterns","bougie","bougies","chandelle","chandelles","candle","candles","lumière douce"],
+        ceiling_light: ["plafonnier","plafonniers","lustre","lustres","ampoule","ampoules","suspension","ceiling","chandelier","lamp"],
+        smoke: ["fumée","fumées","vapeur","brume","brouillard","smoke","steam","mist","fog"],
+        window_light: ["fenêtre","fenêtres","window","lune","moon","lumière extérieure","clair de lune"],
+        stars: ["étoile","étoiles","star","stars","ciel étoilé","starry sky","starry"],
+        water_cells: ["eau","water","rivière","river","lac","lake","mer","sea","océan","ocean","ruisseau","étang","piscine","caustique","caustiques"],
+        trees: ["arbre","arbres","tree","trees","forêt","forêts","forest","feuillage","leaves","sapin","sapins","feuilles","feuille"],
+        birds: ["oiseau","oiseaux","bird","birds","vol","vols","hirondelle","hirondelles","corbeau","corbeaux","mouette","mouettes"],
+        bubbles: ["bulle","bulles","bubble","bubbles"],
+        god_rays: ["rayon","rayons","rayon de lumière","rayons de lumière","god rays","lumière traversante","faisceau","faisceaux"],
+        butterfly: ["papillon","papillons","butterfly","butterflies"],
+        grass: ["herbe","herbes","grass","gazon","pelouse"],
+        dust: ["poussière","dust","particule","particules","particles","luciole","lucioles","firefl","firefly","fireflies"],
+        rain: ["pluie","rain","averse","ondée","storm","orage","orageux","downpour"],
+        snow: ["neige","snow","flocon","flocons","snowflakes","blizzard","poudreuse"],
+        aurora: ["aurore","aurores","aurora","boréale","boreale","borealis","northern lights","sakura","pétale","pétales"]
       };
     }
     parseDescription(text) {
@@ -315,60 +295,23 @@ try {
       const intensity = this._intensityFromText(description);
       let element = null;
       switch (type) {
-        case "fire":
-          element = { ...baseElement, position: { x: 0.25, y: 0.6 }, size: { width: 0.08, height: 0.18 }, intensity: 0.8 * intensity, colors: ["#FF6B00", "#FFA500", "#FFD700"], particle_count: Math.round(50 * intensity), blend_mode: "screen" };
-          break;
-        case "candle":
-          element = { ...baseElement, position: { x: 0.48, y: 0.62 }, radius: 0.06, color: "#FFD700", flickerColor: "#FFD700", flicker_speed: 3.2, blend_mode: "screen" };
-          break;
-        case "ceiling_light":
-          element = { ...baseElement, position: { x: 0.5, y: 0.08 }, radius: 0.45, color: "#FFE0B0", flickerColor: "#FFCC80", flicker_speed: 1.4, intensity: 0.55, blend_mode: "screen" };
-          break;
-        case "smoke":
-          element = { ...baseElement, position: { x: 0.28, y: 0.22 }, size: { width: 0.16, height: 0.42 }, direction: "up", speed: 0.5, count: Math.round(16 * intensity), color: "#D9D3C7", opacity: 0.32, blend_mode: "normal" };
-          break;
-        case "window_light":
-          element = { ...baseElement, position: { x: 0.68, y: 0.08 }, size: { width: 0.22, height: 0.42 }, color: "#87CEEB", shimmer_intensity: 0.28, blend_mode: "overlay" };
-          break;
-        case "stars":
-          element = { ...baseElement, region: { x: 0.04, y: 0.03, width: 0.92, height: 0.28 }, count: Math.round(32 * intensity), twinkle_speed: 1.5, color: "#FFFFFF", starSize: 1.0 };
-          break;
-        case "water_cells":
-          element = { ...baseElement, position: { x: 0.02, y: 0.4 }, size: { width: 0.96, height: 0.55 }, color: "#3B9FC8", causticColor: "#A8F0FF", speed: 0.8, wave_amplitude: 2.5 };
-          break;
-        case "trees":
-          element = { ...baseElement, region: { x: 0, y: 0.18, width: 1, height: 0.62 }, sway_amount: 3, sway_speed: 0.45, color: "#C8B87A", leafCount: Math.round(28 * intensity), leafSize: 1.0, leafStyle: "fall", fall_speed: 0.35 };
-          break;
-        case "birds":
-          element = { ...baseElement, region: { x: 0.05, y: 0.08, width: 0.9, height: 0.35 }, count: 6, speed: 0.4, color: "#1F1B14", size: 1.0 };
-          break;
-        case "pet":
-          element = { ...baseElement, position: { x: 0.55, y: 0.72 }, size: { width: 0.14, height: 0.18 }, color: "#3B2C1E", petType: "cat", breath_speed: 0.9 };
-          break;
-        case "bubbles":
-          element = { ...baseElement, region: { x: 0.2, y: 0.4, width: 0.6, height: 0.5 }, count: 14, speed: 0.6, size: 1.0, color: "#C8E8FF" };
-          break;
-        case "god_rays":
-          element = { ...baseElement, position: { x: 0.5, y: 0.1 }, region: { x: 0.1, y: 0, width: 0.8, height: 1 }, color: "#FFF4C8", intensity: 0.45, count: 4, speed: 0.25 };
-          break;
-        case "butterfly":
-          element = { ...baseElement, position: { x: 0.3, y: 0.5 }, size: { width: 0.06, height: 0.06 }, color: "#3B9FC8", wingColor: "#5AB8D8", speed: 0.6 };
-          break;
-        case "grass":
-          element = { ...baseElement, region: { x: 0, y: 0.72, width: 1, height: 0.28 }, color: "#5A8B3A", count: 40, sway_amount: 3, sway_speed: 0.8 };
-          break;
-        case "dust":
-          element = { ...baseElement, region: { x: 0.12, y: 0.18, width: 0.76, height: 0.55 }, count: Math.round(18 * intensity), speed: 0.15, color: "#FFD700", opacity: 0.28 };
-          break;
-        case "rain":
-          element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 1 }, count: Math.round(70 * intensity), speed: 1.0, color: "#A8C8E8", opacity: 0.55, angle: -0.12 };
-          break;
-        case "snow":
-          element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 1 }, count: Math.round(45 * intensity), speed: 0.55, color: "#FFFFFF", opacity: 0.85, size: 1.5 };
-          break;
-        case "aurora":
-          element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 0.45 }, speed: 0.35, intensity: 0.7, colors: ["#7DE3B5", "#8AB6F0", "#D08AE8"], blend_mode: "screen" };
-          break;
+        case "fire": element = { ...baseElement, position: { x: 0.25, y: 0.6 }, size: { width: 0.08, height: 0.18 }, intensity: 0.8 * intensity, colors: ["#FF6B00","#FFA500","#FFD700"], particle_count: Math.round(50 * intensity), blend_mode: "screen" }; break;
+        case "candle": element = { ...baseElement, position: { x: 0.48, y: 0.62 }, radius: 0.06, color: "#FFD700", flickerColor: "#FFD700", flicker_speed: 3.2, blend_mode: "screen" }; break;
+        case "ceiling_light": element = { ...baseElement, position: { x: 0.5, y: 0.08 }, radius: 0.45, color: "#FFE0B0", flickerColor: "#FFCC80", flicker_speed: 1.4, intensity: 0.55, blend_mode: "screen" }; break;
+        case "smoke": element = { ...baseElement, position: { x: 0.28, y: 0.22 }, size: { width: 0.16, height: 0.42 }, direction: "up", speed: 0.5, count: Math.round(16 * intensity), color: "#D9D3C7", opacity: 0.32, blend_mode: "normal" }; break;
+        case "window_light": element = { ...baseElement, position: { x: 0.68, y: 0.08 }, size: { width: 0.22, height: 0.42 }, color: "#87CEEB", shimmer_intensity: 0.28, blend_mode: "overlay" }; break;
+        case "stars": element = { ...baseElement, region: { x: 0.04, y: 0.03, width: 0.92, height: 0.28 }, count: Math.round(32 * intensity), twinkle_speed: 1.5, color: "#FFFFFF", starSize: 1.0 }; break;
+        case "water_cells": element = { ...baseElement, position: { x: 0.02, y: 0.3 }, size: { width: 0.96, height: 0.65 }, color: "#3B9FC8", causticColor: "#A8F0FF", speed: 0.8, wave_amplitude: 2.5 }; break;
+        case "trees": element = { ...baseElement, region: { x: 0, y: 0.18, width: 1, height: 0.62 }, sway_amount: 3, sway_speed: 0.45, color: "#C8B87A", leafCount: Math.round(28 * intensity), leafSize: 1.0, leafStyle: "fall", fall_speed: 0.35 }; break;
+        case "birds": element = { ...baseElement, region: { x: 0.05, y: 0.08, width: 0.9, height: 0.35 }, count: 6, speed: 0.4, color: "#1F1B14", size: 1.0 }; break;
+        case "bubbles": element = { ...baseElement, region: { x: 0.2, y: 0.4, width: 0.6, height: 0.5 }, count: 14, speed: 0.6, size: 1.0, color: "#C8E8FF" }; break;
+        case "god_rays": element = { ...baseElement, position: { x: 0.5, y: 0.1 }, region: { x: 0.1, y: 0, width: 0.8, height: 1 }, color: "#FFF4C8", intensity: 0.45, count: 4, speed: 0.25 }; break;
+        case "butterfly": element = { ...baseElement, position: { x: 0.3, y: 0.5 }, size: { width: 0.06, height: 0.06 }, color: "#3B9FC8", wingColor: "#5AB8D8", speed: 0.6 }; break;
+        case "grass": element = { ...baseElement, region: { x: 0, y: 0.72, width: 1, height: 0.28 }, color: "#5A8B3A", count: 40, sway_amount: 3, sway_speed: 0.8 }; break;
+        case "dust": element = { ...baseElement, region: { x: 0.12, y: 0.18, width: 0.76, height: 0.55 }, count: Math.round(18 * intensity), speed: 0.15, color: "#FFD700", opacity: 0.28 }; break;
+        case "rain": element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 1 }, count: Math.round(70 * intensity), speed: 1.0, color: "#A8C8E8", opacity: 0.55, angle: -0.12 }; break;
+        case "snow": element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 1 }, count: Math.round(45 * intensity), speed: 0.55, color: "#FFFFFF", opacity: 0.85, size: 1.5 }; break;
+        case "aurora": element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 0.45 }, speed: 0.35, intensity: 0.7, colors: ["#7DE3B5","#8AB6F0","#D08AE8"], blend_mode: "screen" }; break;
         default: return null;
       }
       const applied = hint || (description ? (this._hintsByType(description)[type] || {}) : {});
@@ -395,7 +338,7 @@ try {
         el.position.y = clamp01(cy + (i % 2) * 0.045);
         el.radius = 0.03 + (i % 3) * 0.008;
         el.flicker_speed = 2.4 + (i % 4) * 0.4;
-        el.flickerColor = ["#FFD700", "#FFB347", "#FFE7A3", "#FFCC66"][i % 4];
+        el.flickerColor = ["#FFD700","#FFB347","#FFE7A3","#FFCC66"][i % 4];
         el.color = el.flickerColor;
         elements.push(el);
       }
@@ -404,11 +347,7 @@ try {
       const lower = text.toLowerCase();
       const m = lower.match(/(\d+|deux|trois|quatre|cinq|quelques|plusieurs)\s+(oiseaux|hirondelles|corbeaux|mouettes|birds)/);
       let count = 6;
-      if (m) {
-        const words = { deux: 2, trois: 3, quatre: 4, cinq: 5, quelques: 4, plusieurs: 8 };
-        const n = words[m[1]] || parseInt(m[1], 10);
-        if (Number.isFinite(n)) count = Math.max(1, Math.min(20, n));
-      }
+      if (m) { const words = { deux: 2, trois: 3, quatre: 4, cinq: 5, quelques: 4, plusieurs: 8 }; const n = words[m[1]] || parseInt(m[1], 10); if (Number.isFinite(n)) count = Math.max(1, Math.min(20, n)); }
       const el = this.createElement("birds", text, hint || {});
       el.count = count;
       el.id = `birds_${Date.now().toString(36)}_${++this._seq}`;
@@ -451,14 +390,8 @@ try {
         while (match) {
           const at = match.index + match[1].length;
           let best = null, bestDist = 42;
-          anchors.forEach((anchor) => {
-            const dist = Math.abs(anchor.index - at);
-            if (dist < bestDist) { bestDist = dist; best = anchor; }
-          });
-          if (best) {
-            if (!hints[best.type]) hints[best.type] = {};
-            hints[best.type][word.axis] = word.value;
-          }
+          anchors.forEach((anchor) => { const dist = Math.abs(anchor.index - at); if (dist < bestDist) { bestDist = dist; best = anchor; } });
+          if (best) { if (!hints[best.type]) hints[best.type] = {}; hints[best.type][word.axis] = word.value; }
           match = word.re.exec(lower);
         }
       });
@@ -466,41 +399,25 @@ try {
     }
     _matchAt(text, keyword, index) {
       if (text.substr(index, keyword.length) !== keyword) return false;
-      if (keyword === "feu") {
-        const rest = text.substr(index + 3, 6);
-        if (rest.startsWith("illage") || rest.startsWith("ille")) return false;
-      }
-      const isolated = keyword.length <= 3 || keyword === "star" || keyword === "tree" || keyword === "lake" || keyword === "fire" || keyword === "rain" || keyword === "snow" || keyword === "cat" || keyword === "dog";
-      if (isolated) {
-        const before = index > 0 ? text.charAt(index - 1) : "";
-        const after = text.charAt(index + keyword.length);
-        if (/[a-zà-ÿ]/i.test(before) || /[a-zà-ÿ]/i.test(after)) return false;
-      }
+      if (keyword === "feu") { const rest = text.substr(index + 3, 6); if (rest.startsWith("illage") || rest.startsWith("ille")) return false; }
+      const isolated = keyword.length <= 3 || keyword === "star" || keyword === "tree" || keyword === "lake" || keyword === "fire" || keyword === "rain" || keyword === "snow";
+      if (isolated) { const before = index > 0 ? text.charAt(index - 1) : ""; const after = text.charAt(index + keyword.length); if (/[a-zà-ÿ]/i.test(before) || /[a-zà-ÿ]/i.test(after)) return false; }
       return true;
     }
     _applyHint(element, hint) {
       if (!element || !hint) return element;
-      if (element.position && hint.x != null && element.size && Number(element.size.width) >= 0.9) {
-        element.size.width = 0.5;
-        element.position.x = hint.x >= 0.6 ? 0.5 : hint.x <= 0.35 ? 0 : 0.25;
-      } else if (element.position && hint.x != null) {
-        const half = element.size ? (Number(element.size.width) || 0) / 2 : 0;
-        element.position.x = clamp01(hint.x - half);
-      }
+      if (element.position && hint.x != null && element.size && Number(element.size.width) >= 0.9) { element.size.width = 0.5; element.position.x = hint.x >= 0.6 ? 0.5 : hint.x <= 0.35 ? 0 : 0.25; }
+      else if (element.position && hint.x != null) { const half = element.size ? (Number(element.size.width) || 0) / 2 : 0; element.position.x = clamp01(hint.x - half); }
       if (element.position && hint.y != null) element.position.y = hint.y;
-      if (element.region && hint.x != null && element.region.width > 0.8) {
-        element.region.width = 0.48;
-        element.region.x = hint.x >= 0.6 ? 0.5 : hint.x <= 0.35 ? 0.02 : 0.26;
-      } else if (element.region && hint.x != null) {
-        element.region.x = clamp01(hint.x - element.region.width / 2);
-      }
+      if (element.region && hint.x != null && element.region.width > 0.8) { element.region.width = 0.48; element.region.x = hint.x >= 0.6 ? 0.5 : hint.x <= 0.35 ? 0.02 : 0.26; }
+      else if (element.region && hint.x != null) { element.region.x = clamp01(hint.x - element.region.width / 2); }
       if (element.region && hint.y != null) element.region.y = clamp01(hint.y);
       return element;
     }
     _matches(text, keyword) {
       const k = keyword.toLowerCase();
       if (k === "feu") return /feu(?!illage|illes?)/i.test(text);
-      if (k.length <= 3 || k === "star" || k === "tree" || k === "lake" || k === "fire" || k === "rain" || k === "snow" || k === "cat" || k === "dog") {
+      if (k.length <= 3 || k === "star" || k === "tree" || k === "lake" || k === "fire" || k === "rain" || k === "snow") {
         const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         return new RegExp(`(^|[^a-zà-ÿ])${escaped}([^a-zà-ÿ]|$)`, "i").test(text);
       }
@@ -516,24 +433,12 @@ function installLivingEffects(global) {
   "use strict";
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function lerp(a, b, t) { return a + (b - a) * t; }
-  function smoothNoise(t) {
-    const i = Math.floor(t); const f = t - i; const u = f * f * (3 - 2 * f);
-    const n0 = Math.sin(i * 127.1) * 43758.5453; const n1 = Math.sin((i + 1) * 127.1) * 43758.5453;
-    return lerp(n0 - Math.floor(n0), n1 - Math.floor(n1), u);
-  }
-  function applyBlend(ctx, mode) {
-    const map = { normal: "source-over", screen: "screen", overlay: "overlay", lighter: "lighter", multiply: "multiply", soft_light: "soft-light" };
-    ctx.globalCompositeOperation = map[mode] || mode || "source-over";
-  }
+  function smoothNoise(t) { const i = Math.floor(t); const f = t - i; const u = f * f * (3 - 2 * f); const n0 = Math.sin(i * 127.1) * 43758.5453; const n1 = Math.sin((i + 1) * 127.1) * 43758.5453; return lerp(n0 - Math.floor(n0), n1 - Math.floor(n1), u); }
+  function applyBlend(ctx, mode) { const map = { normal: "source-over", screen: "screen", overlay: "overlay", lighter: "lighter", multiply: "multiply", soft_light: "soft-light" }; ctx.globalCompositeOperation = map[mode] || mode || "source-over"; }
   function parseColor(hex, alpha) {
     const fallback = alpha === undefined ? "rgb(255,255,255)" : `rgba(255,255,255,${alpha})`;
     if (!hex || typeof hex !== "string") return fallback;
-    if (hex.startsWith("rgb")) {
-      if (alpha === undefined) return hex;
-      const m = hex.match(/[\d.]+/g);
-      if (!m || m.length < 3) return hex;
-      return `rgba(${m[0]},${m[1]},${m[2]},${alpha})`;
-    }
+    if (hex.startsWith("rgb")) { if (alpha === undefined) return hex; const m = hex.match(/[\d.]+/g); if (!m || m.length < 3) return hex; return `rgba(${m[0]},${m[1]},${m[2]},${alpha})`; }
     const h = hex.replace("#", "");
     const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
     const n = parseInt(full, 16);
@@ -549,31 +454,14 @@ function installLivingEffects(global) {
     if (Math.abs(n) <= 1) return n * total;
     return n;
   }
-  function scaledAmp(nominal, span) {
-    const n = Number(nominal);
-    if (!Number.isFinite(n)) return span * 0.01;
-    if (Math.abs(n) <= 1) return n * span;
-    return n * (span / 520);
-  }
+  function scaledAmp(nominal, span) { const n = Number(nominal); if (!Number.isFinite(n)) return span * 0.01; if (Math.abs(n) <= 1) return n * span; return n * (span / 520); }
   function readEnabled(cfg) { return !cfg || cfg.enabled !== false; }
   function globalWind() { return Number(global.__wind || 0); }
 
   class AmbientLight {
     constructor(opts) { this.cfg = opts || {}; this.t = 0; this.current = this.cfg.intensity ?? 0.25; }
-    update(dt) {
-      if (!readEnabled(this.cfg)) return;
-      const speed = Number(this.cfg.pulse_speed ?? this.cfg.pulseSpeed ?? 0.45);
-      this.t += dt * speed * 0.35;
-      const pulse = 0.86 + 0.14 * Math.sin(this.t);
-      this.current = (Number(this.cfg.intensity) || 0) * pulse;
-    }
-    draw(ctx, w, h) {
-      if (!readEnabled(this.cfg) || this.current <= 0.001) return;
-      const width = w || ctx.canvas.width; const height = h || ctx.canvas.height;
-      ctx.save(); applyBlend(ctx, "soft-light");
-      ctx.fillStyle = parseColor(this.cfg.color || "#FFA500", this.current);
-      ctx.fillRect(0, 0, width, height); ctx.restore();
-    }
+    update(dt) { if (!readEnabled(this.cfg)) return; const speed = Number(this.cfg.pulse_speed ?? this.cfg.pulseSpeed ?? 0.45); this.t += dt * speed * 0.35; const pulse = 0.86 + 0.14 * Math.sin(this.t); this.current = (Number(this.cfg.intensity) || 0) * pulse; }
+    draw(ctx, w, h) { if (!readEnabled(this.cfg) || this.current <= 0.001) return; const width = w || ctx.canvas.width; const height = h || ctx.canvas.height; ctx.save(); applyBlend(ctx, "soft-light"); ctx.fillStyle = parseColor(this.cfg.color || "#FFA500", this.current); ctx.fillRect(0, 0, width, height); ctx.restore(); }
   }
 
   class FireEffect {
@@ -587,24 +475,16 @@ function installLivingEffects(global) {
       if (this.particles.length !== count) { this.particles = []; for (let i = 0; i < count; i++) this.particles.push(this._spawn(true)); }
       this.ready = true;
     }
-    _spawn(randomV) {
-      const intensity = Number(this.cfg.intensity ?? 0.8);
-      return { u: 0.5 + (Math.random() - 0.5) * 0.5, v: randomV ? 0.2 + Math.random() * 0.8 : 0.82 + Math.random() * 0.16, vu: (Math.random() - 0.5) * 0.08, vv: -(0.28 + Math.random() * 0.45) * (0.55 + intensity * 0.55), life: 0.5 + Math.random() * 0.9, age: randomV ? Math.random() * 0.7 : 0, size: 0.07 + Math.random() * 0.2 };
-    }
+    _spawn(randomV) { const intensity = Number(this.cfg.intensity ?? 0.8); return { u: 0.5 + (Math.random() - 0.5) * 0.5, v: randomV ? 0.2 + Math.random() * 0.8 : 0.82 + Math.random() * 0.16, vu: (Math.random() - 0.5) * 0.08, vv: -(0.28 + Math.random() * 0.45) * (0.55 + intensity * 0.55), life: 0.5 + Math.random() * 0.9, age: randomV ? Math.random() * 0.7 : 0, size: 0.07 + Math.random() * 0.2 }; }
     update(dt) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       const wind = globalWind();
-      for (let i = 0; i < this.particles.length; i++) {
-        const p = this.particles[i]; p.age += dt;
-        p.u += p.vu * dt + wind * 0.02 * dt; p.v += p.vv * dt;
-        p.vu += (Math.random() - 0.5) * 0.25 * dt; p.vv -= 0.08 * dt;
-        if (p.age >= p.life || p.v < -0.08) this.particles[i] = this._spawn(false);
-      }
+      for (let i = 0; i < this.particles.length; i++) { const p = this.particles[i]; p.age += dt; p.u += p.vu * dt + wind * 0.02 * dt; p.v += p.vv * dt; p.vu += (Math.random() - 0.5) * 0.25 * dt; p.vv -= 0.08 * dt; if (p.age >= p.life || p.v < -0.08) this.particles[i] = this._spawn(false); }
     }
     draw(ctx) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       const intensity = clamp(Number(this.cfg.intensity ?? 0.8), 0, 1.5);
-      const colors = Array.isArray(this.cfg.colors) && this.cfg.colors.length ? this.cfg.colors : ["#FF6B00", "#FFA500", "#FFD700"];
+      const colors = Array.isArray(this.cfg.colors) && this.cfg.colors.length ? this.cfg.colors : ["#FF6B00","#FFA500","#FFD700"];
       ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen");
       const gx = this.x + this.w * 0.5; const gy = this.y + this.h * 0.86;
       const glow = ctx.createRadialGradient(gx, gy, 2, gx, gy, this.w * 0.85);
@@ -680,8 +560,7 @@ function installLivingEffects(global) {
     }
     draw(ctx) {
       if (!this.ready || !readEnabled(this.cfg)) return;
-      const color = this.cfg.flickerColor || this.cfg.color || "#FFE0B0";
-      const intensity = clamp(Number(this.cfg.intensity ?? 0.55), 0, 1.6); const b = this.bright * intensity;
+      const color = this.cfg.flickerColor || this.cfg.color || "#FFE0B0"; const intensity = clamp(Number(this.cfg.intensity ?? 0.55), 0, 1.6); const b = this.bright * intensity;
       const r = Math.max(20, this.radius * (0.95 + 0.08 * b));
       ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen");
       const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
@@ -739,9 +618,7 @@ function installLivingEffects(global) {
       if (this.particles.length !== count) { this.particles = []; for (let i = 0; i < count; i++) this.particles.push(this._spawn(true)); }
       this.ready = true;
     }
-    _spawn(random) {
-      return { u: (Math.random() - 0.5) * 0.35, v: random ? -Math.random() * 0.85 : 0.05, vu: (Math.random() - 0.5) * 0.05, grow: 0.15 + Math.random() * 0.25, life: 3.2 + Math.random() * 3.4, age: random ? Math.random() * 3 : 0, size: 0.12 + Math.random() * 0.2, phase: Math.random() * Math.PI * 2 };
-    }
+    _spawn(random) { return { u: (Math.random() - 0.5) * 0.35, v: random ? -Math.random() * 0.85 : 0.05, vu: (Math.random() - 0.5) * 0.05, grow: 0.15 + Math.random() * 0.25, life: 3.2 + Math.random() * 3.4, age: random ? Math.random() * 3 : 0, size: 0.12 + Math.random() * 0.2, phase: Math.random() * Math.PI * 2 }; }
     update(dt) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       const speed = Number(this.cfg.speed ?? 0.5); const dir = this.cfg.direction === "down" ? 1 : -1; const wind = globalWind();
@@ -790,9 +667,7 @@ function installLivingEffects(global) {
     update(dt) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       this.t += dt * Number(this.cfg.twinkle_speed ?? 1.5);
-      if (Math.random() < 0.002) {
-        this.meteors.push({ u: Math.random(), v: Math.random() * 0.5, vu: 0.35 + Math.random() * 0.35, vv: 0.12 + Math.random() * 0.15, age: 0, life: 1.2 + Math.random() * 0.6 });
-      }
+      if (Math.random() < 0.002) { this.meteors.push({ u: Math.random(), v: Math.random() * 0.5, vu: 0.35 + Math.random() * 0.35, vv: 0.12 + Math.random() * 0.15, age: 0, life: 1.2 + Math.random() * 0.6 }); }
       this.meteors = this.meteors.filter((m) => { m.age += dt; m.u += m.vu * dt; m.v += m.vv * dt; return m.age < m.life; });
     }
     draw(ctx) {
@@ -820,25 +695,15 @@ function installLivingEffects(global) {
     }
   }
 
-  /* Caustiques d'eau (organiques, style piscine) */
+  /* CAUSTIQUES RÉALISTES ET TRANSPARENTES : pas d'aplats, uniquement des lignes ondulées */
   class WaterCellsEffect {
-    constructor(opts) { this.cfg = opts || {}; this.kind = "water_cells"; this.t = 0; this.ready = false; this.blobs = []; }
+    constructor(opts) { this.cfg = opts || {}; this.kind = "water_cells"; this.t = 0; this.ready = false; }
     layout(w, h) {
       if (!(w > 0) || !(h > 0)) return;
       const pos = this.cfg.position || {}; const size = this.cfg.size || {};
-      this.x = toPx(pos.x, w, 0.02); this.y = toPx(pos.y, h, 0.4);
-      this.bw = Math.max(40, toPx(size.width, w, 0.96)); this.bh = Math.max(40, toPx(size.height, h, 0.55));
+      this.x = toPx(pos.x, w, 0.02); this.y = toPx(pos.y, h, 0.3);
+      this.bw = Math.max(40, toPx(size.width, w, 0.96)); this.bh = Math.max(40, toPx(size.height, h, 0.65));
       this.frameW = w; this.frameH = h;
-      if (this.blobs.length === 0) {
-        for (let i = 0; i < 40; i++) {
-          this.blobs.push({
-            cx: Math.random(), cy: Math.random(),
-            r: 0.08 + Math.random() * 0.18,
-            phase: Math.random() * Math.PI * 2,
-            drift: 0.3 + Math.random() * 0.5
-          });
-        }
-      }
       this.ready = true;
     }
     update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.8); }
@@ -846,54 +711,48 @@ function installLivingEffects(global) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       const color = this.cfg.color || "#3B9FC8";
       const caustic = this.cfg.causticColor || "#A8F0FF";
-      const waveAmp = Number(this.cfg.wave_amplitude ?? 2.5);
+      const amp = Number(this.cfg.wave_amplitude ?? 2.5);
       const t = this.t;
       ctx.save();
-      // 1) Fond : bleu profond uniforme
+      // On ne remplit PAS le fond : l'image reste visible. On dessine seulement les lignes.
       ctx.beginPath(); ctx.rect(this.x, this.y, this.bw, this.bh); ctx.clip();
-      ctx.fillStyle = parseColor(color, 0.85);
-      ctx.fillRect(this.x, this.y, this.bw, this.bh);
-      // 2) Caustiques : réseau de blobs organiques lumineux
-      ctx.globalCompositeOperation = "screen";
-      for (const b of this.blobs) {
-        const cx = this.x + b.cx * this.bw + Math.sin(t * b.drift + b.phase) * this.bw * 0.02;
-        const cy = this.y + b.cy * this.bh + Math.cos(t * b.drift * 1.3 + b.phase) * this.bh * 0.02;
-        const r = b.r * Math.min(this.bw, this.bh) * (1 + 0.15 * Math.sin(t * 1.7 + b.phase));
-        // Bord lumineux : anneau clair
-        const glow = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r);
-        glow.addColorStop(0, parseColor(caustic, 0));
-        glow.addColorStop(0.7, parseColor(caustic, 0.45));
-        glow.addColorStop(0.95, parseColor(caustic, 0.75));
-        glow.addColorStop(1, parseColor(caustic, 0));
-        ctx.fillStyle = glow;
-        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-        // Intérieur plus clair, décalé
-        const inner = ctx.createRadialGradient(cx - r * 0.1, cy - r * 0.1, 0, cx, cy, r * 0.85);
-        inner.addColorStop(0, parseColor(caustic, 0.35));
-        inner.addColorStop(0.5, parseColor(caustic, 0.12));
-        inner.addColorStop(1, parseColor(color, 0));
-        ctx.fillStyle = inner;
-        ctx.beginPath(); ctx.arc(cx, cy, r * 0.85, 0, Math.PI * 2); ctx.fill();
+      // Lignes sinusoïdales qui forment le maillage organique de caustiques
+      const rows = 12;
+      const cols = 18;
+      ctx.strokeStyle = parseColor(caustic, 0.35);
+      ctx.lineWidth = Math.max(1.2, this.bw * 0.003);
+      ctx.lineCap = "round";
+      for (let i = 0; i < rows; i++) {
+        const baseY = this.y + (i + 0.5) / rows * this.bh;
+        ctx.beginPath();
+        for (let j = 0; j <= cols; j++) {
+          const px = this.x + j / cols * this.bw;
+          const phase = t * 0.8 + j * 0.4 + i * 1.3;
+          const py = baseY + Math.sin(phase) * amp * 1.6 + Math.cos(phase * 0.7) * amp * 0.8;
+          if (j === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
       }
-      // 3) Voile de brillance qui glisse
-      ctx.globalCompositeOperation = "screen";
-      const glide = ((t * 40) % (this.bw + 200)) - 100;
-      const shine = ctx.createLinearGradient(this.x + glide, this.y, this.x + glide + 150, this.y);
-      shine.addColorStop(0, "rgba(255,255,255,0)");
-      shine.addColorStop(0.5, "rgba(255,255,255,0.12)");
-      shine.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = shine; ctx.fillRect(this.x, this.y, this.bw, this.bh);
-      // 4) Écume ondulante sur le bord supérieur
-      ctx.strokeStyle = parseColor("#EAF4FF", 0.25 + 0.15 * Math.sin(t * 1.4));
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      const steps = 80;
-      for (let i = 0; i <= steps; i++) {
-        const px = this.x + (i / steps) * this.bw;
-        const py = this.y + Math.sin(i * 0.5 + t * 1.5) * (waveAmp * 0.6);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      ctx.strokeStyle = parseColor(caustic, 0.28);
+      for (let j = 0; j < cols; j++) {
+        const baseX = this.x + (j + 0.5) / cols * this.bw;
+        ctx.beginPath();
+        for (let i = 0; i <= rows; i++) {
+          const py = this.y + i / rows * this.bh;
+          const phase = t * 0.6 + i * 0.4 + j * 1.1;
+          const px = baseX + Math.sin(phase) * amp * 1.4 + Math.cos(phase * 0.7) * amp * 0.7;
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
+      // Éclats lumineux mobiles qui riment avec l'eau
+      ctx.fillStyle = parseColor("#FFFFFF", 0.16);
+      for (let k = 0; k < 12; k++) {
+        const u = (k / 12 + t * 0.05) % 1;
+        const v = 0.5 + 0.4 * Math.sin(t * 0.7 + k);
+        const r = 2 + 1.5 * Math.sin(t * 1.5 + k * 1.7);
+        ctx.beginPath(); ctx.arc(this.x + u * this.bw, this.y + v * this.bh, Math.max(1, r), 0, Math.PI * 2); ctx.fill();
+      }
       ctx.restore();
     }
   }
@@ -957,9 +816,7 @@ function installLivingEffects(global) {
       if (this.birds.length !== count) { this.birds = []; for (let i = 0; i < count; i++) this.birds.push(this._spawn(true)); }
       this.ready = true;
     }
-    _spawn(random) {
-      return { u: random ? Math.random() : -0.15, v: 0.15 + Math.random() * 0.7, dir: Math.random() > 0.5 ? 1 : -1, speed: 0.4 + Math.random() * 0.5, wingPhase: Math.random() * Math.PI * 2, size: 0.7 + Math.random() * 0.8, vAmp: 0.03 + Math.random() * 0.06, phase: Math.random() * Math.PI * 2 };
-    }
+    _spawn(random) { return { u: random ? Math.random() : -0.15, v: 0.15 + Math.random() * 0.7, dir: Math.random() > 0.5 ? 1 : -1, speed: 0.4 + Math.random() * 0.5, wingPhase: Math.random() * Math.PI * 2, size: 0.7 + Math.random() * 0.8, vAmp: 0.03 + Math.random() * 0.06, phase: Math.random() * Math.PI * 2 }; }
     update(dt) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       this.t += dt; const baseSpeed = Number(this.cfg.speed ?? 0.4); const wind = globalWind();
@@ -990,42 +847,6 @@ function installLivingEffects(global) {
     }
   }
 
-  class PetEffect {
-    constructor(opts) { this.cfg = opts || {}; this.kind = "pet"; this.t = 0; this.breath = 0; this.ready = false; }
-    layout(w, h) {
-      if (!(w > 0) || !(h > 0)) return;
-      const pos = this.cfg.position || {}; const size = this.cfg.size || {};
-      this.x = toPx(pos.x, w, 0.55); this.y = toPx(pos.y, h, 0.72);
-      this.w = Math.max(20, toPx(size.width, w, 0.14)); this.h = Math.max(20, toPx(size.height, h, 0.18));
-      this.frameW = w; this.frameH = h; this.ready = true;
-    }
-    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt; const speed = Number(this.cfg.breath_speed ?? 0.9); this.breath = Math.sin(this.t * speed * 1.5); }
-    draw(ctx) {
-      if (!this.ready || !readEnabled(this.cfg)) return;
-      const color = this.cfg.color || "#3B2C1E"; const petType = this.cfg.petType === "dog" ? "dog" : "cat";
-      const breath = this.breath; const sizeMul = 1 + breath * 0.02;
-      const cx = this.x + this.w * 0.5; const cy = this.y + this.h * 0.5; const W = this.w * sizeMul; const H = this.h * sizeMul;
-      ctx.save(); applyBlend(ctx, "source-over");
-      ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.beginPath(); ctx.ellipse(cx, this.y + this.h * 0.95, W * 0.45, H * 0.08, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = parseColor(color, 0.92); ctx.beginPath(); ctx.ellipse(cx, cy + H * 0.15, W * 0.42, H * 0.28, 0, 0, Math.PI * 2); ctx.fill();
-      const headX = petType === "dog" ? cx + W * 0.22 : cx + W * 0.15; const headY = cy - H * 0.12; const headR = H * 0.22;
-      ctx.beginPath(); ctx.arc(headX, headY, headR, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath();
-      if (petType === "cat") {
-        ctx.moveTo(headX - headR * 0.7, headY - headR * 0.6); ctx.lineTo(headX - headR * 0.9, headY - headR * 1.35); ctx.lineTo(headX - headR * 0.2, headY - headR * 0.95); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(headX + headR * 0.7, headY - headR * 0.6); ctx.lineTo(headX + headR * 0.9, headY - headR * 1.35); ctx.lineTo(headX + headR * 0.2, headY - headR * 0.95); ctx.closePath(); ctx.fill();
-      } else {
-        ctx.beginPath(); ctx.ellipse(headX - headR * 0.85, headY, headR * 0.25, headR * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(headX + headR * 0.85, headY, headR * 0.25, headR * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-      }
-      const tailBaseX = cx - W * 0.4; const tailBaseY = cy + H * 0.1; const tailWag = Math.sin(this.t * 2.2) * 0.5;
-      ctx.strokeStyle = parseColor(color, 0.9); ctx.lineWidth = Math.max(2, H * 0.05); ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(tailBaseX, tailBaseY); ctx.quadraticCurveTo(tailBaseX - W * 0.15, tailBaseY - H * 0.2 + tailWag * H * 0.1, tailBaseX - W * 0.1, tailBaseY - H * 0.4 + tailWag * H * 0.25); ctx.stroke();
-      ctx.fillStyle = "rgba(255,240,180,0.9)"; ctx.beginPath(); ctx.arc(headX + headR * 0.25, headY - headR * 0.1, headR * 0.08, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(headX - headR * 0.15, headY - headR * 0.1, headR * 0.08, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    }
-  }
-
   class BubblesEffect {
     constructor(opts) { this.cfg = opts || {}; this.kind = "bubbles"; this.bubbles = []; this.t = 0; this.ready = false; }
     layout(w, h) {
@@ -1037,9 +858,7 @@ function installLivingEffects(global) {
       if (this.bubbles.length !== count) { this.bubbles = []; for (let i = 0; i < count; i++) this.bubbles.push(this._spawn(true)); }
       this.ready = true;
     }
-    _spawn(random) {
-      return { u: Math.random(), v: random ? Math.random() : 1.05, r: 2 + Math.random() * 6, speed: 0.15 + Math.random() * 0.35, wobble: Math.random() * Math.PI * 2, phase: Math.random() * Math.PI * 2 };
-    }
+    _spawn(random) { return { u: Math.random(), v: random ? Math.random() : 1.05, r: 2 + Math.random() * 6, speed: 0.15 + Math.random() * 0.35, wobble: Math.random() * Math.PI * 2, phase: Math.random() * Math.PI * 2 }; }
     update(dt) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       const speed = Number(this.cfg.speed ?? 0.6); this.t += dt;
@@ -1075,9 +894,7 @@ function installLivingEffects(global) {
       const count = clamp(Math.round(Number(this.cfg.count) || 4), 1, 12);
       if (this.rays.length !== count) {
         this.rays = [];
-        for (let i = 0; i < count; i++) {
-          this.rays.push({ angle: (i / count) * Math.PI * 0.8 - Math.PI * 0.4, width: 0.15 + Math.random() * 0.15, phase: Math.random() * Math.PI * 2, speed: 0.2 + Math.random() * 0.3 });
-        }
+        for (let i = 0; i < count; i++) { this.rays.push({ angle: (i / count) * Math.PI * 0.8 - Math.PI * 0.4, width: 0.15 + Math.random() * 0.15, phase: Math.random() * Math.PI * 2, speed: 0.2 + Math.random() * 0.3 }); }
       }
       this.ready = true;
     }
@@ -1100,7 +917,7 @@ function installLivingEffects(global) {
     }
   }
 
-  /* Papillon dessiné (style illustration) */
+  /* Papillon réaliste : 4 ailes avec découpes, corps fin et antennes */
   class ButterflyEffect {
     constructor(opts) { this.cfg = opts || {}; this.kind = "butterfly"; this.t = 0; this.ready = false; }
     layout(w, h) {
@@ -1115,60 +932,68 @@ function installLivingEffects(global) {
       if (!this.ready || !readEnabled(this.cfg)) return;
       const color = this.cfg.color || "#3B9FC8";
       const wingColor = this.cfg.wingColor || "#5AB8D8";
-      const wingColor2 = mixColor(wingColor, "#FFFFFF", 0.25);
-      // Virevolte en 8
+      const dark = mixColor(color, "#000000", 0.4);
       const cx = this.x + Math.sin(this.t * 1.1) * this.w * 0.6;
       const cy = this.y + Math.cos(this.t * 0.9) * this.h * 0.4;
-      const flap = Math.abs(Math.sin(this.t * 8)); // 0 = fermé, 1 = ouvert
+      const flap = Math.abs(Math.sin(this.t * 8));
+      const W = this.w * (0.4 + 0.6 * flap);
+      const H = this.h;
       ctx.save();
       applyBlend(ctx, "source-over");
-      // Ailes supérieures (2 paires)
-      const W = this.w * (0.5 + 0.5 * flap);
-      const H = this.h;
-      // Ailes gauches
-      ctx.fillStyle = parseColor(wingColor, 0.95);
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.bezierCurveTo(cx - W * 0.9, cy - H * 0.9, cx - W * 1.1, cy - H * 0.1, cx - W * 0.3, cy + H * 0.1);
-      ctx.closePath(); ctx.fill();
-      // Aile droite
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.bezierCurveTo(cx + W * 0.9, cy - H * 0.9, cx + W * 1.1, cy - H * 0.1, cx + W * 0.3, cy + H * 0.1);
-      ctx.closePath(); ctx.fill();
-      // Ailes inférieures (plus petites)
-      ctx.fillStyle = parseColor(wingColor2, 0.95);
-      ctx.beginPath();
-      ctx.moveTo(cx, cy + H * 0.05);
-      ctx.bezierCurveTo(cx - W * 0.7, cy + H * 0.5, cx - W * 0.9, cy + H * 0.8, cx - W * 0.2, cy + H * 0.7);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx, cy + H * 0.05);
-      ctx.bezierCurveTo(cx + W * 0.7, cy + H * 0.5, cx + W * 0.9, cy + H * 0.8, cx + W * 0.2, cy + H * 0.7);
-      ctx.closePath(); ctx.fill();
-      // Motifs de taches sur les ailes
-      ctx.fillStyle = parseColor(color, 0.7);
-      ctx.beginPath(); ctx.arc(cx - W * 0.5, cy - H * 0.3, W * 0.08, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + W * 0.5, cy - H * 0.3, W * 0.08, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = parseColor("#FFE08A", 0.8);
-      ctx.beginPath(); ctx.arc(cx - W * 0.7, cy - H * 0.5, W * 0.04, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + W * 0.7, cy - H * 0.5, W * 0.04, 0, Math.PI * 2); ctx.fill();
-      // Corps segmenté
-      ctx.fillStyle = parseColor(color, 1);
-      ctx.beginPath(); ctx.ellipse(cx, cy + H * 0.15, W * 0.06, H * 0.35, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#1A1A1A";
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath(); ctx.arc(cx, cy - H * 0.15 + i * H * 0.12, W * 0.025, 0, Math.PI * 2); ctx.fill();
+      ctx.translate(cx, cy);
+      // Ailes antérieures (haut) — forme en goutte avec bord découpé
+      for (const side of [-1, 1]) {
+        ctx.save();
+        ctx.scale(side, 1);
+        // Base de l'aile
+        ctx.fillStyle = parseColor(wingColor, 0.96);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(W * 0.4, -H * 1.1, W * 1.2, -H * 0.9, W * 1.05, -H * 0.35);
+        ctx.bezierCurveTo(W * 1.0, -H * 0.1, W * 0.7, -H * 0.05, W * 0.3, 0);
+        ctx.closePath();
+        ctx.fill();
+        // Bordure sombre
+        ctx.strokeStyle = parseColor(dark, 0.85);
+        ctx.lineWidth = Math.max(1, W * 0.03);
+        ctx.stroke();
+        // Taches
+        ctx.fillStyle = parseColor(dark, 0.7);
+        ctx.beginPath(); ctx.arc(W * 0.75, -H * 0.55, W * 0.09, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(W * 0.5, -H * 0.7, W * 0.06, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = parseColor("#FFF8E4", 0.85);
+        ctx.beginPath(); ctx.arc(W * 0.6, -H * 0.45, W * 0.04, 0, Math.PI * 2); ctx.fill();
+        // Aile postérieure (bas) — plus petite
+        ctx.fillStyle = parseColor(wingColor, 0.94);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(W * 0.4, H * 0.5, W * 1.0, H * 0.55, W * 0.85, H * 0.15);
+        ctx.bezierCurveTo(W * 0.75, -H * 0.05, W * 0.4, 0, W * 0.2, 0.02);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = parseColor(dark, 0.85);
+        ctx.stroke();
+        ctx.fillStyle = parseColor(dark, 0.6);
+        ctx.beginPath(); ctx.arc(W * 0.6, H * 0.28, W * 0.07, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
+      // Corps
+      ctx.fillStyle = parseColor(dark, 0.95);
+      ctx.beginPath(); ctx.ellipse(0, H * 0.05, W * 0.045, H * 0.55, 0, 0, Math.PI * 2); ctx.fill();
+      // Tête
+      ctx.beginPath(); ctx.arc(0, -H * 0.5, W * 0.06, 0, Math.PI * 2); ctx.fill();
       // Antennes
-      ctx.strokeStyle = "#1A1A1A"; ctx.lineWidth = 1; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(cx, cy - H * 0.15); ctx.quadraticCurveTo(cx - W * 0.2, cy - H * 0.5, cx - W * 0.35, cy - H * 0.55); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx, cy - H * 0.15); ctx.quadraticCurveTo(cx + W * 0.2, cy - H * 0.5, cx + W * 0.35, cy - H * 0.55); ctx.stroke();
+      ctx.strokeStyle = parseColor(dark, 0.9); ctx.lineWidth = 1; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(0, -H * 0.55); ctx.quadraticCurveTo(-W * 0.15, -H * 0.9, -W * 0.35, -H * 0.95); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -H * 0.55); ctx.quadraticCurveTo(W * 0.15, -H * 0.9, W * 0.35, -H * 0.95); ctx.stroke();
+      // Bout des antennes
+      ctx.fillStyle = parseColor(dark, 0.9);
+      ctx.beginPath(); ctx.arc(-W * 0.35, -H * 0.95, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(W * 0.35, -H * 0.95, 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
   }
 
-  /* Herbe en touffes (style illustration) */
   class GrassEffect {
     constructor(opts) { this.cfg = opts || {}; this.kind = "grass"; this.t = 0; this.blades = []; this.ready = false; }
     layout(w, h) {
@@ -1180,15 +1005,7 @@ function installLivingEffects(global) {
       if (this.blades.length !== count) {
         this.blades = [];
         for (let i = 0; i < count; i++) {
-          this.blades.push({
-            u: Math.random(),
-            height: 0.4 + Math.random() * 0.6,
-            phase: Math.random() * Math.PI * 2,
-            speed: 0.5 + Math.random() * 0.8,
-            thickness: 1 + Math.random() * 1.5,
-            curve: (Math.random() - 0.5) * 0.5,
-            tint: Math.random()
-          });
+          this.blades.push({ u: Math.random(), height: 0.4 + Math.random() * 0.6, phase: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 0.8, thickness: 1 + Math.random() * 1.5, curve: (Math.random() - 0.5) * 0.5, tint: Math.random() });
         }
       }
       this.ready = true;
@@ -1201,31 +1018,18 @@ function installLivingEffects(global) {
       const colorLight = mixColor(color, "#A8E063", 0.3);
       const amp = Number(this.cfg.sway_amount ?? 3);
       const wind = globalWind();
-      ctx.save();
-      applyBlend(ctx, "source-over");
-      ctx.lineCap = "round";
+      ctx.save(); applyBlend(ctx, "source-over"); ctx.lineCap = "round";
       for (const b of this.blades) {
         const x = this.rx + b.u * this.rw;
         const baseY = this.ry + this.rh;
         const h = this.rh * b.height;
         const sway = Math.sin(this.t * b.speed + b.phase) * amp + wind * 6;
         const curve = b.curve * h * 0.5;
-        // Couleur de base selon la teinte
         const fill = b.tint > 0.5 ? colorLight : color;
-        // Brin principal
-        ctx.strokeStyle = parseColor(fill, 0.95);
-        ctx.lineWidth = b.thickness;
-        ctx.beginPath();
-        ctx.moveTo(x, baseY);
-        ctx.quadraticCurveTo(x + sway * 0.5 + curve, baseY - h * 0.6, x + sway, baseY - h);
-        ctx.stroke();
-        // Brin d'ombre (décalé)
-        ctx.strokeStyle = parseColor(colorDark, 0.6);
-        ctx.lineWidth = Math.max(1, b.thickness * 0.6);
-        ctx.beginPath();
-        ctx.moveTo(x + 1, baseY);
-        ctx.quadraticCurveTo(x + sway * 0.5 + curve + 1, baseY - h * 0.6, x + sway + 1, baseY - h);
-        ctx.stroke();
+        ctx.strokeStyle = parseColor(fill, 0.95); ctx.lineWidth = b.thickness;
+        ctx.beginPath(); ctx.moveTo(x, baseY); ctx.quadraticCurveTo(x + sway * 0.5 + curve, baseY - h * 0.6, x + sway, baseY - h); ctx.stroke();
+        ctx.strokeStyle = parseColor(colorDark, 0.6); ctx.lineWidth = Math.max(1, b.thickness * 0.6);
+        ctx.beginPath(); ctx.moveTo(x + 1, baseY); ctx.quadraticCurveTo(x + sway * 0.5 + curve + 1, baseY - h * 0.6, x + sway + 1, baseY - h); ctx.stroke();
       }
       ctx.restore();
     }
@@ -1241,9 +1045,7 @@ function installLivingEffects(global) {
       const count = clamp(Math.round(Number(this.cfg.count) || 18), 0, 160);
       if (this.particles.length !== count) {
         this.particles = [];
-        for (let i = 0; i < count; i++) {
-          this.particles.push({ u: Math.random(), v: Math.random(), vu: (Math.random() - 0.5) * 0.35, vv: (Math.random() - 0.5) * 0.22, size: 0.8 + Math.random() * 1.8, phase: Math.random() * Math.PI * 2 });
-        }
+        for (let i = 0; i < count; i++) { this.particles.push({ u: Math.random(), v: Math.random(), vu: (Math.random() - 0.5) * 0.35, vv: (Math.random() - 0.5) * 0.22, size: 0.8 + Math.random() * 1.8, phase: Math.random() * Math.PI * 2 }); }
       }
       this.ready = true;
     }
@@ -1281,10 +1083,7 @@ function installLivingEffects(global) {
       this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0);
       this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 1));
       const count = clamp(Math.round(Number(this.cfg.count) || 60), 0, 300);
-      if (this.drops.length !== count) {
-        this.drops = [];
-        for (let i = 0; i < count; i++) this.drops.push({ u: Math.random(), v: Math.random(), len: 8 + Math.random() * 18, speed: 0.6 + Math.random() * 0.9 });
-      }
+      if (this.drops.length !== count) { this.drops = []; for (let i = 0; i < count; i++) this.drops.push({ u: Math.random(), v: Math.random(), len: 8 + Math.random() * 18, speed: 0.6 + Math.random() * 0.9 }); }
       this.ready = true;
     }
     update(dt) {
@@ -1319,10 +1118,7 @@ function installLivingEffects(global) {
       this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0);
       this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 1));
       const count = clamp(Math.round(Number(this.cfg.count) || 40), 0, 250);
-      if (this.flakes.length !== count) {
-        this.flakes = [];
-        for (let i = 0; i < count; i++) this.flakes.push({ u: Math.random(), v: Math.random(), size: 1 + Math.random() * 3, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.5 });
-      }
+      if (this.flakes.length !== count) { this.flakes = []; for (let i = 0; i < count; i++) this.flakes.push({ u: Math.random(), v: Math.random(), size: 1 + Math.random() * 3, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.5 }); }
       this.ready = true;
     }
     update(dt) {
@@ -1360,7 +1156,7 @@ function installLivingEffects(global) {
     update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.35); }
     draw(ctx) {
       if (!this.ready || !readEnabled(this.cfg)) return;
-      const colors = Array.isArray(this.cfg.colors) && this.cfg.colors.length ? this.cfg.colors : ["#7DE3B5", "#8AB6F0", "#D08AE8"];
+      const colors = Array.isArray(this.cfg.colors) && this.cfg.colors.length ? this.cfg.colors : ["#7DE3B5","#8AB6F0","#D08AE8"];
       const intensity = Number(this.cfg.intensity ?? 0.7);
       ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen");
       for (let layer = 0; layer < 3; layer++) {
@@ -1387,9 +1183,7 @@ function installLivingEffects(global) {
   function mixColor(a, b, t) {
     const ca = parseColor(a); const cb = parseColor(b);
     const ma = ca.match(/\d+/g) || [0, 0, 0]; const mb = cb.match(/\d+/g) || [0, 0, 0];
-    const r = Math.round(lerp(+ma[0], +mb[0], t));
-    const g = Math.round(lerp(+ma[1], +mb[1], t));
-    const bl = Math.round(lerp(+ma[2], +mb[2], t));
+    const r = Math.round(lerp(+ma[0], +mb[0], t)); const g = Math.round(lerp(+ma[1], +mb[1], t)); const bl = Math.round(lerp(+ma[2], +mb[2], t));
     return `rgb(${r},${g},${bl})`;
   }
 
@@ -1406,7 +1200,6 @@ function installLivingEffects(global) {
       case "water_cells": return new WaterCellsEffect(el);
       case "trees": return new TreesEffect(el);
       case "birds": return new BirdsEffect(el);
-      case "pet": return new PetEffect(el);
       case "bubbles": return new BubblesEffect(el);
       case "god_rays": return new GodRaysEffect(el);
       case "butterfly": return new ButterflyEffect(el);
@@ -1434,8 +1227,7 @@ function installLivingEffects(global) {
       const list = s.animated_elements || s.elements || [];
       list.forEach((el) => {
         if (el.enabled === false) return;
-        const fx = createEffect(el);
-        if (!fx) return;
+        const fx = createEffect(el); if (!fx) return;
         if (fx.layout) fx.layout(this.viewWidth, this.viewHeight);
         this.effects.push(fx);
       });
@@ -1447,20 +1239,12 @@ function installLivingEffects(global) {
       this.effects.forEach((fx) => { if (fx.layout) fx.layout(w, h); });
     }
     start() {
-      if (this.running) return;
-      this.running = true; this.last = performance.now();
-      const loop = (now) => {
-        if (!this.running) return;
-        const dt = Math.min(0.05, (now - this.last) / 1000); this.last = now;
-        this.update(dt); this.draw(); requestAnimationFrame(loop);
-      };
+      if (this.running) return; this.running = true; this.last = performance.now();
+      const loop = (now) => { if (!this.running) return; const dt = Math.min(0.05, (now - this.last) / 1000); this.last = now; this.update(dt); this.draw(); requestAnimationFrame(loop); };
       requestAnimationFrame(loop);
     }
     stop() { this.running = false; }
-    update(dt) {
-      if (this.ambient) this.ambient.update(dt);
-      this.effects.forEach((fx) => fx.update(dt));
-    }
+    update(dt) { if (this.ambient) this.ambient.update(dt); this.effects.forEach((fx) => fx.update(dt)); }
     draw() {
       const ctx = this.ctx; const w = this.viewWidth; const h = this.viewHeight;
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1473,7 +1257,7 @@ function installLivingEffects(global) {
 
   global.LivingEffects = {
     FireEffect, CandleEffect, CeilingLightEffect, WindowLightEffect, SmokeEffect,
-    StarsEffect, DustParticlesEffect, WaterCellsEffect, TreesEffect, BirdsEffect, PetEffect,
+    StarsEffect, DustParticlesEffect, WaterCellsEffect, TreesEffect, BirdsEffect,
     BubblesEffect, GodRaysEffect, ButterflyEffect, GrassEffect,
     RainEffect, SnowEffect, AuroraEffect,
     AmbientLight, ScenePlayer, createEffect, parseColor, applyBlend,
@@ -1487,24 +1271,12 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
 (function (root) {
   "use strict";
   const TYPE_META = {
-    fire: { icon: "🔥", label: "Feu" },
-    candle: { icon: "🕯️", label: "Bougie" },
-    ceiling_light: { icon: "💡", label: "Plafonnier" },
-    smoke: { icon: "💨", label: "Fumée" },
-    window_light: { icon: "🌙", label: "Fenêtre / lune" },
-    stars: { icon: "✨", label: "Étoiles" },
-    water_cells: { icon: "💧", label: "Caustiques d'eau" },
-    trees: { icon: "🍂", label: "Feuilles" },
-    birds: { icon: "🐦", label: "Oiseaux" },
-    pet: { icon: "🐈", label: "Animal" },
-    bubbles: { icon: "🔮", label: "Bulles" },
-    god_rays: { icon: "🌫️", label: "Rayons" },
-    butterfly: { icon: "🦋", label: "Papillon" },
-    grass: { icon: "🌾", label: "Herbe" },
-    dust: { icon: "✴️", label: "Poussière" },
-    rain: { icon: "🌧️", label: "Pluie" },
-    snow: { icon: "❄️", label: "Neige" },
-    aurora: { icon: "🌌", label: "Aurore" }
+    fire: { icon: "🔥", label: "Feu" }, candle: { icon: "🕯️", label: "Bougie" }, ceiling_light: { icon: "💡", label: "Plafonnier" },
+    smoke: { icon: "💨", label: "Fumée" }, window_light: { icon: "🌙", label: "Fenêtre / lune" }, stars: { icon: "✨", label: "Étoiles" },
+    water_cells: { icon: "💧", label: "Caustiques d'eau" }, trees: { icon: "🍂", label: "Feuilles" }, birds: { icon: "🐦", label: "Oiseaux" },
+    bubbles: { icon: "🔮", label: "Bulles" }, god_rays: { icon: "🌫️", label: "Rayons" }, butterfly: { icon: "🦋", label: "Papillon" },
+    grass: { icon: "🌾", label: "Herbe" }, dust: { icon: "✴️", label: "Poussière" }, rain: { icon: "🌧️", label: "Pluie" },
+    snow: { icon: "❄️", label: "Neige" }, aurora: { icon: "🌌", label: "Aurore" }
   };
   function toPx(value, total) { if (value == null || Number.isNaN(Number(value))) return 0; const n = Number(value); return Math.abs(n) <= 1 ? n * total : n; }
   class VisualElement {
@@ -1513,22 +1285,18 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     getBounds() {
       const { w, h } = this.space(); const c = this.config;
       if (c.type === "candle" || c.type === "ceiling_light") {
-        const radius = c.radius == null ? 0.045 : Number(c.radius);
-        const r = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius;
+        const radius = c.radius == null ? 0.045 : Number(c.radius); const r = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius;
         const cx = toPx(c.position?.x ?? 0.5, w); const cy = toPx(c.position?.y ?? 0.5, h);
         return { x: cx - r, y: cy - r, width: r * 2, height: r * 2 };
       }
-      if (c.region) {
-        return { x: toPx(c.region.x, w), y: toPx(c.region.y, h), width: Math.max(12, toPx(c.region.width, w)), height: Math.max(12, toPx(c.region.height, h)) };
-      }
+      if (c.region) { return { x: toPx(c.region.x, w), y: toPx(c.region.y, h), width: Math.max(12, toPx(c.region.width, w)), height: Math.max(12, toPx(c.region.height, h)) }; }
       return { x: toPx(c.position?.x ?? 0, w), y: toPx(c.position?.y ?? 0, h), width: Math.max(12, toPx(c.size?.width ?? 0.1, w)), height: Math.max(12, toPx(c.size?.height ?? 0.1, h)) };
     }
     setBounds(x, y, width, height) {
       const { w, h } = this.space(); const bw = Math.max(16, width); const bh = Math.max(16, height); const c = this.config;
       if (c.type === "candle" || c.type === "ceiling_light") {
         const r = Math.min(bw, bh) / 2; c.radius = r / Math.min(w, h);
-        if (!c.position) c.position = { x: 0.5, y: 0.5 };
-        c.position.x = (x + bw / 2) / w; c.position.y = (y + bh / 2) / h; return;
+        if (!c.position) c.position = { x: 0.5, y: 0.5 }; c.position.x = (x + bw / 2) / w; c.position.y = (y + bh / 2) / h; return;
       }
       if (c.region) { c.region.x = x / w; c.region.y = y / h; c.region.width = bw / w; c.region.height = bh / h; return; }
       if (!c.position) c.position = { x: 0, y: 0 }; if (!c.size) c.size = { width: 0.1, height: 0.1 };
@@ -1551,8 +1319,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     drawSelectionHandles(ctx) {
       const size = 9; ctx.save(); ctx.globalCompositeOperation = "source-over";
       ctx.fillStyle = "#fff8ef"; ctx.strokeStyle = "#e39a45"; ctx.lineWidth = 1.5;
-      this.handles().forEach((h) => { ctx.fillRect(h.x - size / 2, h.y - size / 2, size, size); ctx.strokeRect(h.x - size / 2, h.y - size / 2, size, size); });
-      ctx.restore();
+      this.handles().forEach((h) => { ctx.fillRect(h.x - size / 2, h.y - size / 2, size, size); ctx.strokeRect(h.x - size / 2, h.y - size / 2, size, size); }); ctx.restore();
     }
     getConfig() { return this.config; }
   }
@@ -1574,8 +1341,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     }
     duplicateElement(elementId) {
       const el = this.elements.find((e) => e.config.id === elementId); if (!el) return null;
-      const copy = JSON.parse(JSON.stringify(el.config));
-      copy.id = `${copy.type}_${Date.now().toString(36)}_${Math.floor(Math.random() * 9999)}`;
+      const copy = JSON.parse(JSON.stringify(el.config)); copy.id = `${copy.type}_${Date.now().toString(36)}_${Math.floor(Math.random() * 9999)}`;
       if (copy.position) { copy.position.x = Math.min(0.92, (copy.position.x || 0.4) + 0.04); copy.position.y = Math.min(0.92, (copy.position.y || 0.4) + 0.04); }
       if (copy.region) copy.region.x = Math.min(0.4, (copy.region.x || 0) + 0.03);
       return this.addElement(copy);
@@ -1586,32 +1352,11 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
       this.effects.set(element.config.id, fx); return fx;
     }
     clearElements() { this.elements = []; this.effects.clear(); this.selectedElement = null; this._broken.clear(); }
-    removeElement(elementId) {
-      this.elements = this.elements.filter((el) => el.config.id !== elementId);
-      this.effects.delete(elementId);
-      if (this.selectedElement && this.selectedElement.config.id === elementId) this.selectedElement = null;
-      if (typeof this.onChange === "function") this.onChange();
-    }
-    selectElement(elementId) {
-      this.selectedElement = this.elements.find((el) => el.config.id === elementId) || null;
-      if (typeof this.onSelect === "function") this.onSelect(this.selectedElement);
-      return this.selectedElement;
-    }
-    moveElement(elementId, direction) {
-      const index = this.elements.findIndex((el) => el.config.id === elementId);
-      const next = index + direction;
-      if (index < 0 || next < 0 || next >= this.elements.length) return;
-      const [item] = this.elements.splice(index, 1); this.elements.splice(next, 0, item);
-      if (typeof this.onChange === "function") this.onChange();
-    }
+    removeElement(elementId) { this.elements = this.elements.filter((el) => el.config.id !== elementId); this.effects.delete(elementId); if (this.selectedElement && this.selectedElement.config.id === elementId) this.selectedElement = null; if (typeof this.onChange === "function") this.onChange(); }
+    selectElement(elementId) { this.selectedElement = this.elements.find((el) => el.config.id === elementId) || null; if (typeof this.onSelect === "function") this.onSelect(this.selectedElement); return this.selectedElement; }
+    moveElement(elementId, direction) { const index = this.elements.findIndex((el) => el.config.id === elementId); const next = index + direction; if (index < 0 || next < 0 || next >= this.elements.length) return; const [item] = this.elements.splice(index, 1); this.elements.splice(next, 0, item); if (typeof this.onChange === "function") this.onChange(); }
     handleMouseDown(x, y) {
-      if (this.selectedElement) {
-        const handle = this.selectedElement.hitHandle(x, y);
-        if (handle) {
-          this.isDragging = true; this.dragMode = "resize"; this.activeHandle = handle;
-          this.dragOrigin = { x: x, y: y, bounds: this.selectedElement.getBounds() }; return true;
-        }
-      }
+      if (this.selectedElement) { const handle = this.selectedElement.hitHandle(x, y); if (handle) { this.isDragging = true; this.dragMode = "resize"; this.activeHandle = handle; this.dragOrigin = { x: x, y: y, bounds: this.selectedElement.getBounds() }; return true; } }
       for (let i = this.elements.length - 1; i >= 0; i--) {
         const element = this.elements[i];
         if (element.containsPoint(x, y)) {
@@ -1636,18 +1381,11 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
       const bounds = this.selectedElement.getBounds();
       this.selectedElement.setBounds(x - this.dragOffset.x, y - this.dragOffset.y, bounds.width, bounds.height);
     }
-    handleMouseUp() {
-      const was = this.isDragging; this.isDragging = false; this.dragMode = null; this.activeHandle = null; this.dragOrigin = null;
-      if (was && typeof this.onChange === "function") this.onChange();
-    }
+    handleMouseUp() { const was = this.isDragging; this.isDragging = false; this.dragMode = null; this.activeHandle = null; this.dragOrigin = null; if (was && typeof this.onChange === "function") this.onChange(); }
     updateCursor(x, y) {
       if (!this.canvas) return;
-      if (this.selectedElement && this.selectedElement.hitHandle(x, y)) {
-        const name = this.selectedElement.hitHandle(x, y);
-        this.canvas.style.cursor = (name === "nw" || name === "se") ? "nwse-resize" : "nesw-resize"; return;
-      }
-      const over = this.elements.some((el) => el.containsPoint(x, y));
-      this.canvas.style.cursor = over ? "grab" : "default";
+      if (this.selectedElement && this.selectedElement.hitHandle(x, y)) { const name = this.selectedElement.hitHandle(x, y); this.canvas.style.cursor = (name === "nw" || name === "se") ? "nwse-resize" : "nesw-resize"; return; }
+      const over = this.elements.some((el) => el.containsPoint(x, y)); this.canvas.style.cursor = over ? "grab" : "default";
     }
     exportToJSON() { return { coords: "relative", elements: this.elements.map((el) => JSON.parse(JSON.stringify(el.getConfig()))) }; }
     importFromJSON(json) { this.clearElements(); const list = (json && (json.elements || json.animated_elements)) || []; list.forEach((config) => this.addElement(config)); }
@@ -1667,10 +1405,8 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
       this.elements.forEach((element) => {
         const fx = this.effects.get(element.config.id);
         if (element.config.enabled !== false && fx && !this._broken.has(element.config.id)) {
-          try {
-            fx.cfg = element.config; if (fx.layout) fx.layout(w, h);
-            if (dt) fx.update(dt); fx.draw(ctx, w, h);
-          } catch (err) { console.error(err); this._broken.add(element.config.id); }
+          try { fx.cfg = element.config; if (fx.layout) fx.layout(w, h); if (dt) fx.update(dt); fx.draw(ctx, w, h); }
+          catch (err) { console.error(err); this._broken.add(element.config.id); }
         }
       });
       if (this.ambient && this.ambient.enabled !== false && root.LivingEffects) {
@@ -1688,7 +1424,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
 /* ---- App ---- */
 (function () {
   "use strict";
-  const STORAGE_KEY = "animationApp_v8";
+  const STORAGE_KEY = "animationApp_v9";
   const FIELD_RANGES = {
     "position.x": { min: 0, max: 1, step: 0.01 }, "position.y": { min: 0, max: 1, step: 0.01 },
     "size.width": { min: 0.02, max: 1, step: 0.01 }, "size.height": { min: 0.02, max: 1, step: 0.01 },
@@ -1703,8 +1439,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     sway_speed: { min: 0.05, max: 2, step: 0.05 }, angle: { min: -0.5, max: 0.5, step: 0.01 },
     size: { min: 0.5, max: 4, step: 0.1 }, leafCount: { min: 4, max: 200, step: 1 },
     leafSize: { min: 0.3, max: 3, step: 0.05 }, starSize: { min: 0.3, max: 3, step: 0.05 },
-    fall_speed: { min: 0.05, max: 1.5, step: 0.05 }, glintCount: { min: 4, max: 200, step: 1 },
-    breath_speed: { min: 0.1, max: 3, step: 0.05 }
+    fall_speed: { min: 0.05, max: 1.5, step: 0.05 }, glintCount: { min: 4, max: 200, step: 1 }
   };
   const FIELD_LABELS = {
     "position.x": "Position horizontale", "position.y": "Position verticale", "size.width": "Largeur", "size.height": "Hauteur",
@@ -1715,9 +1450,8 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     wave_frequency: "Fréquence des vagues", sway_amount: "Amplitude du vent", sway_speed: "Vitesse du vent",
     angle: "Inclinaison", size: "Taille", leafCount: "Nombre de feuilles", leafSize: "Taille des feuilles",
     starSize: "Taille des étoiles", fall_speed: "Vitesse de chute", glintCount: "Nombre de reflets",
-    breath_speed: "Vitesse de respiration", color: "Couleur", flickerColor: "Couleur du scintillement",
-    causticColor: "Couleur des caustiques", eyeColor: "Couleur des yeux", wingColor: "Couleur des ailes",
-    "colors.0": "Teinte", direction: "Direction", blend_mode: "Fusion", petType: "Type d'animal"
+    color: "Couleur", flickerColor: "Couleur du scintillement", causticColor: "Couleur des caustiques",
+    wingColor: "Couleur des ailes", "colors.0": "Teinte", direction: "Direction", blend_mode: "Fusion"
   };
   const LEAF_SWATCHES = [
     { hex: "#A8E063", label: "Vert tendre" }, { hex: "#7DAF4E", label: "Vert printemps" }, { hex: "#4A7C3F", label: "Vert forêt" }, { hex: "#2E5A2A", label: "Vert sapin" },
@@ -1734,11 +1468,6 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     { hex: "#FFA8C0", label: "Rose poudré" }, { hex: "#D8B0E8", label: "Lavande" }, { hex: "#A8D8B8", label: "Vert sauge" }, { hex: "#7DC89A", label: "Vert menthe" },
     { hex: "#E8E0A8", label: "Jaune pâle" }, { hex: "#F0C850", label: "Jaune or" }, { hex: "#B8B8B8", label: "Gris argent" }, { hex: "#8A8AA8", label: "Gris bleu" }
   ];
-  const PET_COLORS = [
-    { hex: "#3B2C1E", label: "Brun" }, { hex: "#1A1A1A", label: "Noir" }, { hex: "#E8D9C0", label: "Crème" }, { hex: "#B8B0A0", label: "Gris" },
-    { hex: "#D8A878", label: "Roux" }, { hex: "#F4E4D4", label: "Blanc" }, { hex: "#A8845A", label: "Caramel" }, { hex: "#6B4A2A", label: "Chocolat" },
-    { hex: "#F0F0F0", label: "Blanc pur" }, { hex: "#2C2C2C", label: "Anthracite" }, { hex: "#E8A5C0", label: "Rose" }, { hex: "#D8D0C0", label: "Sable" }
-  ];
   const BUTTERFLY_COLORS = [
     { hex: "#F0A8D8", label: "Rose" }, { hex: "#A8C8F0", label: "Bleu ciel" }, { hex: "#F0C850", label: "Jaune or" }, { hex: "#E86B5A", label: "Rouge" },
     { hex: "#A8E063", label: "Vert pomme" }, { hex: "#D8B0E8", label: "Lavande" }, { hex: "#3B9FC8", label: "Turquoise" }, { hex: "#5AB8D8", label: "Cyan" },
@@ -1750,7 +1479,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     enchanted: { description: "Jardin enchanté avec lucioles, brume, herbes, oiseaux et papillons", ambient: { enabled: true, color: "#A0E8B0", intensity: 0.16, pulse_speed: 0.3 }, elements: [{ type: "grass", region: { x: 0, y: 0.72, width: 1, height: 0.28 }, color: "#5A8B3A" }, { type: "trees", region: { x: 0, y: 0.15, width: 1, height: 0.7 }, color: "#4A7C3F", leafCount: 40 }, { type: "birds", region: { x: 0.05, y: 0.05, width: 0.9, height: 0.3 }, count: 6 }, { type: "butterfly", position: { x: 0.3, y: 0.5 } }, { type: "smoke", position: { x: 0.2, y: 0.55 }, size: { width: 0.6, height: 0.35 } }, { type: "dust", region: { x: 0.1, y: 0.25, width: 0.8, height: 0.6 }, color: "#FFE7A3" }] },
     aurora: { description: "Ciel nocturne avec aurore boréale et étoiles", ambient: { enabled: true, color: "#7DE3B5", intensity: 0.15, pulse_speed: 0.25 }, elements: [{ type: "stars", region: { x: 0, y: 0, width: 1, height: 0.4 } }, { type: "aurora", region: { x: 0, y: 0, width: 1, height: 0.5 } }] },
     pool: { description: "Piscine turquoise avec caustiques d'eau, bulles, rayons de lumière et un papillon", ambient: { enabled: true, color: "#3B9FC8", intensity: 0.15, pulse_speed: 0.35 }, elements: [{ type: "god_rays", position: { x: 0.5, y: 0.1 }, count: 3, color: "#FFF4C8" }, { type: "water_cells", position: { x: 0.02, y: 0.3 }, size: { width: 0.96, height: 0.65 } }, { type: "bubbles", region: { x: 0.2, y: 0.6, width: 0.6, height: 0.35 }, count: 14 }, { type: "butterfly", position: { x: 0.7, y: 0.4 }, color: "#3B9FC8", wingColor: "#5AB8D8" }] },
-    rainy: { description: "Jour de pluie avec fenêtre éclairée, plafonnier chaud et un chat endormi", ambient: { enabled: true, color: "#8A9AAA", intensity: 0.1, pulse_speed: 0.3 }, elements: [{ type: "ceiling_light", position: { x: 0.4, y: 0.06 }, radius: 0.35, flickerColor: "#FFCC80" }, { type: "rain", region: { x: 0, y: 0, width: 1, height: 1 } }, { type: "window_light", position: { x: 0.7, y: 0.1 }, size: { width: 0.2, height: 0.35 } }, { type: "smoke", position: { x: 0.3, y: 0.3 }, size: { width: 0.2, height: 0.3 } }, { type: "pet", position: { x: 0.55, y: 0.7 }, size: { width: 0.14, height: 0.18 }, petType: "cat", color: "#3B2C1E" }] }
+    rainy: { description: "Jour de pluie avec fenêtre éclairée, plafonnier chaud", ambient: { enabled: true, color: "#8A9AAA", intensity: 0.1, pulse_speed: 0.3 }, elements: [{ type: "ceiling_light", position: { x: 0.4, y: 0.06 }, radius: 0.35, flickerColor: "#FFCC80" }, { type: "rain", region: { x: 0, y: 0, width: 1, height: 1 } }, { type: "window_light", position: { x: 0.7, y: 0.1 }, size: { width: 0.2, height: 0.35 } }, { type: "smoke", position: { x: 0.3, y: 0.3 }, size: { width: 0.2, height: 0.3 } }] }
   };
   class AnimationApp {
     constructor() {
@@ -2241,12 +1970,8 @@ ${safeEffects}
       push("radius", "range"); push("flicker_speed", "range");
       fields.push({ key: "flickerColor", label: "Couleur du scintillement", type: "swatches", swatches: CEILING_SWATCHES, config });
       push("blend_mode", "select", { options: [{ value: "screen", label: "Écran" }, { value: "lighter", label: "Éclaircir" }, { value: "soft_light", label: "Lumière douce" }, { value: "overlay", label: "Superposition" }] });
-    } else if (config.type === "pet") {
-      fields.push({ key: "color", label: "Nuances d'animal", type: "swatches", swatches: PET_COLORS, config });
-      push("breath_speed", "range");
-      push("petType", "select", { options: [{ value: "cat", label: "Chat" }, { value: "dog", label: "Chien" }] });
     } else {
-      ["intensity", "opacity", "radius", "particle_count", "flicker_speed", "speed", "shimmer_intensity", "count", "twinkle_speed", "wave_amplitude", "wave_frequency", "sway_amount", "sway_speed", "angle", "leafCount", "leafSize", "starSize", "fall_speed", "glintCount", "breath_speed"].forEach((key) => { if (config[key] != null) push(key, "range"); });
+      ["intensity", "opacity", "radius", "particle_count", "flicker_speed", "speed", "shimmer_intensity", "count", "twinkle_speed", "wave_amplitude", "wave_frequency", "sway_amount", "sway_speed", "angle", "leafCount", "leafSize", "starSize", "fall_speed", "glintCount"].forEach((key) => { if (config[key] != null) push(key, "range"); });
       if (typeof config.color === "string") push("color", "color");
       if (typeof config.causticColor === "string") push("causticColor", "color");
       if (typeof config.flickerColor === "string") push("flickerColor", "color");
@@ -2265,8 +1990,7 @@ ${safeEffects}
   }
   function iconButton(action, label, text) { const btn = document.createElement("button"); btn.type = "button"; btn.dataset.action = action; btn.title = label; btn.setAttribute("aria-label", label); btn.textContent = text; return btn; }
   function mixWithWhite(hex, t) {
-    const raw = String(hex || "#FFA500").replace("#", "");
-    const full = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
+    const raw = String(hex || "#FFA500").replace("#", ""); const full = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
     const n = parseInt(full, 16); if (!Number.isFinite(n)) return "#FFD700";
     const mix = (c) => Math.round(c + (255 - c) * t); const h = (c) => c.toString(16).padStart(2, "0");
     return `#${h(mix((n >> 16) & 255))}${h(mix((n >> 8) & 255))}${h(mix(n & 255))}`;
