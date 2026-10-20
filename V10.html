@@ -65,8 +65,21 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
 .list-actions { display: flex; gap: 6px; margin-bottom: 10px; }
 .list-actions button { flex: 1; background: var(--bg-elev-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; }
 .list-actions button:hover { border-color: rgba(227,154,69,0.7); }
-.add-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.add-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .add-grid button { padding: 6px 10px; font-size: 0.88rem; }
+
+/* Section Mascottes */
+.mascot-section { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.mascot-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.mascot-item { position: relative; width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--line); background: #12100e; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.mascot-item img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
+.mascot-item:hover { border-color: var(--accent); }
+.mascot-item .mascot-del { position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.7); color: #f87171; border: none; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 0 0 0 6px; }
+.mascot-item .mascot-del:hover { background: #b91c1c; color: white; }
+.mascot-add { width: 60px; height: 60px; border-radius: 8px; border: 2px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 0.6rem; text-align: center; }
+.mascot-add:hover { border-color: var(--accent); color: var(--accent); }
+.mascot-add input { display: none; }
+
 #propertyPanel { display: none; }
 .property-title { margin: 0 0 10px; font-weight: 650; }
 .property-row { display: grid; gap: 4px; margin-bottom: 10px; }
@@ -119,7 +132,7 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
   </header>
 
   <nav class="progress" aria-label="Étapes">
-    <button type="button" class="progress-step current" data-step="1"><span class="progress-index">1</span><span>Image et texte</span></button>
+    <button type="button" class="progress-step current" data-step="1"><span class="progress-index">1</span><span>Image de fond</span></button>
     <button type="button" class="progress-step" data-step="2"><span class="progress-index">2</span><span>Éditeur</span></button>
     <button type="button" class="progress-step" data-step="3"><span class="progress-index">3</span><span>Export</span></button>
   </nav>
@@ -134,30 +147,6 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
           <img id="uploadPreview" alt="Aperçu de l'image choisie" hidden>
         </div>
         <p id="imageFileName" class="hint" hidden></p>
-      </div>
-
-      <div class="panel">
-        <h2>Description</h2>
-        <label class="field-label" for="description">Ce que l'on doit voir bouger</label>
-        <textarea id="description" rows="6" placeholder="Un capybara assis au bord d'une rivière Ghibli, des ondulations d'eau, des lucioles et de l'herbe."></textarea>
-        <p class="hint">Mots reconnus : feu, bougie, plafonnier, fumée, fenêtre, lune, étoile, pluie, neige, aurore, rivière/eau/lac/piscine, herbe, oiseau, papillon, bulles, rayon, poussière, capybara.</p>
-        <div class="examples">
-          <button type="button" class="example-btn" data-example="Capybara assis au bord d'une rivière Ghibli, des ondulations d'eau, des lucioles et de l'herbe.">Capybara assis au bord d'une rivière Ghibli, des ondulations d'eau, des lucioles et de l'herbe.</button>
-          <button type="button" class="example-btn" data-example="Rivière calme avec reflets dorés de lanternes, ondulations douces et bulles. Style Ghibli.">Rivière calme avec reflets dorés de lanternes, ondulations douces et bulles. Style Ghibli.</button>
-          <button type="button" class="example-btn" data-example="Jardin enchanté avec herbes, papillons, lucioles et brume">Jardin enchanté avec herbes, papillons, lucioles et brume</button>
-        </div>
-
-        <p class="field-label">Styles d'ambiance prédéfinis</p>
-        <div class="styles-row">
-          <button type="button" class="style-btn" data-style="ghibli">🌿 Capybara Ghibli</button>
-          <button type="button" class="style-btn" data-style="fire">🔥 Feu de camp</button>
-          <button type="button" class="style-btn" data-style="winter">❄️ Nuit d'hiver</button>
-          <button type="button" class="style-btn" data-style="aurora">🌌 Aurore boréale</button>
-          <button type="button" class="style-btn" data-style="pool">🌊 Rivière paisible</button>
-          <button type="button" class="style-btn" data-style="rainy">🌧️ Jour de pluie</button>
-        </div>
-
-        <button type="button" id="analyzeButton" class="btn btn-primary">Analyser et créer l'animation</button>
       </div>
     </section>
 
@@ -184,9 +173,8 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
               <button type="button" id="clearAllButton">Vider</button>
             </div>
             <div id="elementList" class="element-list"></div>
-            <p class="field-label">Ajouter</p>
+            <p class="field-label">Ajouter un effet</p>
             <div id="addGrid" class="add-grid">
-              <button type="button" data-add="capybara">🦫 Capybara</button>
               <button type="button" data-add="fire">🔥 Feu</button>
               <button type="button" data-add="candle">🕯️ Bougie</button>
               <button type="button" data-add="ceiling_light">💡 Plafonnier</button>
@@ -204,6 +192,14 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
               <button type="button" data-add="rain">🌧️ Pluie</button>
               <button type="button" data-add="snow">❄️ Neige</button>
               <button type="button" data-add="aurora">🌌 Aurore</button>
+            </div>
+
+            <!-- Nouvelle section Mascottes -->
+            <div class="mascot-section">
+              <p class="field-label">Mascottes</p>
+              <div id="mascotList" class="mascot-list">
+                <!-- La liste sera générée en JS -->
+              </div>
             </div>
           </section>
 
@@ -244,194 +240,13 @@ textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px s
   <footer class="bottom-bar">
     <button type="button" id="prevButton" class="btn btn-ghost">← Précédent</button>
     <p id="statusLine" class="status-line"></p>
-    <button type="button" id="nextButton" class="btn btn-primary">Analyser →</button>
+    <button type="button" id="nextButton" class="btn btn-primary">Éditeur →</button>
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Activez JavaScript pour composer l'animation.</p></noscript>
   <script>
 try {
-/* ---- Parser ---- */
-(function (root) {
-  "use strict";
-  class TextParser {
-    constructor() {
-      this._seq = 0;
-      this.keywords = {
-        capybara: ["capybara", "capybaras", "cabiai", "caby"],
-        fire: ["feu","feux","flamme","flammes","cheminée","cheminées","foyer","fire","flame","fireplace"],
-        candle: ["lanterne","lanternes","lantern","lanterns","bougie","bougies","chandelle","chandelles","candle","candles","lumière douce"],
-        ceiling_light: ["plafonnier","plafonniers","lustre","lustres","ampoule","ampoules","suspension","ceiling","chandelier","lamp"],
-        smoke: ["fumée","fumées","vapeur","brume","brouillard","smoke","steam","mist","fog"],
-        window_light: ["fenêtre","fenêtres","window","lune","moon","lumière extérieure","clair de lune"],
-        stars: ["étoile","étoiles","star","stars","ciel étoilé","starry sky","starry"],
-        water_cells: ["eau","water","rivière","river","lac","lake","mer","sea","océan","ocean","ruisseau","étang","piscine","caustique","caustiques"],
-        trees: ["arbre","arbres","tree","trees","forêt","forêts","forest","feuillage","leaves","sapin","sapins","feuilles","feuille"],
-        birds: ["oiseau","oiseaux","bird","birds","vol","vols","hirondelle","hirondelles","corbeau","corbeaux","mouette","mouettes"],
-        bubbles: ["bulle","bulles","bubble","bubbles"],
-        god_rays: ["rayon","rayons","rayon de lumière","rayons de lumière","god rays","lumière traversante","faisceau","faisceaux"],
-        butterfly: ["papillon","papillons","butterfly","butterflies"],
-        grass: ["herbe","herbes","grass","gazon","pelouse"],
-        dust: ["poussière","dust","particule","particules","particles","luciole","lucioles","firefl","firefly","fireflies"],
-        rain: ["pluie","rain","averse","ondée","storm","orage","orageux","downpour"],
-        snow: ["neige","snow","flocon","flocons","snowflakes","blizzard","poudreuse"],
-        aurora: ["aurore","aurores","aurora","boréale","boreale","borealis","northern lights","sakura","pétale","pétales"]
-      };
-    }
-    parseDescription(text) {
-      const elements = [];
-      const source = String(text || "");
-      const lowerText = source.toLowerCase();
-      const hints = this._hintsByType(lowerText);
-      Object.keys(this.keywords).forEach((type) => {
-        const hasKeyword = this.keywords[type].some((keyword) => this._matches(lowerText, keyword));
-        if (!hasKeyword) return;
-        if (type === "candle") { this._pushCandles(source, elements, hints.candle || {}); return; }
-        if (type === "birds") { this._pushBirds(source, elements, hints.birds || {}); return; }
-        const element = this.createElement(type, source, hints[type] || {});
-        if (element) elements.push(element);
-      });
-      return elements;
-    }
-    createElement(type, description, hint) {
-      const baseElement = { id: `${type}_${Date.now().toString(36)}_${++this._seq}`, type: type, enabled: true };
-      const intensity = this._intensityFromText(description);
-      let element = null;
-      switch (type) {
-        case "capybara": element = { ...baseElement, position: { x: 0.4, y: 0.7 }, size: { width: 0.15, height: 0.12 }, speed: 0.6 }; break;
-        case "fire": element = { ...baseElement, position: { x: 0.25, y: 0.6 }, size: { width: 0.08, height: 0.18 }, intensity: 0.8 * intensity, colors: ["#FF6B00","#FFA500","#FFD700"], particle_count: Math.round(50 * intensity), blend_mode: "screen" }; break;
-        case "candle": element = { ...baseElement, position: { x: 0.48, y: 0.62 }, radius: 0.06, color: "#FFD700", flickerColor: "#FFD700", flicker_speed: 3.2, blend_mode: "screen" }; break;
-        case "ceiling_light": element = { ...baseElement, position: { x: 0.5, y: 0.08 }, radius: 0.45, color: "#FFE0B0", flickerColor: "#FFCC80", flicker_speed: 1.4, intensity: 0.55, blend_mode: "screen" }; break;
-        case "smoke": element = { ...baseElement, position: { x: 0.28, y: 0.22 }, size: { width: 0.16, height: 0.42 }, direction: "up", speed: 0.5, count: Math.round(16 * intensity), color: "#D9D3C7", opacity: 0.32, blend_mode: "normal" }; break;
-        case "window_light": element = { ...baseElement, position: { x: 0.68, y: 0.08 }, size: { width: 0.22, height: 0.42 }, color: "#87CEEB", shimmer_intensity: 0.28, blend_mode: "overlay" }; break;
-        case "stars": element = { ...baseElement, region: { x: 0.04, y: 0.03, width: 0.92, height: 0.28 }, count: Math.round(32 * intensity), twinkle_speed: 1.5, color: "#FFFFFF", starSize: 1.0 }; break;
-        case "water_cells": element = { ...baseElement, position: { x: 0.02, y: 0.3 }, size: { width: 0.96, height: 0.65 }, color: "#3B9FC8", causticColor: "#A8F0FF", reflectionColor: "#FFE08A", speed: 0.8, wave_amplitude: 3.5 }; break;
-        case "trees": element = { ...baseElement, region: { x: 0, y: 0.18, width: 1, height: 0.62 }, sway_amount: 3, sway_speed: 0.45, color: "#C8B87A", leafCount: Math.round(28 * intensity), leafSize: 1.0, leafStyle: "fall", fall_speed: 0.35 }; break;
-        case "birds": element = { ...baseElement, region: { x: 0.05, y: 0.08, width: 0.9, height: 0.35 }, count: 6, speed: 0.4, color: "#1F1B14", size: 1.0 }; break;
-        case "bubbles": element = { ...baseElement, region: { x: 0.2, y: 0.4, width: 0.6, height: 0.5 }, count: 14, speed: 0.6, size: 1.0, color: "#C8E8FF" }; break;
-        case "god_rays": element = { ...baseElement, position: { x: 0.5, y: 0.1 }, region: { x: 0.1, y: 0, width: 0.8, height: 1 }, color: "#FFF4C8", intensity: 0.45, count: 4, speed: 0.25 }; break;
-        case "butterfly": element = { ...baseElement, position: { x: 0.3, y: 0.5 }, size: { width: 0.03, height: 0.03 }, color: "#3B9FC8", wingColor: "#5AB8D8", speed: 0.6 }; break;
-        case "grass": element = { ...baseElement, region: { x: 0, y: 0.72, width: 1, height: 0.28 }, color: "#5A8B3A", count: 40, sway_amount: 3, sway_speed: 0.8 }; break;
-        case "dust": element = { ...baseElement, region: { x: 0.12, y: 0.18, width: 0.76, height: 0.55 }, count: Math.round(18 * intensity), speed: 0.15, color: "#FFD700", opacity: 0.28 }; break;
-        case "rain": element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 1 }, count: Math.round(70 * intensity), speed: 1.0, color: "#A8C8E8", opacity: 0.55, angle: -0.12 }; break;
-        case "snow": element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 1 }, count: Math.round(45 * intensity), speed: 0.55, color: "#FFFFFF", opacity: 0.85, size: 1.5 }; break;
-        case "aurora": element = { ...baseElement, region: { x: 0, y: 0, width: 1, height: 0.45 }, speed: 0.35, intensity: 0.7, colors: ["#7DE3B5","#8AB6F0","#D08AE8"], blend_mode: "screen" }; break;
-        default: return null;
-      }
-      const applied = hint || (description ? (this._hintsByType(description)[type] || {}) : {});
-      return this._applyHint(element, applied);
-    }
-    _intensityFromText(text) {
-      const lower = String(text || "").toLowerCase();
-      if (/\b(léger|legere|discret|fin|fine|doux|douce)\b/.test(lower)) return 0.6;
-      if (/\b(fort|forte|intense|violent|violente|gros|grosse)\b/.test(lower)) return 1.4;
-      if (/\b(beaucoup|dense|épais|epais)\b/.test(lower)) return 1.6;
-      if (/\b(peu|quelques|petit|petite|mini|faible)\b/.test(lower)) return 0.4;
-      return 1.0;
-    }
-    _pushCandles(text, elements, hint) {
-      const count = this._candleCount(text);
-      const place = hint || {};
-      const cx = place.x != null ? place.x : 0.5;
-      const cy = place.y != null ? place.y : 0.62;
-      const span = Math.min(0.34, 0.07 * Math.max(1, count));
-      for (let i = 0; i < count; i++) {
-        const el = this.createElement("candle", "", {});
-        const t = count === 1 ? 0.5 : i / (count - 1);
-        el.position.x = clamp01(cx + (t - 0.5) * span);
-        el.position.y = clamp01(cy + (i % 2) * 0.045);
-        el.radius = 0.03 + (i % 3) * 0.008;
-        el.flicker_speed = 2.4 + (i % 4) * 0.4;
-        el.flickerColor = ["#FFD700","#FFB347","#FFE7A3","#FFCC66"][i % 4];
-        el.color = el.flickerColor;
-        elements.push(el);
-      }
-    }
-    _pushBirds(text, elements, hint) {
-      const lower = text.toLowerCase();
-      const m = lower.match(/(\d+|deux|trois|quatre|cinq|quelques|plusieurs)\s+(oiseaux|hirondelles|corbeaux|mouettes|birds)/);
-      let count = 6;
-      if (m) { const words = { deux: 2, trois: 3, quatre: 4, cinq: 5, quelques: 4, plusieurs: 8 }; const n = words[m[1]] || parseInt(m[1], 10); if (Number.isFinite(n)) count = Math.max(1, Math.min(20, n)); }
-      const el = this.createElement("birds", text, hint || {});
-      el.count = count;
-      el.id = `birds_${Date.now().toString(36)}_${++this._seq}`;
-      elements.push(el);
-    }
-    _candleCount(text) {
-      const lower = text.toLowerCase();
-      if (!/bougies|chandelles|candles|lanternes|lanterns/.test(lower)) return 1;
-      const m = lower.match(/(\d+|deux|trois|quatre|cinq|quelques)\s+(bougies|chandelles|candles|lanternes|lanterns)/);
-      if (!m) return 3;
-      const words = { deux: 2, trois: 3, quatre: 4, cinq: 5, quelques: 3 };
-      const n = words[m[1]] || parseInt(m[1], 10);
-      if (!Number.isFinite(n)) return 3;
-      return Math.max(1, Math.min(6, n));
-    }
-    _hintsByType(text) {
-      const lower = String(text || "").toLowerCase();
-      const anchors = [];
-      Object.keys(this.keywords).forEach((type) => {
-        this.keywords[type].forEach((keyword) => {
-          let from = 0;
-          while (from < lower.length) {
-            const index = lower.indexOf(keyword, from);
-            if (index === -1) break;
-            if (this._matchAt(lower, keyword, index)) anchors.push({ type, index });
-            from = index + Math.max(1, keyword.length);
-          }
-        });
-      });
-      const words = [
-        { re: /(^|[^a-zà-ÿ])(gauche|left)(?![a-zà-ÿ])/gi, axis: "x", value: 0.22 },
-        { re: /(^|[^a-zà-ÿ])(droite|right)(?![a-zà-ÿ])/gi, axis: "x", value: 0.78 },
-        { re: /(^|[^a-zà-ÿ])(centre|center|milieu)(?![a-zà-ÿ])/gi, axis: "x", value: 0.5 },
-        { re: /(^|[^a-zà-ÿ])(haut|top|dessus)(?![a-zà-ÿ])/gi, axis: "y", value: 0.12 },
-        { re: /(^|[^a-zà-ÿ])(bas|bottom|dessous)(?![a-zà-ÿ])/gi, axis: "y", value: 0.72 }
-      ];
-      const hints = {};
-      words.forEach((word) => {
-        let match = word.re.exec(lower);
-        while (match) {
-          const at = match.index + match[1].length;
-          let best = null, bestDist = 42;
-          anchors.forEach((anchor) => { const dist = Math.abs(anchor.index - at); if (dist < bestDist) { bestDist = dist; best = anchor; } });
-          if (best) { if (!hints[best.type]) hints[best.type] = {}; hints[best.type][word.axis] = word.value; }
-          match = word.re.exec(lower);
-        }
-      });
-      return hints;
-    }
-    _matchAt(text, keyword, index) {
-      if (text.substr(index, keyword.length) !== keyword) return false;
-      if (keyword === "feu") { const rest = text.substr(index + 3, 6); if (rest.startsWith("illage") || rest.startsWith("ille")) return false; }
-      const isolated = keyword.length <= 3 || keyword === "star" || keyword === "tree" || keyword === "lake" || keyword === "fire" || keyword === "rain" || keyword === "snow";
-      if (isolated) { const before = index > 0 ? text.charAt(index - 1) : ""; const after = text.charAt(index + keyword.length); if (/[a-zà-ÿ]/i.test(before) || /[a-zà-ÿ]/i.test(after)) return false; }
-      return true;
-    }
-    _applyHint(element, hint) {
-      if (!element || !hint) return element;
-      if (element.position && hint.x != null && element.size && Number(element.size.width) >= 0.9) { element.size.width = 0.5; element.position.x = hint.x >= 0.6 ? 0.5 : hint.x <= 0.35 ? 0 : 0.25; }
-      else if (element.position && hint.x != null) { const half = element.size ? (Number(element.size.width) || 0) / 2 : 0; element.position.x = clamp01(hint.x - half); }
-      if (element.position && hint.y != null) element.position.y = hint.y;
-      if (element.region && hint.x != null && element.region.width > 0.8) { element.region.width = 0.48; element.region.x = hint.x >= 0.6 ? 0.5 : hint.x <= 0.35 ? 0.02 : 0.26; }
-      else if (element.region && hint.x != null) { element.region.x = clamp01(hint.x - element.region.width / 2); }
-      if (element.region && hint.y != null) element.region.y = clamp01(hint.y);
-      return element;
-    }
-    _matches(text, keyword) {
-      const k = keyword.toLowerCase();
-      if (k === "feu") return /feu(?!illage|illes?)/i.test(text);
-      if (k.length <= 3 || k === "star" || k === "tree" || k === "lake" || k === "fire" || k === "rain" || k === "snow") {
-        const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        return new RegExp(`(^|[^a-zà-ÿ])${escaped}([^a-zà-ÿ]|$)`, "i").test(text);
-      }
-      return text.includes(k);
-    }
-  }
-  function clamp01(v) { return Math.max(0.02, Math.min(0.92, v)); }
-  root.TextParser = TextParser;
-})(typeof window !== "undefined" ? window : globalThis);
-
 /* ---- Moteur ---- */
 function installLivingEffects(global) {
   "use strict";
@@ -468,7 +283,7 @@ function installLivingEffects(global) {
     draw(ctx, w, h) { if (!readEnabled(this.cfg) || this.current <= 0.001) return; const width = w || ctx.canvas.width; const height = h || ctx.canvas.height; ctx.save(); applyBlend(ctx, "soft-light"); ctx.fillStyle = parseColor(this.cfg.color || "#FFA500", this.current); ctx.fillRect(0, 0, width, height); ctx.restore(); }
   }
 
-  /* === CAPYBARA (Image externe) === */
+  /* === CAPYBARA (Image externe via Base64) === */
   class CapybaraEffect {
     constructor(opts) {
       this.cfg = opts || {};
@@ -476,86 +291,58 @@ function installLivingEffects(global) {
       this.t = Math.random() * 10;
       this.ready = false;
       this.img = null;
-      this.imgSrc = this.cfg.imageSrc || ""; 
-      
-      if (this.imgSrc) {
-        this.loadImage();
-      } else {
-        this.ready = true; // Prêt à afficher le dessin de secours
-      }
+      this.imgSrc = this.cfg.imageSrc || "";
+      if (this.imgSrc) this.loadImage(); else this.ready = true;
     }
-
     loadImage() {
       this.img = new Image();
       this.img.crossOrigin = "Anonymous";
-      this.img.onload = () => {
-        this.ready = true;
-      };
-      this.img.onerror = () => {
-        console.warn("Impossible de charger l'image du capybara.");
-      };
+      this.img.onload = () => { this.ready = true; };
+      this.img.onerror = () => { console.warn("Impossible de charger l'image de la mascotte."); };
       this.img.src = this.imgSrc;
     }
-
     update(dt) {
       if (!readEnabled(this.cfg)) return;
-      // Si l'URL change dans l'interface, on recharge l'image
       if (this.cfg.imageSrc !== this.imgSrc) {
         this.imgSrc = this.cfg.imageSrc;
         if (this.imgSrc) this.loadImage();
       }
-
       const speed = Number(this.cfg.speed ?? 0.6);
       this.t += dt * speed;
     }
-
     layout(w, h) {
       if (!(w > 0) || !(h > 0)) return;
       const pos = this.cfg.position || {}; const size = this.cfg.size || {};
       this.x = toPx(pos.x, w, 0.4); this.y = toPx(pos.y, h, 0.7);
       this.w = Math.max(30, toPx(size.width, w, 0.15)); this.h = Math.max(30, toPx(size.height, h, 0.12));
-      this.frameW = w; this.frameH = h; 
-      
-      if (this.img && this.img.naturalWidth) {
-         this.aspectRatio = this.img.naturalWidth / this.img.naturalHeight;
-      } else {
-         this.aspectRatio = 1; 
-      }
+      this.frameW = w; this.frameH = h;
+      this.aspectRatio = (this.img && this.img.naturalWidth) ? this.img.naturalWidth / this.img.naturalHeight : 1;
     }
-
     draw(ctx) {
       if (!readEnabled(this.cfg)) return;
-
-      const breathe = 1 + Math.sin(this.t * 2) * 0.03; 
-      const floatY = Math.sin(this.t * 1.5) * 4; 
-
+      const breathe = 1 + Math.sin(this.t * 2) * 0.03;
+      const floatY = Math.sin(this.t * 1.5) * 4;
       ctx.save();
       applyBlend(ctx, "source-over");
-      
       const cx = this.x + this.w * 0.5;
       const cy = this.y + this.h * 0.5 + floatY;
-
       ctx.fillStyle = "rgba(0,0,0,0.2)";
       ctx.beginPath();
       ctx.ellipse(cx, this.y + this.h * 0.9, this.w * 0.5, this.h * 0.1, 0, 0, Math.PI * 2);
       ctx.fill();
-
       if (this.ready && this.img && this.img.complete) {
         const drawW = this.w * breathe;
         const drawH = (this.w / this.aspectRatio) * breathe;
         const drawX = cx - drawW / 2;
         const drawY = cy - drawH / 2;
-
         ctx.drawImage(this.img, drawX, drawY, drawW, drawH);
       } else {
-        // Dessin vectoriel de secours si l'image ne charge pas
         ctx.fillStyle = "#A67B5B";
         ctx.beginPath(); ctx.ellipse(cx, cy, this.w * 0.4, this.h * 0.4, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#1A1A1A";
         ctx.beginPath(); ctx.arc(cx + this.w*0.2, cy - this.h*0.1, this.w*0.04, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(cx - this.w*0.05, cy - this.h*0.1, this.w*0.04, 0, Math.PI*2); ctx.fill();
       }
-
       ctx.restore();
     }
   }
@@ -799,99 +586,46 @@ function installLivingEffects(global) {
       this.x = toPx(pos.x, w, 0.02); this.y = toPx(pos.y, h, 0.3);
       this.bw = Math.max(40, toPx(size.width, w, 0.96)); this.bh = Math.max(40, toPx(size.height, h, 0.65));
       this.frameW = w; this.frameH = h;
-      
       if (this.ripples.length === 0) {
         for (let i = 0; i < 12; i++) {
-          this.ripples.push({
-            yPos: Math.random(),
-            amp: 2 + Math.random() * 4,
-            freq1: 0.5 + Math.random() * 1.5,
-            freq2: 1.2 + Math.random() * 2.0,
-            speed1: 0.2 + Math.random() * 0.4,
-            speed2: 0.4 + Math.random() * 0.6,
-            phase: Math.random() * Math.PI * 2,
-            width: 0.5 + Math.random() * 1.5,
-            opacity: 0.1 + Math.random() * 0.25
-          });
+          this.ripples.push({ yPos: Math.random(), amp: 2 + Math.random() * 4, freq1: 0.5 + Math.random() * 1.5, freq2: 1.2 + Math.random() * 2.0, speed1: 0.2 + Math.random() * 0.4, speed2: 0.4 + Math.random() * 0.6, phase: Math.random() * Math.PI * 2, width: 0.5 + Math.random() * 1.5, opacity: 0.1 + Math.random() * 0.25 });
         }
         for (let i = 0; i < 20; i++) {
-          this.sparkles.push({
-            u: Math.random(),
-            v: Math.random(),
-            size: 0.5 + Math.random() * 2.5,
-            phase: Math.random() * Math.PI * 2,
-            speed: 0.5 + Math.random() * 1.5
-          });
+          this.sparkles.push({ u: Math.random(), v: Math.random(), size: 0.5 + Math.random() * 2.5, phase: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 1.5 });
         }
       }
       this.ready = true;
     }
-    update(dt) {
-      if (!this.ready || !readEnabled(this.cfg)) return;
-      this.t += dt * Number(this.cfg.speed ?? 0.8);
-    }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.8); }
     draw(ctx) {
       if (!this.ready || !readEnabled(this.cfg)) return;
-      
-      const rippleColor = this.cfg.causticColor || "#FFFFFF"; 
-      const sparkleColor = this.cfg.reflectionColor || "#FFE08A";
-      const ampBase = Number(this.cfg.wave_amplitude ?? 3.5);
-      const t = this.t;
-
-      ctx.save();
-      ctx.beginPath(); ctx.rect(this.x, this.y, this.bw, this.bh); ctx.clip();
-      applyBlend(ctx, "screen");
-      ctx.lineCap = "round";
-      
+      const rippleColor = this.cfg.causticColor || "#FFFFFF"; const sparkleColor = this.cfg.reflectionColor || "#FFE08A";
+      const ampBase = Number(this.cfg.wave_amplitude ?? 3.5); const t = this.t;
+      ctx.save(); ctx.beginPath(); ctx.rect(this.x, this.y, this.bw, this.bh); ctx.clip(); applyBlend(ctx, "screen"); ctx.lineCap = "round";
       for (const rip of this.ripples) {
-        ctx.strokeStyle = parseColor(rippleColor, rip.opacity);
-        ctx.lineWidth = rip.width;
-        ctx.beginPath();
-        
-        const yBase = this.y + rip.yPos * this.bh;
-        const step = 4;
-        let first = true;
-        
+        ctx.strokeStyle = parseColor(rippleColor, rip.opacity); ctx.lineWidth = rip.width; ctx.beginPath();
+        const yBase = this.y + rip.yPos * this.bh; const step = 4; let first = true;
         for (let i = 0; i <= this.bw; i += step) {
           const px = this.x + i;
           const wave1 = Math.sin(i * 0.01 * rip.freq1 - t * rip.speed1 + rip.phase) * (rip.amp * ampBase * 0.5);
           const wave2 = Math.cos(i * 0.02 * rip.freq2 + t * rip.speed2 + rip.phase) * (rip.amp * ampBase * 0.2);
           const py = yBase + wave1 + wave2;
-          
-          if (first) { ctx.moveTo(px, py); first = false; }
-          else { ctx.lineTo(px, py); }
+          if (first) { ctx.moveTo(px, py); first = false; } else { ctx.lineTo(px, py); }
         }
         ctx.stroke();
       }
-
       for (const sp of this.sparkles) {
         const spX = this.x + sp.u * this.bw + Math.sin(t * 0.2 + sp.phase) * 8;
         const spY = this.y + sp.v * this.bh + Math.cos(t * 0.15 + sp.phase) * 4;
         const alpha = 0.3 + 0.7 * Math.max(0, Math.sin(t * sp.speed + sp.phase));
         const size = sp.size * (0.8 + 0.4 * Math.sin(t * 2 + sp.phase));
-        
         const grad = ctx.createRadialGradient(spX, spY, 0, spX, spY, size * 3);
-        grad.addColorStop(0, parseColor(sparkleColor, alpha * 0.9));
-        grad.addColorStop(0.3, parseColor(sparkleColor, alpha * 0.4));
-        grad.addColorStop(1, parseColor(sparkleColor, 0));
-        
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(spX, spY, size * 3, 0, Math.PI * 2);
-        ctx.fill();
-        
+        grad.addColorStop(0, parseColor(sparkleColor, alpha * 0.9)); grad.addColorStop(0.3, parseColor(sparkleColor, alpha * 0.4)); grad.addColorStop(1, parseColor(sparkleColor, 0));
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(spX, spY, size * 3, 0, Math.PI * 2); ctx.fill();
         if (alpha > 0.6) {
-          ctx.fillStyle = parseColor("#FFFFFF", alpha);
-          ctx.beginPath();
-          ctx.arc(spX, spY, size * 0.5, 0, Math.PI * 2);
-          ctx.fill();
-          
-          ctx.strokeStyle = parseColor(sparkleColor, alpha * 0.6);
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(spX - size * 1.5, spY);
-          ctx.lineTo(spX + size * 1.5, spY);
-          ctx.stroke();
+          ctx.fillStyle = parseColor("#FFFFFF", alpha); ctx.beginPath(); ctx.arc(spX, spY, size * 0.5, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = parseColor(sparkleColor, alpha * 0.6); ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(spX - size * 1.5, spY); ctx.lineTo(spX + size * 1.5, spY); ctx.stroke();
         }
       }
       ctx.restore();
@@ -1398,7 +1132,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
 (function (root) {
   "use strict";
   const TYPE_META = {
-    capybara: { icon: "🦫", label: "Capybara" },
+    capybara: { icon: "🦫", label: "Mascotte" },
     fire: { icon: "🔥", label: "Feu" }, candle: { icon: "🕯️", label: "Bougie" }, ceiling_light: { icon: "💡", label: "Plafonnier" },
     smoke: { icon: "💨", label: "Fumée" }, window_light: { icon: "🌙", label: "Fenêtre / lune" }, stars: { icon: "✨", label: "Étoiles" },
     water_cells: { icon: "💧", label: "Caustiques d'eau" }, trees: { icon: "🍂", label: "Feuilles" }, birds: { icon: "🐦", label: "Oiseaux" },
@@ -1552,7 +1286,8 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
 /* ---- App ---- */
 (function () {
   "use strict";
-  const STORAGE_KEY = "animationApp_v13";
+  const STORAGE_KEY = "animationApp_v14";
+  const MASCOT_STORAGE_KEY = "vs_mascots_v14";
   const FIELD_RANGES = {
     "position.x": { min: 0, max: 1, step: 0.01 }, "position.y": { min: 0, max: 1, step: 0.01 },
     "size.width": { min: 0.02, max: 1, step: 0.01 }, "size.height": { min: 0.02, max: 1, step: 0.01 },
@@ -1579,9 +1314,16 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     angle: "Inclinaison", size: "Taille", leafCount: "Nombre de feuilles", leafSize: "Taille des feuilles",
     starSize: "Taille des étoiles", fall_speed: "Vitesse de chute", glintCount: "Nombre de reflets",
     color: "Couleur", flickerColor: "Couleur du scintillement", causticColor: "Couleur des ondulations",
-    reflectionColor: "Couleur des reflets (lanternes)", wingColor: "Couleur des ailes", "colors.0": "Teinte", direction: "Direction", blend_mode: "Fusion", 
-    imageSrc: "Lien de l'image (URL ou Base64)"
+    reflectionColor: "Couleur des reflets (lanternes)", wingColor: "Couleur des ailes", "colors.0": "Teinte", direction: "Direction", blend_mode: "Fusion",
+    imageSrc: "Image (Base64)"
   };
+  const CEILING_SWATCHES = [
+    { hex: "#FFE0B0", label: "Ambré chaud" }, { hex: "#FFEBC4", label: "Miel" }, { hex: "#FFF4D6", label: "Blanc neutre" }, { hex: "#FFFFFF", label: "Blanc pur" },
+    { hex: "#D6E8F5", label: "Blanc froid" }, { hex: "#A8C8E8", label: "Bleu ciel" }, { hex: "#8AB6F0", label: "Bleu nuit" }, { hex: "#5A7FB8", label: "Bleu profond" },
+    { hex: "#FFB870", label: "Chandelle" }, { hex: "#FFCC80", label: "Abricot" }, { hex: "#FF9070", label: "Bougie rouge" }, { hex: "#E86B5A", label: "Cuivre chaud" },
+    { hex: "#FFA8C0", label: "Rose poudré" }, { hex: "#D8B0E8", label: "Lavande" }, { hex: "#A8D8B8", label: "Vert sauge" }, { hex: "#7DC89A", label: "Vert menthe" },
+    { hex: "#E8E0A8", label: "Jaune pâle" }, { hex: "#F0C850", label: "Jaune or" }, { hex: "#B8B8B8", label: "Gris argent" }, { hex: "#8A8AA8", label: "Gris bleu" }
+  ];
   const LEAF_SWATCHES = [
     { hex: "#A8E063", label: "Vert tendre" }, { hex: "#7DAF4E", label: "Vert printemps" }, { hex: "#4A7C3F", label: "Vert forêt" }, { hex: "#2E5A2A", label: "Vert sapin" },
     { hex: "#E8E8C8", label: "Beige pâle" }, { hex: "#C8B87A", label: "Doré" }, { hex: "#E8B84A", label: "Or chaud" }, { hex: "#D98F3A", label: "Orange" },
@@ -1590,40 +1332,25 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     { hex: "#4A2E1A", label: "Brun foncé" }, { hex: "#E8D9A8", label: "Blanc cassé" }, { hex: "#F4E4D4", label: "Crème" }, { hex: "#FFFFFF", label: "Blanc" },
     { hex: "#8B8B8B", label: "Gris" }, { hex: "#3B2C1E", label: "Terre brûlée" }, { hex: "#A8D5BA", label: "Vert d'eau" }, { hex: "#F5A8A0", label: "Corail" }
   ];
-  const CEILING_SWATCHES = [
-    { hex: "#FFE0B0", label: "Ambré chaud" }, { hex: "#FFEBC4", label: "Miel" }, { hex: "#FFF4D6", label: "Blanc neutre" }, { hex: "#FFFFFF", label: "Blanc pur" },
-    { hex: "#D6E8F5", label: "Blanc froid" }, { hex: "#A8C8E8", label: "Bleu ciel" }, { hex: "#8AB6F0", label: "Bleu nuit" }, { hex: "#5A7FB8", label: "Bleu profond" },
-    { hex: "#FFB870", label: "Chandelle" }, { hex: "#FFCC80", label: "Abricot" }, { hex: "#FF9070", label: "Bougie rouge" }, { hex: "#E86B5A", label: "Cuivre chaud" },
-    { hex: "#FFA8C0", label: "Rose poudré" }, { hex: "#D8B0E8", label: "Lavande" }, { hex: "#A8D8B8", label: "Vert sauge" }, { hex: "#7DC89A", label: "Vert menthe" },
-    { hex: "#E8E0A8", label: "Jaune pâle" }, { hex: "#F0C850", label: "Jaune or" }, { hex: "#B8B8B8", label: "Gris argent" }, { hex: "#8A8AA8", label: "Gris bleu" }
-  ];
   const BUTTERFLY_COLORS = [
     { hex: "#F0A8D8", label: "Rose" }, { hex: "#A8C8F0", label: "Bleu ciel" }, { hex: "#F0C850", label: "Jaune or" }, { hex: "#E86B5A", label: "Rouge" },
     { hex: "#A8E063", label: "Vert pomme" }, { hex: "#D8B0E8", label: "Lavande" }, { hex: "#3B9FC8", label: "Turquoise" }, { hex: "#5AB8D8", label: "Cyan" },
     { hex: "#1A1A1A", label: "Noir" }, { hex: "#8B3A1A", label: "Cuivre" }
   ];
-  const CAPYBARA_COLORS = [
-    { hex: "#A67B5B", label: "Brun Ghibli" }, { hex: "#8B5A2B", label: "Brun foncé" },
-    { hex: "#D2B48C", label: "Sable" }, { hex: "#B8A088", label: "Gris chaud" }
-  ];
-  const STYLES = {
-    ghibli: { description: "Un capybara assis au bord d'une rivière Ghibli, des ondulations d'eau, des lucioles et de l'herbe.", ambient: { enabled: true, color: "#A0E8B0", intensity: 0.15, pulse_speed: 0.3 }, elements: [{ type: "water_cells", position: { x: 0.02, y: 0.4 }, size: { width: 0.96, height: 0.6 }, color: "#3B9FC8", causticColor: "#A8F0FF", reflectionColor: "#FFE08A" }, { type: "grass", region: { x: 0, y: 0.72, width: 1, height: 0.28 }, color: "#5A8B3A" }, { type: "capybara", position: { x: 0.4, y: 0.7 }, size: { width: 0.15, height: 0.12 }, pose: "sitting" }, { type: "butterfly", position: { x: 0.7, y: 0.4 }, color: "#F0A8D8", wingColor: "#F0A8D8" }, { type: "dust", region: { x: 0.1, y: 0.25, width: 0.8, height: 0.6 }, color: "#FFE7A3" }] },
-    fire: { description: "Feu de camp chaleureux avec fumée qui monte et braises qui montent", ambient: { enabled: true, color: "#FFA500", intensity: 0.22, pulse_speed: 0.4 }, elements: [{ type: "fire", position: { x: 0.44, y: 0.66 }, size: { width: 0.12, height: 0.2 } }, { type: "smoke", position: { x: 0.46, y: 0.22 }, size: { width: 0.18, height: 0.45 } }, { type: "dust", region: { x: 0.2, y: 0.3, width: 0.6, height: 0.5 } }] },
-    winter: { description: "Nuit d'hiver, neige douce et étoiles", ambient: { enabled: true, color: "#8AB6F0", intensity: 0.14, pulse_speed: 0.28 }, elements: [{ type: "stars", region: { x: 0.02, y: 0.02, width: 0.96, height: 0.32 } }, { type: "snow", region: { x: 0, y: 0, width: 1, height: 1 } }, { type: "trees", region: { x: 0, y: 0.3, width: 1, height: 0.6 }, color: "#C8D6A0", leafStyle: "fall" }] },
-    aurora: { description: "Ciel nocturne avec aurore boréale et étoiles", ambient: { enabled: true, color: "#7DE3B5", intensity: 0.15, pulse_speed: 0.25 }, elements: [{ type: "stars", region: { x: 0, y: 0, width: 1, height: 0.4 } }, { type: "aurora", region: { x: 0, y: 0, width: 1, height: 0.5 } }] },
-    pool: { description: "Rivière calme avec reflets dorés de lanternes, ondulations douces et bulles. Style Ghibli.", ambient: { enabled: true, color: "#3B9FC8", intensity: 0.15, pulse_speed: 0.35 }, elements: [{ type: "god_rays", position: { x: 0.5, y: 0.1 }, count: 3, color: "#FFF4C8" }, { type: "water_cells", position: { x: 0.02, y: 0.3 }, size: { width: 0.96, height: 0.65 }, color: "#3B9FC8", causticColor: "#A8F0FF", reflectionColor: "#FFE08A" }, { type: "bubbles", region: { x: 0.2, y: 0.6, width: 0.6, height: 0.35 }, count: 14 }, { type: "butterfly", position: { x: 0.7, y: 0.4 }, color: "#3B9FC8", wingColor: "#5AB8D8" }] },
-    rainy: { description: "Jour de pluie avec fenêtre éclairée, plafonnier chaud", ambient: { enabled: true, color: "#8A9AAA", intensity: 0.1, pulse_speed: 0.3 }, elements: [{ type: "ceiling_light", position: { x: 0.4, y: 0.06 }, radius: 0.35, flickerColor: "#FFCC80" }, { type: "rain", region: { x: 0, y: 0, width: 1, height: 1 } }, { type: "window_light", position: { x: 0.7, y: 0.1 }, size: { width: 0.2, height: 0.35 } }, { type: "smoke", position: { x: 0.3, y: 0.3 }, size: { width: 0.2, height: 0.3 } }] }
-  };
+  
   class AnimationApp {
     constructor() {
       this.currentStep = 1; this.image = null; this.imageDataUrl = null; this.persistImage = null;
-      this.parser = new TextParser(); this.editor = null; this._dragging = false; this._analyzedOnce = false;
+      this.editor = null; this._dragging = false; 
       this._toastTimer = 0; this._saveTimer = 0;
       this.ambient = { enabled: true, color: "#FFA500", intensity: 0.18, pulse_speed: 0.4 };
-      this.wind = 0; this.description = ""; this.init();
+      this.wind = 0; 
+      this.mascots = []; // Liste des mascottes uploadées
+      this.init();
     }
-    init() { try { this.setupEventListeners(); const restored = this.loadFromLocalStorage(); if (!restored) this.showStep(1); } catch (err) { console.error(err); this.showBootError(err); this.showStep(1); } }
+    init() { try { this.setupEventListeners(); this.loadMascots(); const restored = this.loadFromLocalStorage(); if (!restored) this.showStep(1); } catch (err) { console.error(err); this.showBootError(err); this.showStep(1); } }
     showBootError(err) { const box = document.getElementById("bootError"); if (!box) return; box.className = "show"; box.textContent = "Erreur au démarrage : " + (err && err.message ? err.message : String(err)); }
+    
     setupEventListeners() {
       const upload = document.getElementById("imageUpload"); if (!upload) throw new Error("Zone d'image introuvable.");
       upload.addEventListener("change", (event) => this.handleImageUpload(event));
@@ -1631,16 +1358,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
       ["dragenter", "dragover"].forEach((name) => { dropZone.addEventListener(name, (event) => { event.preventDefault(); dropZone.classList.add("is-over"); }); });
       ["dragleave", "drop"].forEach((name) => { dropZone.addEventListener(name, (event) => { event.preventDefault(); dropZone.classList.remove("is-over"); }); });
       dropZone.addEventListener("drop", (event) => { const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]; if (file) this.handleImageFile(file); });
-      document.getElementById("analyzeButton").addEventListener("click", () => this.analyzeDescription());
-      document.querySelectorAll(".example-btn").forEach((btn) => { btn.addEventListener("click", (event) => { const example = event.currentTarget.dataset.example || ""; document.getElementById("description").value = example; this.description = example; this.scheduleSave(); }); });
-      document.querySelectorAll(".style-btn").forEach((btn) => { btn.addEventListener("click", (event) => this.applyStyle(event.currentTarget.dataset.style)); });
-      document.getElementById("description").addEventListener("input", (event) => { this.description = event.target.value; this.scheduleSave(); });
-      const canvas = document.getElementById("editorCanvas");
-      canvas.addEventListener("pointerdown", (event) => this.handleCanvasPointerDown(event));
-      window.addEventListener("pointermove", (event) => this.handleCanvasPointerMove(event));
-      window.addEventListener("pointerup", () => this.handleCanvasPointerUp());
-      document.getElementById("propertyPanel").addEventListener("input", (event) => this.handlePropertyChange(event));
-      document.getElementById("propertyPanel").addEventListener("click", (event) => this.handleSwatchClick(event));
+      
       document.getElementById("addGrid").addEventListener("click", (event) => { const btn = event.target.closest("[data-add]"); if (!btn) return; this.addEffect(btn.dataset.add); });
       document.getElementById("elementList").addEventListener("click", (event) => this.handleListClick(event));
       document.getElementById("hideAllButton").addEventListener("click", () => this.hideAllElements());
@@ -1648,19 +1366,50 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
       document.getElementById("toggleZones").addEventListener("change", (event) => { if (!this.editor) return; this.editor.showZones = event.target.checked; });
       document.getElementById("ambientPanel").addEventListener("input", () => { this.readAmbientFromForm(); this.scheduleSave(); });
       document.getElementById("resetAmbientBtn").addEventListener("click", () => { this.ambient = { enabled: true, color: "#FFA500", intensity: 0.18, pulse_speed: 0.4 }; this.wind = 0; this.writeAmbientToForm(); if (this.editor) this.editor.ambient = this.ambient; this.scheduleSave(); });
+      
       document.getElementById("exportButton").addEventListener("click", () => this.exportAnimation());
       document.getElementById("copyButton").addEventListener("click", () => this.copyAnimation());
       document.getElementById("copyJsonButton").addEventListener("click", () => this.copyJson());
       document.getElementById("restartButton").addEventListener("click", () => this.restart());
       document.getElementById("prevButton").addEventListener("click", () => this.prevStep());
       document.getElementById("nextButton").addEventListener("click", () => this.nextStep());
+      
       document.querySelectorAll(".progress-step").forEach((btn) => { btn.addEventListener("click", () => this.gotoStep(Number(btn.dataset.step))); });
+      
+      const canvas = document.getElementById("editorCanvas");
+      canvas.addEventListener("pointerdown", (event) => this.handleCanvasPointerDown(event));
+      window.addEventListener("pointermove", (event) => this.handleCanvasPointerMove(event));
+      window.addEventListener("pointerup", () => this.handleCanvasPointerUp());
+      document.getElementById("propertyPanel").addEventListener("input", (event) => this.handlePropertyChange(event));
+      document.getElementById("propertyPanel").addEventListener("click", (event) => this.handleSwatchClick(event));
+      
       document.addEventListener("keydown", (event) => this.handleKeyDown(event));
       const wrap = document.getElementById("stageWrap");
       if (typeof ResizeObserver !== "undefined") { this._resizeObserver = new ResizeObserver(() => { if (this.currentStep === 2) this.fitStage(); }); this._resizeObserver.observe(wrap); }
       else { window.addEventListener("resize", () => { if (this.currentStep === 2) this.fitStage(); }); }
       document.addEventListener("visibilitychange", () => { if (!this.editor) return; if (document.hidden) this.editor.stop(); else if (this.currentStep === 2) this.editor.start(); });
+
+      // Gestion de l'upload des mascottes
+      document.getElementById("mascotList").addEventListener("change", (e) => {
+        if (e.target && e.target.id === "mascotUpload") {
+          this.handleMascotUpload(e.target.files);
+        }
+      });
+      document.getElementById("mascotList").addEventListener("click", (e) => {
+        if (e.target.closest(".mascot-add")) {
+          document.getElementById("mascotUpload").click();
+        } else if (e.target.closest(".mascot-item")) {
+          if (e.target.closest(".mascot-del")) {
+            const btn = e.target.closest(".mascot-del");
+            this.removeMascot(btn.dataset.id);
+          } else {
+            const item = e.target.closest(".mascot-item");
+            this.addMascotToScene(item.dataset.src);
+          }
+        }
+      });
     }
+    
     handleImageUpload(event) { const file = event.target.files && event.target.files[0]; if (file) this.handleImageFile(file); event.target.value = ""; }
     async handleImageFile(file) {
       if (!file || !file.type || file.type.indexOf("image/") !== 0) { this.toast("Choisissez un fichier image (JPG, PNG, WebP…).", "error"); return; }
@@ -1671,6 +1420,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
         const nameLine = document.getElementById("imageFileName");
         if (nameLine) { nameLine.hidden = false; nameLine.textContent = "Image prête : " + (file.name || "fichier local"); }
         this.saveToLocalStorage(); this.toast("Image chargée.");
+        updateGenBtn();
       } catch (err) { console.error(err); this.toast("Impossible de lire cette image.", "error"); }
     }
     setImage(src) {
@@ -1690,57 +1440,120 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
             this.editor.ambient = this.ambient; this.editor.wind = this.wind;
           } else { this.editor.image = img; }
           this.fitStage(); resolve(img);
+          updateGenBtn();
         };
         img.onerror = () => reject(new Error("image")); img.src = src;
       });
     }
-    analyzeDescription() {
-      const description = document.getElementById("description").value; this.description = description;
-      if (!description.trim()) { this.toast("Écrivez une description de la scène.", "error"); return; }
-      if (!this.image || !this.editor) { this.toast("Ajoutez d'abord une image de fond.", "error"); return; }
-      if (this._analyzedOnce && this.editor.elements.length) {
-        const redo = window.confirm("Relancer l'analyse remplace les éléments déjà placés. Continuer ?");
-        if (!redo) { this.currentStep = 2; this.showStep(2); return; }
+
+    // --- GESTION DES MASCOTTES ---
+    async handleMascotUpload(files) {
+      if (!files || files.length === 0) return;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith("image/")) continue;
+        try {
+          const dataUrl = await readFileAsDataURL(file);
+          const compressed = await compressDataUrl(dataUrl, 400, 0.8); // Petite taille pour stockage
+          const id = "mascot_" + Date.now().toString(36) + "_" + i;
+          this.mascots.push({ id: id, name: file.name, src: compressed });
+        } catch(e) { console.error("Erreur upload mascotte", e); }
       }
-      let elements = [];
-      try { elements = this.parser.parseDescription(description); } catch (err) { console.error(err); this.toast("L'analyse du texte a échoué.", "error"); return; }
-      if (!elements.length) { this.toast("Aucun élément reconnu. Essayez « feu », « herbe », « capybara »…", "error"); return; }
-      this.editor.clearElements(); elements.forEach((config) => this.editor.addElement(config));
-      this._analyzedOnce = true; this.applyAmbientFor(elements);
-      this.currentStep = 2; this.showStep(2); this.refreshElementList(); this.hidePropertyPanel(); this.saveToLocalStorage();
-      this.setStatus(`${elements.length} élément${elements.length > 1 ? "s" : ""} placé${elements.length > 1 ? "s" : ""}.`);
-      this.toast("Animation composée. Ajustez les zones si besoin.");
+      this.saveMascots();
+      this.renderMascots();
     }
-    applyStyle(styleId) {
-      const style = STYLES[styleId]; if (!style) return;
-      document.getElementById("description").value = style.description; this.description = style.description;
-      if (!this.image || !this.editor) { this.toast("Ajoutez d'abord une image de fond.", "error"); return; }
-      this.editor.clearElements();
-      style.elements.forEach((partial) => { const config = this.parser.createElement(partial.type, ""); if (!config) return; Object.assign(config, partial); this.editor.addElement(config); });
-      this.ambient = { ...style.ambient }; this.writeAmbientToForm(); if (this.editor) this.editor.ambient = this.ambient;
-      this.currentStep = 2; this.showStep(2); this.refreshElementList(); this.hidePropertyPanel(); this.saveToLocalStorage();
-      this.setStatus(`Style « ${styleId} » appliqué.`); this.toast("Style appliqué.");
+    removeMascot(id) {
+      this.mascots = this.mascots.filter(m => m.id !== id);
+      this.saveMascots();
+      this.renderMascots();
+      this.toast("Mascotte supprimée", "warn");
     }
-    applyAmbientFor(elements) {
-      const types = elements.map((el) => el.type);
-      const warm = types.includes("fire") || types.includes("candle") || types.includes("ceiling_light");
-      const water = types.includes("water_cells");
-      const night = types.includes("stars") || types.includes("window_light");
-      const cool = types.includes("snow") || types.includes("rain") || types.includes("aurora");
-      if (warm) this.ambient = { enabled: true, color: "#FFA500", intensity: 0.2, pulse_speed: 0.38 };
-      else if (water) this.ambient = { enabled: true, color: "#3B9FC8", intensity: 0.12, pulse_speed: 0.35 };
-      else if (night || cool) this.ambient = { enabled: true, color: "#6FA8DC", intensity: 0.12, pulse_speed: 0.28 };
-      this.writeAmbientToForm(); if (this.editor) this.editor.ambient = this.ambient;
+    saveMascots() {
+      try { localStorage.setItem(MASCOT_STORAGE_KEY, JSON.stringify(this.mascots)); } catch(e) { console.warn("Mascotte trop lourde pour localStorage"); }
     }
+    loadMascots() {
+      try {
+        const saved = localStorage.getItem(MASCOT_STORAGE_KEY);
+        if (saved) this.mascots = JSON.parse(saved);
+      } catch(e) {}
+      this.renderMascots();
+    }
+    renderMascots() {
+      const list = document.getElementById("mascotList");
+      if (!list) return;
+      list.innerHTML = "";
+      this.mascots.forEach(m => {
+        const item = document.createElement("div");
+        item.className = "mascot-item";
+        item.title = "Cliquez pour ajouter au centre";
+        item.dataset.src = m.src;
+        const img = document.createElement("img");
+        img.src = m.src;
+        item.appendChild(img);
+        const del = document.createElement("button");
+        del.className = "mascot-del";
+        del.dataset.id = m.id;
+        del.textContent = "×";
+        del.title = "Supprimer cette mascotte";
+        item.appendChild(del);
+        list.appendChild(item);
+      });
+      const add = document.createElement("div");
+      add.className = "mascot-add";
+      add.innerHTML = "➕<br>Ajouter";
+      add.onclick = () => document.getElementById("mascotUpload").click();
+      list.appendChild(add);
+      const uploadInput = document.createElement("input");
+      uploadInput.type = "file";
+      uploadInput.id = "mascotUpload";
+      uploadInput.accept = "image/*";
+      uploadInput.multiple = true;
+      uploadInput.style.display = "none";
+      list.appendChild(uploadInput);
+    }
+    addMascotToScene(imgSrc) {
+      if (!this.editor || !this.image) { this.toast("Ajoutez une image de fond avant.", "error"); return; }
+      const config = {
+        type: "capybara",
+        enabled: true,
+        position: { x: 0.5, y: 0.5 }, // Au centre
+        size: { width: 0.2, height: 0.2 },
+        imageSrc: imgSrc,
+        speed: 0.6
+      };
+      const element = this.editor.addElement(config);
+      this.editor.selectElement(element.config.id);
+      this.showPropertyPanel(element);
+      this.refreshElementList();
+      this.saveToLocalStorage();
+      this.toast("Mascotte ajoutée au centre !");
+    }
+    // ----------------------------
+
     addEffect(type) {
       if (!this.editor || !this.image) { this.toast("Ajoutez une image avant de poser un effet.", "error"); return; }
-      const config = this.parser.createElement(type, ""); if (!config) return;
+      const config = {
+        type: type, enabled: true,
+        position: { x: 0.4, y: 0.6 }, size: { width: 0.1, height: 0.1 },
+        speed: 0.6
+      };
+      if (type === "fire") config.position = { x: 0.25, y: 0.6 };
+      if (type === "candle") config.radius = 0.06;
+      if (type === "ceiling_light") config.radius = 0.45;
+      if (type === "water_cells") { config.position = { x: 0.02, y: 0.3 }; config.size = { width: 0.96, height: 0.65 }; }
+      if (type === "grass") { config.region = { x: 0, y: 0.72, width: 1, height: 0.28 }; delete config.position; delete config.size; }
+      
       const same = this.editor.elements.filter((el) => el.config.type === type).length;
-      if (config.position) { config.position.x = Math.min(0.9, (config.position.x || 0.4) + same * 0.07); config.position.y = Math.min(0.88, (config.position.y || 0.4) + (same % 2) * 0.06); }
-      if (config.region) config.region.x = Math.min(0.4, (config.region.x || 0) + same * 0.04);
-      const element = this.editor.addElement(config); this.editor.selectElement(element.config.id);
-      this.showPropertyPanel(element); this.refreshElementList(); this.saveToLocalStorage();
+      if (config.position) { config.position.x = Math.min(0.9, (config.position.x || 0.4) + same * 0.05); config.position.y = Math.min(0.88, (config.position.y || 0.4) + (same % 3) * 0.05); }
+      if (config.region) config.region.x = Math.min(0.4, (config.region.x || 0) + same * 0.02);
+      
+      const element = this.editor.addElement(config);
+      this.editor.selectElement(element.config.id);
+      this.showPropertyPanel(element);
+      this.refreshElementList();
+      this.saveToLocalStorage();
     }
+    
     hideAllElements() { if (!this.editor) return; this.editor.elements.forEach((el) => { el.config.enabled = false; }); this.refreshElementList(); this.scheduleSave(); }
     clearAllElements() { if (!this.editor) return; if (!window.confirm("Supprimer tous les éléments ?")) return; this.editor.clearElements(); this.refreshElementList(); this.hidePropertyPanel(); this.scheduleSave(); }
     handleListClick(event) {
@@ -1916,14 +1729,14 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     async copyJson() {
       try {
         const scene = this.editor ? this.editor.exportToJSON() : { elements: [] };
-        const json = JSON.stringify({ coords: "relative", description: this.description || "", ambient_light: this.ambient, wind: this.wind, elements: scene.elements }, null, 2);
+        const json = JSON.stringify({ coords: "relative", ambient_light: this.ambient, wind: this.wind, elements: scene.elements }, null, 2);
         await copyText(json); this.toast("JSON copié.");
       } catch (err) { console.error(err); this.toast("Impossible de copier.", "error"); }
     }
     async generateStandaloneHTML() {
       if (!this.imageDataUrl) throw new Error("Aucune image à exporter.");
       const effectsCode = this.getAllEffectsCode();
-      const scene = { coords: "relative", description: this.description || "", ambient_light: this.ambient, wind: this.wind, elements: this.editor ? this.editor.exportToJSON().elements : [] };
+      const scene = { coords: "relative", ambient_light: this.ambient, wind: this.wind, elements: this.editor ? this.editor.exportToJSON().elements : [] };
       const json = JSON.stringify(scene).replace(/</g, "\\u003c");
       const safeEffects = effectsCode.replace(/<\/script/gi, "<\\/script");
       return `<!DOCTYPE html>
@@ -1996,7 +1809,7 @@ ${safeEffects}
       });
       const prev = document.getElementById("prevButton"); const next = document.getElementById("nextButton");
       if (prev) prev.style.display = step > 1 ? "inline-flex" : "none";
-      if (next) { next.style.display = step === 3 ? "none" : "inline-flex"; next.textContent = step === 1 ? "Analyser →" : "Exporter →"; }
+      if (next) { next.style.display = step === 3 ? "none" : "inline-flex"; next.textContent = step === 1 ? "Éditeur →" : "Exporter →"; }
       if (step === 2) {
         this.refreshElementList(); this.writeAmbientToForm();
         if (this.editor) { this.editor.ambient = this.ambient; this.editor.wind = this.wind; }
@@ -2021,7 +1834,11 @@ ${safeEffects}
       if (this.editor) { this.editor.viewWidth = w; this.editor.viewHeight = h; this.editor.dpr = dpr; this.editor.image = this.image; }
     }
     nextStep() {
-      if (this.currentStep === 1) { this.analyzeDescription(); return; }
+      if (this.currentStep === 1) {
+        if (!this.image) { this.toast("Ajoutez une image de fond avant.", "error"); return; }
+        this.showStep(2); 
+        return; 
+      }
       if (this.currentStep === 2) { if (!this.image) { this.toast("Ajoutez une image avant d'exporter.", "error"); return; } this.showStep(3); this.saveToLocalStorage(); }
     }
     prevStep() { if (this.currentStep > 1) this.showStep(this.currentStep - 1); this.saveToLocalStorage(); }
@@ -2047,7 +1864,7 @@ ${safeEffects}
     }
     scheduleSave() { window.clearTimeout(this._saveTimer); this._saveTimer = window.setTimeout(() => this.saveToLocalStorage(), 600); }
     saveToLocalStorage() {
-      const data = { currentStep: this.currentStep, description: document.getElementById("description").value, image: this.persistImage || this.imageDataUrl, scene: this.editor ? this.editor.exportToJSON() : null, ambient: this.ambient, wind: this.wind };
+      const data = { currentStep: this.currentStep, image: this.persistImage || this.imageDataUrl, scene: this.editor ? this.editor.exportToJSON() : null, ambient: this.ambient, wind: this.wind };
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
       catch (err) { try { const slim = { ...data, image: null }; localStorage.setItem(STORAGE_KEY, JSON.stringify(slim)); this.toast("Projet mémorisé sans l'image : elle est trop lourde.", "error"); } catch (err2) { console.error(err2); } }
     }
@@ -2056,15 +1873,14 @@ ${safeEffects}
       if (!raw) return false;
       try {
         const parsed = JSON.parse(raw);
-        this.currentStep = parsed.currentStep || 1; this.description = parsed.description || "";
-        document.getElementById("description").value = this.description;
+        this.currentStep = parsed.currentStep || 1; 
         if (parsed.ambient) this.ambient = parsed.ambient;
         if (typeof parsed.wind === "number") this.wind = parsed.wind;
         this.writeAmbientToForm();
         if (!parsed.image) { this.showStep(Math.min(this.currentStep, 1)); return true; }
         this.persistImage = parsed.image;
         this.setImage(parsed.image).then(() => {
-          if (parsed.scene && this.editor) { this.editor.importFromJSON(parsed.scene); this._analyzedOnce = this.editor.elements.length > 0; }
+          if (parsed.scene && this.editor) { this.editor.importFromJSON(parsed.scene); }
           const step = this.image ? (parsed.currentStep || 1) : 1; this.showStep(step); this.refreshElementList();
         }).catch(() => { this.toast("L'image sauvegardée n'a pas pu être rechargée.", "error"); this.showStep(1); });
         return true;
@@ -2073,6 +1889,7 @@ ${safeEffects}
     setStatus(text) { const line = document.getElementById("statusLine"); if (line) line.textContent = text || ""; }
     toast(message, kind) { const el = document.getElementById("toast"); el.textContent = message; el.className = "toast show" + (kind ? ` ${kind}` : ""); window.clearTimeout(this._toastTimer); this._toastTimer = window.setTimeout(() => { el.className = "toast"; }, 3400); }
   }
+  
   function fieldsFor(config) {
     const fields = [];
     const push = (key, type, extra) => { const range = FIELD_RANGES[key] || {}; fields.push({ key, label: FIELD_LABELS[key] || key, type, value: valueAt(config, key), min: range.min, max: range.max, step: range.step, config, ...extra }); };
@@ -2081,9 +1898,8 @@ ${safeEffects}
     if (config.size) { if (typeof config.size === "object") { push("size.width", "range"); push("size.height", "range"); } }
     
     if (config.type === "capybara") {
-      // Ajout du champ texte pour l'URL de l'image
-      fields.push({ key: "imageSrc", label: "Lien de l'image (URL ou Base64)", type: "text", value: valueAt(config, "imageSrc") || "", config });
-      fields.push({ key: "color", label: "Couleur de secours", type: "swatches", swatches: CAPYBARA_COLORS, config });
+      // L'imageSrc n'est plus éditable manuellement via texte, elle est gérée par la mascotte.
+      // On peut juste ajuster la vitesse de respiration.
       push("speed", "range");
     } else if (config.type === "water_cells") {
       fields.push({ key: "causticColor", label: "Couleur des ondulations", type: "swatches", swatches: CEILING_SWATCHES, config });
@@ -2140,12 +1956,29 @@ ${safeEffects}
     return new Promise((resolve) => { const img = new Image(); img.onload = () => { const scale = Math.min(1, maxEdge / Math.max(img.width, img.height)); const canvas = document.createElement("canvas"); canvas.width = Math.max(2, Math.round(img.width * scale)); canvas.height = Math.max(2, Math.round(img.height * scale)); canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height); resolve(canvas.toDataURL("image/jpeg", quality)); }; img.onerror = () => resolve(dataUrl); img.src = dataUrl; });
   }
   async function copyText(text) { if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text); else { const area = document.createElement("textarea"); area.value = text; document.body.appendChild(area); area.select(); document.execCommand("copy"); area.remove(); } }
+
+  function updateGenBtn() {
+    const btn = document.getElementById("nextButton");
+    if (!btn) return;
+    if (document.getElementById("step1").classList.contains("is-on")) {
+      btn.disabled = !window.animationApp || !window.animationApp.image;
+    }
+  }
+  
   function boot() {
     try {
-      if (typeof TextParser !== "function") throw new Error("TextParser manquant");
       if (!window.LivingEffects) throw new Error("Moteur d'effets manquant");
       if (typeof VisualEditor !== "function") throw new Error("Éditeur manquant");
       window.animationApp = new AnimationApp();
+      
+      // Mettre à jour le bouton quand l'image change
+      const originalHandleImageFile = window.animationApp.handleImageFile.bind(window.animationApp);
+      window.animationApp.handleImageFile = async function(file) {
+        await originalHandleImageFile(file);
+        updateGenBtn();
+      };
+      document.getElementById("imageUpload").addEventListener("change", updateGenBtn);
+      
     } catch (err) { console.error(err); const box = document.getElementById("bootError"); if (box) { box.className = "show"; box.textContent = "Impossible de démarrer l'application : " + (err && err.message ? err.message : err); } }
   }
   if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", boot); else boot();
