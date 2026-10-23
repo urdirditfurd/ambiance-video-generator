@@ -170,16 +170,30 @@ function showStep(n) {
   $('step3').classList.toggle('hidden', n !== 3);
 }
 
+// ═════════════════════════════════════════════════════════════════════
+// CORRECTION CORS : On utilise un proxy public pour télécharger l'image
+// ═════════════════════════════════════════════════════════════════════
 async function toDataUrl(url) {
   if (url.startsWith('data:')) return url;
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
+  
+  // Le proxy va chercher l'image côté serveur et ajoute l'en-tête CORS
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  
+  try {
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error(`Proxy HTTP ${response.status}`);
+    
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error("Erreur conversion image via proxy:", e);
+    return url; // Fallback (l'image s'affichera mais l'assemblage échouera)
+  }
 }
 
 async function generateSingleFrame(index, total) {
@@ -271,7 +285,7 @@ async function startGeneration() {
     toast("✅ Génération des images terminée !");
     $('btnAssemble').classList.remove('hidden');
   } else {
-    toast(`⚠️ Certaines images ont échoué. Vérifie la console.`);
+    toast(`⚠️ Certaines images ont échoué (CORS). Vérifie la console.`);
   }
 }
 
@@ -285,7 +299,7 @@ function renderGrid() {
   const grid = $('framesGrid');
   grid.innerHTML = state.images.map((img, i) => {
     if (img.status === 'done') return `<div class="cd pk"><div class="im"><img src="${img.url}" alt="Frame ${i+1}"></div><div class="lab" style="text-align:center">Frame ${i + 1}</div></div>`;
-    if (img.status === 'error') return `<div class="cd" style="border-color:var(--er)"><div class="im" style="color:var(--er)">✕</div><div class="lab" style="text-align:center;font-size:9px">Erreur</div></div>`;
+    if (img.status === 'error') return `<div class="cd" style="border-color:var(--er)"><div class="im" style="color:var(--er)">✕</div><div class="lab" style="text-align:center;font-size:9px">Erreur CORS</div></div>`;
     return `<div class="cd"><div class="im"><div class="sp"></div></div><div class="lab" style="text-align:center">Frame ${i + 1}…</div></div>`;
   }).join('');
 }
@@ -367,7 +381,7 @@ async function assembleVideo() {
     videoEncoder.encode(frame, { keyFrame: i % 60 === 0 });
     frame.close();
 
-    // Petite pause pour laisser le temps au processeur de souffler
+    // Petite pause pour laisser le temps au processeur
     await sleep(10); 
 
     // Mise à jour UI
