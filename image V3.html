@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LOFI-LOOP STUDIO · Générateur d'Ambiance</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Bibliothèque pour corriger la durée manquante des fichiers WebM -->
+<script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
 <style>
 :root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -49,7 +51,6 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 </header>
 
 <main id="main">
-  <!-- ÉTAPE 1 : CONFIGURATION -->
   <div id="step1" class="hero">
     <div class="lab">ÉTAPE 1 / 3</div>
     <h2>Configuration de la <b>scène</b></h2>
@@ -95,7 +96,6 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     </div>
   </div>
 
-  <!-- ÉTAPE 2 : GÉNÉRATION -->
   <div id="step2" class="hero hidden">
     <div class="lab">ÉTAPE 2 / 3</div>
     <h2>Génération de la <b>séquence</b></h2>
@@ -115,7 +115,6 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     </div>
   </div>
 
-  <!-- ÉTAPE 3 : ASSEMBLAGE & EXPORT -->
   <div id="step3" class="hero hidden">
     <div class="lab">ÉTAPE 3 / 3</div>
     <h2>Assemblage et <b>Export</b></h2>
@@ -141,11 +140,8 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <div id="toast"></div>
 
 <script>
-/* ═════════════════════════════════════════════════════════════════════
-   CONFIG & ÉTAT
-   ═════════════════════════════════════════════════════════════════════ */
 const API_URL = 'https://apihub.agnes-ai.com/v1';
-const IMG_MODEL = 'agnes-image-2.1-flash'; // Modèle stable
+const IMG_MODEL = 'agnes-image-2.1-flash';
 
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
@@ -160,9 +156,6 @@ let state = {
 
 document.getElementById('apiKey').value = state.apiKey;
 
-/* ═════════════════════════════════════════════════════════════════════
-   UTILITAIRES
-   ═════════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const toast = msg => {
@@ -178,9 +171,6 @@ function showStep(n) {
   $('step3').classList.toggle('hidden', n !== 3);
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   CONVERSION IMAGE (CORS -> Data URI pour Canvas)
-   ═════════════════════════════════════════════════════════════════════ */
 async function toDataUrl(url) {
   if (url.startsWith('data:')) return url;
   try {
@@ -198,9 +188,6 @@ async function toDataUrl(url) {
   }
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   APPEL API AGNÈS (Image) — AVEC RETRY
-   ═════════════════════════════════════════════════════════════════════ */
 async function generateSingleFrame(index, total) {
   const prompt = `${state.basePrompt}. Subtle variation frame ${index} of ${total}. Only animate: ${state.animElements}. Keep the exact same composition, lighting, camera angle and style. No text, no watermark.`;
 
@@ -249,9 +236,6 @@ async function generateSingleFrame(index, total) {
   }
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   PIPELINE DE GÉNÉRATION
-   ═════════════════════════════════════════════════════════════════════ */
 async function startGeneration() {
   state.apiKey = $('apiKey').value.trim();
   if (!state.apiKey) return toast("Veuillez entrer une clé API Agnès");
@@ -322,9 +306,6 @@ function renderGrid() {
   }).join('');
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   ASSEMBLAGE VIDÉO LOCAL — FIX 00:00:00
-   ═════════════════════════════════════════════════════════════════════ */
 async function assembleVideo() {
   showStep(3);
   const canvas = $('videoCanvas');
@@ -332,7 +313,6 @@ async function assembleVideo() {
   const status = $('assembleStatus');
   const btnDownload = $('downloadLink');
 
-  // Désactiver le bouton pendant l'assemblage
   btnDownload.classList.add('hidden');
 
   const [w, h] = state.ratio === '16:9' ? [1024, 576] : state.ratio === '1:1' ? [768, 768] : [1024, 640];
@@ -342,18 +322,17 @@ async function assembleVideo() {
   const fps = 24;
   const frameDuration = 1000 / fps;
   
-  // Mise à jour de l'UI
+  const totalDurationMs = (state.framesCount / fps) * 1000;
+
   $('loopDuration').textContent = `${(state.framesCount / fps).toFixed(1)}s`;
   $('outputFormat').textContent = 'WebM (VP9)';
   status.textContent = "Préparation de l'encodage...";
 
-  // Filtrer les images valides
   const validImages = state.images.filter(img => img.status === 'done' && img.dataUrl);
   if (validImages.length < 12) {
     return toast("Pas assez d'images valides (min. 12)");
   }
 
-  // Précharger toutes les images en mémoire (évite les délais et les écrans noirs)
   status.textContent = "Chargement des images en mémoire...";
   const loadedImages = await Promise.all(validImages.map(item => {
     return new Promise((resolve) => {
@@ -370,7 +349,6 @@ async function assembleVideo() {
 
   status.textContent = "Encodage de la vidéo (ne ferme pas l'onglet)...";
 
-  // Configuration de l'enregistreur (WebM VP9 est le seul 100% fiable)
   const stream = canvas.captureStream(fps);
   const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
     ? 'video/webm;codecs=vp9' 
@@ -385,52 +363,56 @@ async function assembleVideo() {
   recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
   recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
+    const rawBlob = new Blob(chunks, { type: 'video/webm' });
     
-    btnDownload.href = url;
-    btnDownload.download = `lofi-loop-${Date.now()}.webm`;
-    btnDownload.textContent = "⬇ Télécharger la vidéo (.webm)";
-    btnDownload.classList.remove('hidden');
-    
-    status.textContent = "✅ Vidéo WebM prête ! (À lire avec VLC ou Chrome)";
-    toast("Vidéo assemblée avec succès !");
-    
-    // Arrêter les pistes du flux
-    stream.getTracks().forEach(track => track.stop());
+    // ═══════════════════════════════════════════════════════════════
+    // CORRECTION DU BUG : Injection de la durée dans les métadonnées
+    // ═══════════════════════════════════════════════════════════════
+    if (typeof ysFixWebmDuration === 'function') {
+      status.textContent = "Correction des métadonnées de durée...";
+      
+      ysFixWebmDuration(rawBlob, totalDurationMs, function(fixedBlob) {
+        const url = URL.createObjectURL(fixedBlob);
+        btnDownload.href = url;
+        btnDownload.download = `lofi-loop-${Date.now()}.webm`;
+        btnDownload.textContent = "⬇ Télécharger la vidéo (.webm)";
+        btnDownload.classList.remove('hidden');
+        
+        status.textContent = "✅ Vidéo prête (métadonnées corrigées) !";
+        toast("Vidéo assemblée avec succès !");
+        stream.getTracks().forEach(track => track.stop());
+      });
+    } else {
+      // Fallback si le CDN n'a pas chargé
+      const url = URL.createObjectURL(rawBlob);
+      btnDownload.href = url;
+      btnDownload.download = `lofi-loop-${Date.now()}.webm`;
+      btnDownload.textContent = "⬇ Télécharger la vidéo (WebM brut)";
+      btnDownload.classList.remove('hidden');
+      status.textContent = "✅ Vidéo prête (sans métadonnées) !";
+      toast("Vidéo assemblée (sans métadonnées de durée).");
+      stream.getTracks().forEach(track => track.stop());
+    }
   };
 
-  // Démarrer l'enregistrement
   recorder.start();
 
   let currentFrame = 0;
   
-  // Fonction de dessin précise (synchrone avec le timing de la vidéo)
   function drawNextFrame() {
-    // Si l'enregistreur s'est arrêté (annulation), on stoppe la boucle
     if (recorder.state !== 'recording') return;
 
-    // Si on a atteint la fin de la séquence
     if (currentFrame >= loadedImages.length) {
-      // On redessine la première image pour une boucle parfaite
       ctx.drawImage(loadedImages[0], 0, 0, w, h);
-      
-      // On laisse 1 frame s'afficher avant de couper l'enregistrement
-      setTimeout(() => {
-        recorder.stop();
-      }, frameDuration);
+      setTimeout(() => { recorder.stop(); }, frameDuration);
       return;
     }
 
-    // Dessiner l'image courante
     ctx.drawImage(loadedImages[currentFrame], 0, 0, w, h);
     currentFrame++;
-
-    // Programmer le dessin de la prochaine image après le délai exact
     setTimeout(drawNextFrame, frameDuration);
   }
 
-  // Lancer la boucle de dessin
   drawNextFrame();
 }
 
