@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LOFI-MP4 STUDIO · Générateur d'Ambiance</title>
+<title>LOFI-LOOP STUDIO · Générateur d'Ambiance</title>
+<!-- Import FFmpeg.wasm pour la conversion MP4 -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Importation de la librairie mp4-muxer pour créer des MP4 natifs -->
-<script src="https://unpkg.com/mp4-muxer/build/mp4-muxer.mjs" type="module"></script>
-
 <style>
 :root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -47,7 +46,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <body>
 
 <header>
-  <div class="logo">LOFI<b>-MP4</b><i>STUDIO D'AMBIANCE IA</i></div>
+  <div class="logo">LOFI<b>-LOOP</b><i>STUDIO D'AMBIANCE IA</i></div>
   <button class="btn" onclick="resetApp()">↺ Nouvelle session</button>
 </header>
 
@@ -56,7 +55,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
   <div id="step1" class="hero">
     <div class="lab">ÉTAPE 1 / 3</div>
     <h2>Configuration de la <b>scène</b></h2>
-    <p class="sub">Décris ton décor Lofi. L'IA générera une séquence d'images pour créer une boucle parfaite exportable en MP4.</p>
+    <p class="sub">Décris ton décor Lofi. L'IA générera une séquence d'images où seuls les éléments spécifiés bougent, créant une boucle parfaite pour une diffusion de 5h.</p>
     
     <label class="f">
       <span>🔑 Clé API Agnès (stockée localement)</span>
@@ -85,7 +84,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
       <label class="f" style="flex:1">
         <span>🎞️ Fluidité de la boucle (Nombre d'images)</span>
         <select id="framesCount">
-          <option value="24">24 images (1 sec à 24 FPS)</option>
+          <option value="24">24 images (1 sec à 24 FPS) - Rapide, risque de saccade</option>
           <option value="48" selected>48 images (2 sec à 24 FPS) - Bon compromis</option>
           <option value="96">96 images (4 sec à 24 FPS) - Idéal pour 5h, très fluide</option>
         </select>
@@ -102,7 +101,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
   <div id="step2" class="hero hidden">
     <div class="lab">ÉTAPE 2 / 3</div>
     <h2>Génération de la <b>séquence</b></h2>
-    <p class="sub">L'IA crée chaque image en conservant la composition identique. Ne ferme pas cette page.</p>
+    <p class="sub">L'IA crée chaque image en conservant la composition identique, en faisant évoluer uniquement les éléments animés. Ne ferme pas cette page.</p>
     
     <div class="bar"><i id="progressBar"></i></div>
     <div class="stats">
@@ -114,15 +113,15 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 
     <div class="ft">
       <button class="btn" onclick="cancelGeneration()">■ Annuler</button>
-      <button id="btnAssemble" class="big hidden" onclick="assembleVideo()">🎬 Assembler en MP4 (Local)</button>
+      <button id="btnAssemble" class="big hidden" onclick="assembleVideo()">🎬 Assembler & Convertir en MP4</button>
     </div>
   </div>
 
   <!-- ÉTAPE 3 : ASSEMBLAGE & EXPORT -->
   <div id="step3" class="hero hidden">
     <div class="lab">ÉTAPE 3 / 3</div>
-    <h2>Assemblage et <b>Export MP4</b></h2>
-    <p class="sub">La vidéo est encodée en MP4 (H.264) directement dans votre navigateur. Compatible avec tous les lecteurs et logiciels de montage.</p>
+    <h2>Assemblage et <b>Export</b></h2>
+    <p class="sub">La vidéo est créée puis convertie en MP4 directement dans votre navigateur. Compatible avec tous les lecteurs et réseaux sociaux.</p>
 
     <div class="preview-box">
       <canvas id="videoCanvas"></canvas>
@@ -143,14 +142,16 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 
 <div id="toast"></div>
 
-<script type="module">
+<script>
 /* ═════════════════════════════════════════════════════════════════════
-   IMPORTS & CONFIG
+   CONFIG & ÉTAT
    ═════════════════════════════════════════════════════════════════════ */
-import Muxer from 'https://unpkg.com/mp4-muxer/build/mp4-muxer.mjs';
-
 const API_URL = 'https://apihub.agnes-ai.com/v1';
-const IMG_MODEL = 'agnes-image-2.5-flash';
+const IMG_MODEL = 'agnes-image-2.5-flash'; 
+
+// Initialisation FFmpeg
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: true });
 
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
@@ -162,7 +163,6 @@ let state = {
   isGenerating: false,
 };
 
-// Initialisation
 document.getElementById('apiKey').value = state.apiKey;
 
 /* ═════════════════════════════════════════════════════════════════════
@@ -177,25 +177,12 @@ const toast = msg => {
   setTimeout(() => d.remove(), 4000);
 };
 
-window.showStep = function(n) {
+function showStep(n) {
   $('step1').classList.toggle('hidden', n !== 1);
   $('step2').classList.toggle('hidden', n !== 2);
   $('step3').classList.toggle('hidden', n !== 3);
-};
+}
 
-window.resetApp = function() {
-  if (confirm("Recommencer une nouvelle génération ?")) {
-    state.images = [];
-    $('downloadLink').classList.add('hidden');
-    $('btnAssemble').classList.add('hidden');
-    $('progressBar').style.width = '0%';
-    showStep(1);
-  }
-};
-
-/* ═════════════════════════════════════════════════════════════════════
-   CONVERSION IMAGE (CORS -> Data URI)
-   ═════════════════════════════════════════════════════════════════════ */
 async function toDataUrl(url) {
   if (url.startsWith('data:')) return url;
   try {
@@ -244,8 +231,8 @@ async function generateSingleFrame(index, total) {
     const imageUrl = data.data?.[0]?.url || data.data?.[0]?.b64_json;
     
     if (!imageUrl) throw new Error("Aucune URL d'image reçue");
-
     const dataUrl = await toDataUrl(imageUrl);
+    
     return { url: imageUrl, dataUrl: dataUrl, status: 'done' };
   } catch (error) {
     console.error(`Erreur frame ${index}:`, error);
@@ -256,7 +243,7 @@ async function generateSingleFrame(index, total) {
 /* ═════════════════════════════════════════════════════════════════════
    PIPELINE DE GÉNÉRATION
    ═════════════════════════════════════════════════════════════════════ */
-window.startGeneration = async function() {
+async function startGeneration() {
   state.apiKey = $('apiKey').value.trim();
   if (!state.apiKey) return toast("Veuillez entrer une clé API Agnès");
   localStorage.setItem('lofi_api_key', state.apiKey);
@@ -277,7 +264,7 @@ window.startGeneration = async function() {
   const startTime = Date.now();
   
   for (let i = 0; i < state.framesCount; i++) {
-    if (!state.isGenerating) break;
+    if (!state.isGenerating) break; 
 
     $('progText').textContent = `${i + 1} / ${state.framesCount}`;
     const pct = ((i + 1) / state.framesCount) * 100;
@@ -301,13 +288,13 @@ window.startGeneration = async function() {
   } else {
     toast("⚠️ Génération terminée avec des erreurs.");
   }
-};
+}
 
-window.cancelGeneration = function() {
+function cancelGeneration() {
   state.isGenerating = false;
   toast("Génération annulée");
   showStep(1);
-};
+}
 
 function renderGrid() {
   const grid = $('framesGrid');
@@ -323,15 +310,14 @@ function renderGrid() {
 }
 
 /* ═════════════════════════════════════════════════════════════════════
-   ASSEMBLAGE VIDÉO MP4 (via mp4-muxer)
+   ASSEMBLAGE VIDÉO + CONVERSION MP4
    ═════════════════════════════════════════════════════════════════════ */
-window.assembleVideo = async function() {
+async function assembleVideo() {
   showStep(3);
   const canvas = $('videoCanvas');
   const ctx = canvas.getContext('2d');
   const status = $('assembleStatus');
   
-  // Résolution
   const [w, h] = state.ratio === '16:9' ? [1024, 576] : state.ratio === '1:1' ? [768, 768] : [1024, 640];
   canvas.width = w;
   canvas.height = h;
@@ -340,79 +326,90 @@ window.assembleVideo = async function() {
   const frameDuration = 1000 / fps;
   $('loopDuration').textContent = `${(state.framesCount / fps).toFixed(1)}s`;
 
-  status.textContent = "Préparation des images...";
-  
   const validImages = state.images.filter(img => img.status === 'done' && img.dataUrl);
-  if (validImages.length < 12) {
-    return toast("Pas assez d'images valides pour créer une vidéo (min. 12)");
-  }
+  if (validImages.length < 12) return toast("Pas assez d'images valides.");
 
-  status.textContent = "Encodage MP4 en cours... (Cela peut prendre quelques minutes)";
+  // 1. Enregistrement WebM temporaire
+  status.textContent = "1/2 : Création de la vidéo brute...";
+  const stream = canvas.captureStream(fps);
+  const recorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9', videoBitsPerSecond: 8000000 });
+  const chunks = [];
   
-  // Configuration du Muxer MP4
-  const muxer = new Muxer.Muxer({
-    target: new Muxer.ArrayBufferTarget(),
-    video: {
-      codec: 'avc', // H.264
-      width: w,
-      height: h,
-    },
-    firstTimestampBehavior: 'offset',
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  
+  const recordingPromise = new Promise(resolve => {
+    recorder.onstop = resolve;
   });
 
-  const encoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-    error: (e) => console.error(e),
-  });
+  recorder.start();
 
-  encoder.configure({
-    codec: 'avc1.42001f', // H.264 Baseline Profile
-    width: w,
-    height: h,
-    bitrate: 5_000_000, // 5 Mbps
-    framerate: fps,
-  });
-
-  // Boucle d'encodage
+  // Dessin des frames
   for (let i = 0; i < validImages.length; i++) {
     const img = new Image();
     img.src = validImages[i].dataUrl;
     await new Promise(r => { img.onload = r; });
-    
     ctx.drawImage(img, 0, 0, w, h);
-    
-    // Astuce pour la boucle parfaite : fondu sur les dernières frames
-    if (i >= validImages.length - 2) {
-      ctx.globalAlpha = 0.5; 
-    }
-    
-    const frame = new VideoFrame(canvas, { timestamp: i * (1_000_000 / fps) });
-    encoder.encode(frame);
-    frame.close();
-    
+    if (i >= validImages.length - 2) ctx.globalAlpha = 0.5;
+    await sleep(frameDuration);
     ctx.globalAlpha = 1.0;
-    
-    // Mise à jour UI
-    status.textContent = `Encodage frame ${i + 1}/${validImages.length}...`;
-    await new Promise(r => requestAnimationFrame(r));
   }
+  // Frame finale pour boucle parfaite
+  const firstImg = new Image();
+  firstImg.src = validImages[0].dataUrl;
+  await new Promise(r => { firstImg.onload = r; });
+  ctx.drawImage(firstImg, 0, 0, w, h);
+  await sleep(frameDuration);
 
-  // Finalisation
-  await encoder.flush();
-  muxer.finalize();
+  recorder.stop();
+  await recordingPromise;
+  
+  const webmBlob = new Blob(chunks, { type: 'video/webm' });
+  
+  // 2. Conversion en MP4 via FFmpeg.wasm
+  status.textContent = "2/2 : Conversion en MP4 (cela peut prendre quelques secondes)...";
+  
+  try {
+    if (!ffmpeg.isLoaded()) {
+      await ffmpeg.load();
+    }
 
-  const buffer = muxer.target.buffer;
-  const blob = new Blob([buffer], { type: 'video/mp4' });
-  const url = URL.createObjectURL(blob);
-  
-  const link = $('downloadLink');
-  link.href = url;
-  link.download = `lofi-loop-${Date.now()}.mp4`;
-  link.classList.remove('hidden');
-  
-  status.textContent = "✅ Vidéo MP4 prête !";
-  toast("Vidéo MP4 assemblée avec succès !");
-};
+    ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmBlob));
+
+    // Commande de conversion optimisée pour la compatibilité
+    await ffmpeg.run('-i', 'input.webm', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'ultrafast', 'output.mp4');
+
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+    const url = URL.createObjectURL(mp4Blob);
+    
+    const link = $('downloadLink');
+    link.href = url;
+    link.download = `lofi-loop-${Date.now()}.mp4`;
+    link.classList.remove('hidden');
+    
+    status.textContent = "✅ Vidéo MP4 prête !";
+    toast("Vidéo MP4 générée avec succès !");
+    
+    // Nettoyage mémoire FFmpeg
+    ffmpeg.FS('unlink', 'input.webm');
+    ffmpeg.FS('unlink', 'output.mp4');
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = "❌ Erreur lors de la conversion MP4.";
+    toast("Erreur de conversion. Essayez un autre navigateur.");
+  }
+}
+
+function resetApp() {
+  if (confirm("Recommencer une nouvelle génération ?")) {
+    state.images = [];
+    $('downloadLink').classList.add('hidden');
+    $('btnAssemble').classList.add('hidden');
+    $('progressBar').style.width = '0%';
+    showStep(1);
+  }
+}
 </script>
 </body>
 </html>
