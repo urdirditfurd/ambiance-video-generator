@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Lofi Video Generator — Agnes IA</title>
+<style>
+  :root {
+    --bg: #1a1520;
+    --panel: #241d2c;
+    --accent: #b8a4d4;
+    --accent2: #e8b4bc;
+    --text: #e8e0f0;
+    --muted: #8a7f95;
+    --ok: #a8d8b9;
+    --err: #e89b9b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+  h1 { color: var(--accent); margin-top: 0; font-weight: 300; letter-spacing: 2px; }
+  h2 { color: var(--accent2); font-weight: 400; margin: 24px 0 12px; font-size: 18px; }
+  .panel {
+    background: var(--panel); border-radius: 12px; padding: 20px;
+    margin-bottom: 16px; border: 1px solid #2e2638;
+  }
+  label { display: block; margin: 10px 0 6px; color: var(--muted); font-size: 13px; }
+  input, textarea, select {
+    width: 100%; padding: 10px; background: #1a1520;
+    border: 1px solid #3a3045; border-radius: 6px;
+    color: var(--text); font-family: inherit; font-size: 14px;
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  button {
+    background: var(--accent); color: #1a1520; border: 0;
+    padding: 10px 20px; border-radius: 6px; cursor: pointer;
+    font-weight: 600; margin: 8px 6px 0 0; transition: opacity .2s;
+  }
+  button:hover { opacity: .85; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.secondary { background: var(--accent2); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 200px; }
+  .gallery {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px; margin-top: 12px;
+  }
+  .gallery img { width: 100%; border-radius: 8px; border: 2px solid transparent; cursor: pointer; }
+  .gallery img.selected { border-color: var(--accent2); }
+  .status { padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; }
+  .status.info { background: #2a2438; color: var(--accent); }
+  .status.ok { background: #1f2e26; color: var(--ok); }
+  .status.err { background: #2e1f22; color: var(--err); }
+  #previewCanvas {
+    width: 100%; max-width: 720px; border-radius: 10px;
+    background: #000; display: block; margin: 12px auto;
+  }
+  .step-num {
+    display: inline-block; width: 26px; height: 26px; line-height: 26px;
+    text-align: center; background: var(--accent); color: var(--bg);
+    border-radius: 50%; margin-right: 8px; font-weight: 700;
+  }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>☕ Lofi Video Generator</h1>
+<p style="color:var(--muted);margin-top:-10px;">
+  Génère une ambiance loopable à partir d'une image — alimenté par <b>Agnes IA</b>
+</p>
+
+<!-- ============ ÉTAPE 0 : CONFIG ============ -->
+<div class="panel">
+  <h2><span class="step-num">0</span>Configuration API Agnes</h2>
+  <div class="row">
+    <div>
+      <label>Endpoint (URL complète)</label>
+      <input id="cfgEndpoint" placeholder="https://api.agnes-ia.com/v1/images/generations">
+    </div>
+    <div>
+      <label>Modèle</label>
+      <input id="cfgModel" placeholder="agnes-diffusion" value="agnes-diffusion">
+    </div>
+  </div>
+  <label>Clé API (stockée uniquement dans ton navigateur — localStorage)</label>
+  <input id="cfgKey" type="password" placeholder="sk-...">
+  <div class="hint">Format attendu : compatible OpenAI (POST JSON {model, prompt, n, size, response_format:"b64_json"}). Adapte le fetch si Agnes utilise un autre format.</div>
+  <button onclick="saveConfig()">💾 Sauvegarder la config</button>
+  <div id="cfgStatus"></div>
+</div>
+
+<!-- ============ ÉTAPE 1 : PROMPT ============ -->
+<div class="panel">
+  <h2><span class="step-num">1</span>Description de la scène</h2>
+  <label>Décris ton ambiance lofi</label>
+  <textarea id="scenePrompt" placeholder="Ex: un paysage japonais au crépuscule, temple au loin, cerisiers, un oiseau posé sur une branche, pluie fine, vapeur de thé qui monte d'une tasse au premier plan, style lofi anime, cozy, pastel"></textarea>
+  <div class="row">
+    <div>
+      <label>Nombre de variations à générer</label>
+      <input id="nbVariations" type="number" value="8" min="4" max="16">
+    </div>
+    <div>
+      <label>Durée d'affichage par frame (secondes)</label>
+      <input id="frameDuration" type="number" value="3" min="1" max="8" step="0.5">
+    </div>
+    <div>
+      <label>Durée du fondu (secondes)</label>
+      <input id="fadeDuration" type="number" value="1.5" min="0.3" max="4" step="0.1">
+    </div>
+  </div>
+  <button onclick="generateBase()">✨ Générer l'image de base</button>
+  <div id="genStatus"></div>
+</div>
+
+<!-- ============ ÉTAPE 2 : ÉLÉMENTS ANIMABLES ============ -->
+<div class="panel">
+  <h2><span class="step-num">2</span>Éléments à animer</h2>
+  <p class="hint">Liste les éléments qui doivent bouger subtilement. Le générateur créera des variations autour de ces micro-mouvements.</p>
+  <label>Éléments animables (un par ligne)</label>
+  <textarea id="animElements" placeholder="vapeur de thé qui monte doucement
+gouttes de pluie qui tombent
+oiseau qui tourne légèrement la tête
+feuilles qui tremblent
+nuages qui défilent lentement"></textarea>
+  <button onclick="generateVariations()">🎞️ Générer les variations</button>
+  <div id="varStatus"></div>
+  <div id="galleryContainer" class="gallery"></div>
+</div>
+
+<!-- ============ ÉTAPE 3 : PREVIEW & EXPORT ============ -->
+<div class="panel">
+  <h2><span class="step-num">3</span>Prévisualisation & Export vidéo</h2>
+  <canvas id="previewCanvas" width="1024" height="576"></canvas>
+  <div class="row">
+    <button onclick="playPreview()">▶️ Aperçu</button>
+    <button class="secondary" onclick="exportVideo()">📼 Exporter en WebM</button>
+    <button class="secondary" onclick="stopPreview()">⏹ Stop</button>
+  </div>
+  <div id="exportStatus"></div>
+  <details>
+    <summary>💡 Astuce pour la boucle 5h</summary>
+    <p class="hint">
+      Cette vidéo fait volontairement ~30s avec des fondus très lents et un léger zoom (Ken Burns).
+      En la mettant en boucle dans VLC / OBS / YouTube, le cerveau ne perçoit pas la coupure
+      car il n'y a pas de mouvement brusque. Ajoute une piste audio lofi en superposition.
+    </p>
+  </details>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG & PERSISTANCE
+============================================================ */
+const LS_KEY = "lofi_agnes_config";
+function loadConfig() {
+  try {
+    const c = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+    if (c.endpoint) cfgEndpoint.value = c.endpoint;
+    if (c.model)    cfgModel.value    = c.model;
+    if (c.key)      cfgKey.value      = c.key;
+  } catch(e){}
+}
+function saveConfig() {
+  const c = {
+    endpoint: cfgEndpoint.value.trim(),
+    model:    cfgModel.value.trim(),
+    key:      cfgKey.value.trim()
+  };
+  if (!c.endpoint || !c.key) {
+    return showStatus("cfgStatus", "Endpoint et clé requis", "err");
+  }
+  localStorage.setItem(LS_KEY, JSON.stringify(c));
+  showStatus("cfgStatus", "✅ Config sauvegardée localement", "ok");
+}
+function getConfig() {
+  const c = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+  if (!c) throw new Error("Configure l'API à l'étape 0");
+  return c;
+}
+loadConfig();
+
+/* ============================================================
+   UTILITAIRES UI
+============================================================ */
+function showStatus(id, msg, type="info") {
+  const el = document.getElementById(id);
+  el.innerHTML = `<div class="status ${type}">${msg}</div>`;
+}
+function appendStatus(id, msg, type="info") {
+  const el = document.getElementById(id);
+  el.innerHTML += `<div class="status ${type}">${msg}</div>`;
+}
+
+/* ============================================================
+   APPEL API AGNES (format OpenAI-compatible)
+   Retourne une URL d'image (data: ou http)
+============================================================ */
+async function callAgnes(prompt, size="1024x576") {
+  const cfg = getConfig();
+  const body = {
+    model: cfg.model,
+    prompt: prompt,
+    n: 1,
+    size: size,
+    response_format: "b64_json"
+  };
+  const res = await fetch(cfg.endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + cfg.key
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`API ${res.status}: ${txt.slice(0,200)}`);
+  }
+  const data = await res.json();
+  // Format OpenAI : data.data[0].b64_json ou data.data[0].url
+  if (data.data?.[0]?.b64_json) {
+    return "data:image/png;base64," + data.data[0].b64_json;
+  }
+  if (data.data?.[0]?.url) return data.data[0].url;
+  throw new Error("Format de réponse inattendu");
+}
+
+/* ============================================================
+   ÉTAPE 1 : IMAGE DE BASE
+============================================================ */
+let baseImage = null;
+let basePrompt = "";
+
+async function generateBase() {
+  basePrompt = scenePrompt.value.trim();
+  if (!basePrompt) return showStatus("genStatus", "Description requise", "err");
+  showStatus("genStatus", "⏳ Génération de l'image de base...", "info");
+  try {
+    // On ajoute un suffixe "style" pour la cohérence lofi
+    const styledPrompt = basePrompt +
+      ", lofi aesthetic, cozy anime style, soft pastel colors, cinematic lighting, highly detailed, static scene, no motion blur";
+    baseImage = await callAgnes(styledPrompt);
+    showStatus("genStatus", "✅ Image de base générée", "ok");
+    // Pré-remplir les éléments animables si vides
+    if (!animElements.value.trim()) {
+      animElements.value = suggestAnimatedElements(basePrompt);
+    }
+  } catch(e) {
+    showStatus("genStatus", "❌ " + e.message, "err");
+  }
+}
+
+/* Suggestion basique d'éléments animables selon le prompt */
+function suggestAnimatedElements(prompt) {
+  const p = prompt.toLowerCase();
+  const suggestions = [];
+  if (p.includes("pluie") || p.includes("rain")) suggestions.push("gouttes de pluie qui tombent doucement");
+  if (p.includes("thé") || p.includes("tea") || p.includes("café")) suggestions.push("vapeur qui monte lentement");
+  if (p.includes("oiseau") || p.includes("bird")) suggestions.push("oiseau qui tourne légèrement la tête");
+  if (p.includes("feu") || p.includes("bougie") || p.includes("flamme")) suggestions.push("flamme qui vacille");
+  if (p.includes("eau") || p.includes("rivière") || p.includes("ruisseau")) suggestions.push("eau qui ruisselle");
+  if (p.includes("nuage") || p.includes("cloud")) suggestions.push("nuages qui défilent lentement");
+  if (p.includes("arbre") || p.includes("feuille")) suggestions.push("feuilles qui tremblent au vent");
+  if (p.includes("chat") || p.includes("cat")) suggestions.push("chat qui cligne des yeux lentement");
+  if (p.includes("personnage") || p.includes("character")) suggestions.push("personnage qui respire doucement");
+  if (suggestions.length === 0) suggestions.push("léger scintillement de la lumière\npoussière en suspension dans l'air");
+  return suggestions.join("\n");
+}
+
+/* ============================================================
+   ÉTAPE 2 : GÉNÉRATION DES VARIATIONS
+   Stratégie : on crée N prompts dérivés, chacun mettant
+   l'accent sur UN mouvement subtil d'UN élément.
+============================================================ */
+let variations = []; // URLs d'images
+
+async function generateVariations() {
+  if (!baseImage) return showStatus("varStatus", "Génère d'abord l'image de base", "err");
+  const elements = animElements.value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if (elements.length === 0) return showStatus("varStatus", "Liste au moins un élément animable", "err");
+
+  const n = parseInt(nbVariations.value) || 8;
+  const gallery = document.getElementById("galleryContainer");
+  gallery.innerHTML = "";
+  variations = [];
+
+  showStatus("varStatus", `⏳ Génération de ${n} variations...`, "info");
+
+  // On construit N prompts : chacun = décor de base + 1 mouvement spécifique
+  // + un "seed mood" différent pour varier subtilement la lumière/ambiance
+  const moods = [
+    "soft warm golden hour light",
+    "cool blue twilight atmosphere",
+    "gentle pink sunset glow",
+    "misty morning ambiance",
+    "dreamy lavender haze",
+    "warm candlelit mood",
+    "faded vintage tones",
+    "dusky purple sky",
+    "amber afternoon light",
+    "silvery moonlit scene",
+    "peach dawn light",
+    "foggy ethereal atmosphere",
+    "rosy evening sky",
+    "soft overcast daylight",
+    "honey-colored light",
+    "deep indigo night"
+  ];
+
+  for (let i = 0; i < n; i++) {
+    const element = elements[i % elements.length];
+    const mood = moods[i % moods.length];
+    const variantPrompt =
+      `${basePrompt}, ${mood}, ${element}, ` +
+      `lofi aesthetic, cozy anime style, soft pastel colors, ` +
+      `highly detailed, same scene composition, same camera angle, ` +
+      `subtle variation only, no major changes`;
+
+    appendStatus("varStatus", `⏳ Variation ${i+1}/${n} : "${element}"`, "info");
+    try {
+      const url = await callAgnes(variantPrompt);
+      variations.push(url);
+      const img = document.createElement("img");
+      img.src = url;
+      gallery.appendChild(img);
+    } catch(e) {
+      appendStatus("varStatus", `❌ Échec var ${i+1}: ${e.message}`, "err");
+    }
+    // Petit délai pour ne pas saturer l'API
+    await sleep(400);
+  }
+
+  showStatus("varStatus", `✅ ${variations.length} variations générées. Lance l'aperçu.`, "ok");
+  if (variations.length > 0) playPreview();
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   ÉTAPE 3 : ANIMATION CANVAS + EXPORT
+   Technique : fondu enchaîné lent + léger zoom Ken Burns
+   pour casser la répétition sur 5h de boucle.
+============================================================ */
+const canvas = document.getElementById("previewCanvas");
+const ctx = canvas.getContext("2d");
+let loadedImages = [];
+let animRunning = false;
+let animRAF = null;
+
+async function loadAllImages() {
+  loadedImages = [];
+  // On inclut l'image de base en premier
+  const all = [baseImage, ...variations].filter(Boolean);
+  for (const url of all) {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.crossOrigin = "anonymous";
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    loadedImages.push(img);
+  }
+}
+
+function drawKenBurns(img, t, totalDuration) {
+  // t : 0..1 progression dans la frame
+  // Zoom très léger : 1.00 -> 1.04 sur la durée totale
+  const zoom = 1 + 0.04 * t;
+  const w = canvas.width, h = canvas.height;
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  // Couverture (cover)
+  const scale = Math.max(w/iw, h/ih) * zoom;
+  const dw = iw * scale, dh = ih * scale;
+  // Pan très léger (oscillation sinusoïdale)
+  const panX = Math.sin(t * Math.PI) * (dw - w) * 0.3;
+  const panY = Math.cos(t * Math.PI * 0.7) * (dh - h) * 0.3;
+  const dx = (w - dw)/2 - panX;
+  const dy = (h - dh)/2 - panY;
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+
+async function playPreview() {
+  if (loadedImages.length === 0) await loadAllImages();
+  if (loadedImages.length === 0) return;
+  stopPreview();
+  animRunning = true;
+
+  const frameDur = parseFloat(frameDuration.value) || 3;
+  const fadeDur  = parseFloat(fadeDuration.value)  || 1.5;
+  const totalFrames = loadedImages.length;
+  const cycleDur = totalFrames * frameDur; // durée d'un cycle complet
+
+  const startTime = performance.now();
+
+  function frame(now) {
+    if (!animRunning) return;
+    const elapsed = (now - startTime) / 1000;
+    const cycleT  = elapsed % cycleDur;
+    const frameIdx = Math.floor(cycleT / frameDur) % totalFrames;
+    const frameLocalT = cycleT - frameIdx * frameDur; // 0..frameDur
+    const nextIdx = (frameIdx + 1) % totalFrames;
+
+    // Fond noir
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Frame courante
+    const progress = frameLocalT / frameDur;
+    ctx.globalAlpha = 1;
+    drawKenBurns(loadedImages[frameIdx], progress, frameDur);
+
+    // Fondu entrant de la frame suivante en fin de frame
+    if (frameLocalT > frameDur - fadeDur) {
+      const fadeProgress = (frameLocalT - (frameDur - fadeDur)) / fadeDur;
+      ctx.globalAlpha = fadeProgress;
+      drawKenBurns(loadedImages[nextIdx], 0, frameDur);
+    }
+
+    ctx.globalAlpha = 1;
+    animRAF = requestAnimationFrame(frame);
+  }
+  animRAF = requestAnimationFrame(frame);
+}
+
+function stopPreview() {
+  animRunning = false;
+  if (animRAF) cancelAnimationFrame(animRAF);
+  animRAF = null;
+}
+
+/* ============================================================
+   EXPORT VIDEO via MediaRecorder (WebM)
+   On capture le canvas pendant UN cycle complet.
+============================================================ */
+async function exportVideo() {
+  if (loadedImages.length === 0) await loadAllImages();
+  if (loadedImages.length === 0) return;
+
+  const frameDur = parseFloat(frameDuration.value) || 3;
+  const totalDur = loadedImages.length * frameDur;
+
+  showStatus("exportStatus", `⏳ Enregistrement de ${totalDur.toFixed(1)}s...`, "info");
+  stopPreview();
+
+  const stream = canvas.captureStream(30); // 30 fps
+  const recorder = new MediaRecorder(stream, {
+    mimeType: "video/webm;codecs=vp9",
+    videoBitsPerSecond: 6_000_000
+  });
+  const chunks = [];
+  recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: "video/webm" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lofi_ambiance_${Date.now()}.webm`;
+    a.click();
+    showStatus("exportStatus", `✅ Vidéo exportée (${(blob.size/1024/1024).toFixed(1)} Mo) — boucle-la dans VLC/OBS pour 5h`, "ok");
+    stream.getTracks().forEach(t => t.stop());
+  };
+
+  // On relance l'anim et on enregistre en parallèle
+  await playPreview();
+  recorder.start();
+  setTimeout(() => {
+    recorder.stop();
+    stopPreview();
+  }, totalDur * 1000 + 200);
+}
+</script>
+</body>
+</html>
