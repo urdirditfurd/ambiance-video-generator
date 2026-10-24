@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LOFI-LOOP STUDIO · Cinemagraph</title>
+<title>LOFI-LOOP STUDIO · Vrai Cinemagraph</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
@@ -38,7 +38,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <body>
 
 <header>
-  <div class="logo">LOFI<b>-LOOP</b><i>CALQUES ANIMÉS</i></div>
+  <div class="logo">LOFI<b>-LOOP</b><i>VRAI CINEMAGRAPH</i></div>
   <button class="btn" onclick="resetApp()">↺ Nouvelle session</button>
 </header>
 
@@ -46,7 +46,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
   <div id="step1" class="hero">
     <div class="lab">ÉTAPE 1 / 3</div>
     <h2>Configuration du <b>décor</b></h2>
-    <p class="sub">L'IA génère un fond fixe, puis un "sprite" (élément animé). Le code assemble le tout pour créer un mouvement continu sans utiliser l'API vidéo.</p>
+    <p class="sub">L'IA génère un fond fixe et parfait. Ensuite, on définit une petite zone précise où l'animation aura lieu (fumée, pluie, lumière). Le reste de l'image reste totalement figé.</p>
 
     <label class="f">
       <span>🔑 Clé API Agnès</span>
@@ -54,13 +54,13 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     </label>
 
     <label class="f">
-      <span>🎨 Décor principal (Fond)</span>
-      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, warm desk lamp, cat sleeping on a cushion, lofi hip hop aesthetic"></textarea>
+      <span>🎨 Décor principal (Le fond qui ne bouge pas)</span>
+      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, warm desk lamp, cat sleeping on a cushion, lofi hip hop aesthetic, studio ghibli style"></textarea>
     </label>
 
     <label class="f">
-      <span>✨ Élément animé (Ce qui doit bouger)</span>
-      <input type="text" id="animPrompt" placeholder="Ex: A glowing steam rising from a tea cup">
+      <span>✨ Texte décrivant la zone animée (ce que l'IA va dessiner dans le masque)</span>
+      <input type="text" id="animPrompt" placeholder="Ex: Rising white steam, pure black background, isolated">
     </label>
 
     <div style="display:flex;gap:16px;flex-wrap:wrap">
@@ -82,36 +82,31 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 
     <div class="ft">
       <span></span>
-      <button class="big" onclick="startGeneration()">✦ Générer le fond et l'élément</button>
+      <button class="big" onclick="startGeneration()">✦ Générer le fond et la texture</button>
     </div>
   </div>
 
   <div id="step2" class="hero hidden">
     <div class="lab">ÉTAPE 2 / 3</div>
-    <h2>Aperçu des <b>calques</b></h2>
-    <p class="sub">Le fond et l'élément animé sont prêts. Le code va maintenant les fusionner.</p>
-
-    <div style="display:flex;gap:12px;">
-        <div style="flex:1; text-align:center;">
-            <div class="lab">Fond</div>
-            <img id="imgBase" style="width:100%; border:1px solid var(--ln); border-radius:4px;">
-        </div>
-        <div style="flex:1; text-align:center;">
-            <div class="lab">Élément animé (Noir = Transparent)</div>
-            <img id="imgAnim" style="width:100%; border:1px solid var(--ln); border-radius:4px; background:#000;">
-        </div>
+    <h2>Définir la <b>zone vivante</b></h2>
+    <p class="sub">Clique et fais glisser sur l'image de fond pour définir le rectangle où la fumée/pluie doit apparaître. Le reste sera figé.</p>
+    
+    <div class="preview-box" style="cursor: crosshair; position: relative;">
+      <img id="imgBase" style="width:100%; height:100%; object-fit:contain; pointer-events:none;">
+      <div id="maskRect" style="position:absolute; border:2px dashed var(--a); background:rgba(139,92,246,0.2); display:none; pointer-events:none;"></div>
+      <canvas id="maskCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; cursor: crosshair;"></canvas>
     </div>
 
     <div class="ft">
-      <button class="btn" onclick="showStep(1)">← Modifier</button>
-      <button class="big" onclick="animateVideo()">🎬 Créer la vidéo</button>
+      <button class="btn" onclick="showStep(1)">← Modifier le décor</button>
+      <button class="big" onclick="animateVideo()">🎬 Animer cette zone</button>
     </div>
     <div id="animStatus" class="status-line"></div>
   </div>
 
   <div id="step3" class="hero hidden">
     <div class="lab">ÉTAPE 3 / 3</div>
-    <h2>Vidéo <b>Finale</b></h2>
+    <h2>Vidéo <b>Cinemagraph</b></h2>
     
     <div class="preview-box">
       <canvas id="videoCanvas"></canvas>
@@ -132,13 +127,6 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 
 <div id="toast"></div>
 
-<!-- LA BIBLIOTHÈQUE EST INTÉGRÉE ICI POUR NE JAMAIS ÊTRE BLOQUÉE -->
-<script>
-// Code source de mp4-muxer intégré directement
-(function(){var e="undefined"!=typeof globalThis?globalThis:"undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{};function t(e,t){return e(t={exports:{}},t.exports),t.exports}var s=t((function(e){!function(t){if("object"==typeof e&&"undefined"!=typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).Mp4Muxer=t()}}((function(){return function e(t,s,n){function a(o,c){if(!s[o]){if(!t[o]){var h="function"==typeof require&&require;if(!c&&h)return h(o,!0);if(r)return r(o,!0);var l=new Error("Cannot find module '"+o+"'");throw l.code="MODULE_NOT_FOUND",l}var d=s[o]={exports:{}};t[o][0].call(d.exports,(function(e){return a(t[o][1][e]||e)}),d,d.exports,e,t,s,n)}return s[o].exports}for(var r="function"==typeof require&&require,o=0;o<n.length;o++)a(n[o]);return a}({1:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],2:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],3:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.FileSystemWritableFileStreamTarget=class{constructor(e,t){this.stream=e,this.chunkSize=t||null}reset(){this.stream.seek(0)}finalize(){}}},{}],4:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.CallbackTarget=class{constructor(e){this.callback=e,this.reset=()=>{},this.finalize=()=>{}}},{}],5:[function(e,t,s){"use strict";var n=this&&this.__awaiter||function(e,t,s,n){return new(s||(s=Promise))((function(a,r){function o(e){try{h(n.next(e))}catch(e){r(e)}}function c(e){try{h(n.throw(e))}catch(e){r(e)}}function h(e){var t;e.done?a(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,c)}h((n=n.apply(e,t||[])).next())}))};Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e,t){this.file=e,this.chunkSize=t||null,this.reset=()=>n(this,void 0,void 0,(function*(){yield this.file.truncate(0)})),this.finalize=()=>n(this,void 0,void 0,(function*(){yield this.file.close()}))}}},{}],6:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],7:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],8:[function(e,t,s){"use strict";function n(e){return e instanceof Uint8Array}Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}},s.Uint8ArrayTarget=class{constructor(){this.buffer=null}finalize(){}},s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},s.FileSystemWritableFileStreamTarget=class{constructor(e,t){this.stream=e,this.chunkSize=t||null}reset(){this.stream.seek(0)}finalize(){}},s.CallbackTarget=class{constructor(e){this.callback=e,this.reset=()=>{},this.finalize=()=>{}},s.isUint8Array=n},{}],9:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],10:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],11:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],12:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}},s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],13:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],14:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],15:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],16:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}]},{},[1])(1)}))}));
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/build/mp4-muxer.js"></script>
-
 <script>
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
@@ -147,9 +135,13 @@ const FPS = 24;
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
   baseImage: null,
-  animImage: null,
+  animImage: null, // Texture de fumée sur fond noir
   ratio: '16:9',
-  duration: 10
+  duration: 10,
+  maskRect: { x: 0, y: 0, w: 0, h: 0 }, // Coordonnées du masque en pourcentage (0-1)
+  isDrawing: false,
+  startX: 0,
+  startY: 0
 };
 
 const $ = id => document.getElementById(id);
@@ -166,7 +158,7 @@ function showStep(n) {
   $('step3').classList.toggle('hidden', n !== 3);
 }
 
-// Génération d'une image (retourne une dataURL)
+// Génération d'une image
 async function generateImage(prompt) {
   const body = {
     model: IMG_MODEL, prompt: prompt, n: 1, size: '1K', ratio: state.ratio,
@@ -196,27 +188,97 @@ async function startGeneration() {
   if (!basePrompt || !animPrompt) return toast('Remplissez les deux champs');
 
   showStep(2);
-  $('animStatus').textContent = "Génération du fond fixe...";
+  $('animStatus').textContent = "Génération du fond parfait...";
   try {
     state.baseImage = await generateImage(basePrompt);
     $('imgBase').src = state.baseImage;
+    
+    // Initialiser le canvas de dessin du masque
+    initMaskCanvas();
 
-    $('animStatus').textContent = "Génération de l'élément animé sur fond noir...";
-    const fullAnimPrompt = `${animPrompt}, pure black background, isolated element, high contrast`;
+    $('animStatus').textContent = "Génération de la texture animée...";
+    // On force un fond noir pur pour pouvoir l'incruster facilement
+    const fullAnimPrompt = `${animPrompt}, pure black background, isolated element, high contrast, no text`;
     state.animImage = await generateImage(fullAnimPrompt);
-    $('imgAnim').src = state.animImage;
-
-    $('animStatus').textContent = "Prêt !";
-    toast('Images générées avec succès');
+    
+    // On précharge la texture en arrière-plan pour l'assemblage
+    const imgAnim = new Image();
+    imgAnim.src = state.animImage;
+    
+    $('animStatus').textContent = "✅ Prêt ! Dessine un rectangle sur le fond pour définir la zone vivante.";
+    toast('Images générées. Dessine la zone animée.');
   } catch (e) {
     toast('Erreur: ' + e.message);
     $('animStatus').textContent = "Erreur: " + e.message;
   }
 }
 
-// Assemblage MP4 avec canvas
+// --- GESTION DU MASQUE (DESSIN) ---
+function initMaskCanvas() {
+    const canvas = $('maskCanvas');
+    const rect = $('maskRect');
+    const previewBox = canvas.parentElement;
+    
+    // Ajuster la taille du canvas à l'image
+    const img = $('imgBase');
+    const onImgLoad = () => {
+        canvas.width = img.clientWidth;
+        canvas.height = img.clientHeight;
+    };
+    if (img.complete) onImgLoad();
+    else img.onload = onImgLoad;
+
+    canvas.onmousedown = (e) => {
+        const r = canvas.getBoundingClientRect();
+        state.isDrawing = true;
+        state.startX = e.clientX - r.left;
+        state.startY = e.clientY - r.top;
+        rect.style.display = 'block';
+        rect.style.left = state.startX + 'px';
+        rect.style.top = state.startY + 'px';
+        rect.style.width = '0px';
+        rect.style.height = '0px';
+    };
+
+    canvas.onmousemove = (e) => {
+        if (!state.isDrawing) return;
+        const r = canvas.getBoundingClientRect();
+        const currentX = e.clientX - r.left;
+        const currentY = e.clientY - r.top;
+        
+        const x = Math.min(state.startX, currentX);
+        const y = Math.min(state.startY, currentY);
+        const w = Math.abs(currentX - state.startX);
+        const h = Math.abs(currentY - state.startY);
+
+        rect.style.left = x + 'px';
+        rect.style.top = y + 'px';
+        rect.style.width = w + 'px';
+        rect.style.height = h + 'px';
+    };
+
+    canvas.onmouseup = () => {
+        state.isDrawing = false;
+        // Sauvegarder les coordonnées relatives (0 à 1)
+        const rect = $('maskRect');
+        const w = parseFloat(rect.style.width);
+        const h = parseFloat(rect.style.height);
+        if (w > 10 && h > 10) {
+            state.maskRect = {
+                x: parseFloat(rect.style.left) / canvas.width,
+                y: parseFloat(rect.style.top) / canvas.height,
+                w: w / canvas.width,
+                h: h / canvas.height
+            };
+            toast('Zone définie ! Clique sur "Animer".');
+        }
+    };
+}
+
+// --- ASSEMBLAGE FINAL (LE CINEMAGRAPH) ---
 async function animateVideo() {
   if (!state.baseImage || !state.animImage) return toast('Images manquantes');
+  if (state.maskRect.w === 0) return toast('Dessine d\'abord un rectangle sur l\'image !');
   
   showStep(3);
   $('downloadLink').classList.add('hidden');
@@ -224,11 +286,12 @@ async function animateVideo() {
   $('videoCanvas').classList.remove('hidden');
 
   const status = $('assembleStatus');
-  status.textContent = "Préparation de l'animation...";
+  status.textContent = "Préparation...";
 
   const canvas = $('videoCanvas');
   const ctx = canvas.getContext('2d', { alpha: false });
   
+  // Résolution de sortie (doit correspondre au ratio de l'image)
   const [w, h] = state.ratio === '1:1' ? [768, 768] : [1024, 576];
   canvas.width = w; canvas.height = h;
 
@@ -238,27 +301,29 @@ async function animateVideo() {
     const imgBase = await loadImg(state.baseImage);
     const imgAnim = await loadImg(state.animImage);
 
-    // Découper l'élément animé (retirer le noir)
-    const cutCanvas = document.createElement('canvas');
-    cutCanvas.width = w; cutCanvas.height = h;
-    const cutCtx = cutCanvas.getContext('2d');
-    cutCtx.drawImage(imgAnim, 0, 0, w, h);
-    const imgData = cutCtx.getImageData(0, 0, w, h);
-    const data = imgData.data;
-
+    // Créer un canvas "masque" pour la texture animée
+    // On va dessiner la texture de fumée, mais on ne gardera que les pixels non-noirs
+    const animCanvas = document.createElement('canvas');
+    animCanvas.width = w; animCanvas.height = h;
+    const animCtx = animCanvas.getContext('2d');
+    animCtx.drawImage(imgAnim, 0, 0, w, h);
+    
+    const animData = animCtx.getImageData(0, 0, w, h);
+    const data = animData.data;
     for (let i = 0; i < data.length; i += 4) {
-      if (data[i] < 20 && data[i+1] < 20 && data[i+2] < 20) {
-        data[i+3] = 0; 
-      }
+        // Rendre transparent tout ce qui est noir
+        if (data[i] < 20 && data[i+1] < 20 && data[i+2] < 20) {
+            data[i+3] = 0;
+        }
     }
-    cutCtx.putImageData(imgData, 0, 0);
+    animCtx.putImageData(animData, 0, 0);
 
+    // Configuration de l'encodeur
     const totalFrames = FPS * state.duration;
     const frameDurationUs = Math.round(1_000_000 / FPS);
 
-    // Initialisation du Muxer MP4
     if (typeof Mp4Muxer === 'undefined' || !Mp4Muxer.Muxer) {
-      throw new Error("La bibliothèque MP4 n'a pas pu être chargée. Essayez de rafraîchir la page.");
+      throw new Error("Bibliothèque MP4 introuvable. Recharge la page.");
     }
 
     const muxer = new Mp4Muxer.Muxer({
@@ -272,24 +337,40 @@ async function animateVideo() {
       error: e => console.error(e)
     });
 
-    const config = { codec: 'avc1.42001f', width: w, height: h, bitrate: 5_000_000, framerate: FPS };
-    videoEncoder.configure(config);
+    videoEncoder.configure({ codec: 'avc1.42001f', width: w, height: h, bitrate: 5_000_000, framerate: FPS });
 
     status.textContent = "Encodage...";
 
+    // Coordonnées du masque en pixels
+    const maskX = state.maskRect.x * w;
+    const maskY = state.maskRect.y * h;
+    const maskW = state.maskRect.w * w;
+    const maskH = state.maskRect.h * h;
+
     for (let frame = 0; frame < totalFrames; frame++) {
+      // 1. Dessiner le fond (STATIQUE)
       ctx.drawImage(imgBase, 0, 0, w, h);
       
-      // Animation de l'overlay (mouvement fluide)
-      const t = (frame / FPS); 
-      const offsetX = Math.sin(t * 0.5) * 30;
-      const offsetY = Math.cos(t * 0.3) * 15 - (t * 5); 
-      
+      // 2. Dessiner la texture animée, UNIQUEMENT dans la zone du masque
       ctx.save();
-      ctx.globalAlpha = 0.8; 
-      ctx.drawImage(cutCanvas, offsetX, offsetY, w, h);
+      // On découpe une fenêtre rectangulaire correspondant à notre masque
+      ctx.beginPath();
+      ctx.rect(maskX, maskY, maskW, maskH);
+      ctx.clip(); // Tout ce qu'on dessine après sera limité à ce rectangle
+
+      // Animation de la texture à l'intérieur du masque
+      // Mouvement lent et sinusoïdal pour un effet "fumée"
+      const t = (frame / FPS); 
+      const offsetX = Math.sin(t * 0.3) * 15; // Léger balancement horizontal
+      const offsetY = - (t * 10) % maskH; // La fumée monte et boucle
+
+      // On dessine la texture plusieurs fois pour couvrir la zone (effet de défilement infini)
+      ctx.drawImage(animCanvas, maskX + offsetX, maskY + offsetY, maskW, maskH);
+      ctx.drawImage(animCanvas, maskX + offsetX, maskY + offsetY + maskH, maskW, maskH); // raccord pour la boucle
+      
       ctx.restore();
 
+      // 3. Créer la frame
       const vf = new VideoFrame(canvas, { 
         timestamp: frame * frameDurationUs, 
         duration: frameDurationUs,
@@ -319,12 +400,12 @@ async function animateVideo() {
     $('downloadLink').download = `lofi-cinemagraph-${Date.now()}.mp4`;
     $('downloadLink').classList.remove('hidden');
     status.textContent = "✅ Vidéo prête !";
-    toast('Vidéo assemblée avec succès !');
+    toast('Cinemagraph généré !');
     $('resultVideo').play().catch(()=>{});
 
   } catch (e) {
     status.textContent = "Erreur : " + e.message;
-    toast("Erreur d'assemblage : " + e.message);
+    toast("Erreur : " + e.message);
     console.error(e);
   }
 }
@@ -332,10 +413,12 @@ async function animateVideo() {
 function resetApp() {
   state.baseImage = null;
   state.animImage = null;
+  state.maskRect = { x: 0, y: 0, w: 0, h: 0 };
   $('resultVideo').removeAttribute('src');
   $('resultVideo').classList.add('hidden');
   $('videoCanvas').classList.remove('hidden');
   $('downloadLink').classList.add('hidden');
+  $('maskRect').style.display = 'none';
   showStep(1);
 }
 </script>
