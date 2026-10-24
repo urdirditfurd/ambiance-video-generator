@@ -74,9 +74,9 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
       <label class="f" style="flex:1">
         <span>🎞️ Durée de la boucle</span>
         <select id="duration">
-          <option value="5">5 secondes (boucle courte)</option>
-          <option value="10" selected>10 secondes (recommandé)</option>
-          <option value="18">18 secondes (longue)</option>
+          <option value="5">5 secondes</option>
+          <option value="8" selected>8 secondes (recommandé)</option>
+          <option value="12">12 secondes (maximum Flash)</option>
         </select>
       </label>
     </div>
@@ -129,14 +129,15 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <script>
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
-const VIDEO_MODEL = 'agnes-video-v2.0';
+const VIDEO_MODEL = 'agnes-video-2.5-flash';
+const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
 
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
   basePrompt: '',
   animElements: '',
   ratio: '16:9',
-  duration: 10,
+  duration: 8,
   baseImageUrl: null,
   videoUrl: null
 };
@@ -218,17 +219,17 @@ async function startGeneration() {
   }
 }
 
-// Génération de la vidéo Cinemagraph à partir de l'image de base
+// Génération de la vidéo Cinemagraph (Modèle 2.5 Flash)
 async function animateVideo() {
   if (!state.baseImageUrl) return toast('Pas d\'image de base');
   if (!state.apiKey) return toast('Clé API manquante');
 
   const status = $('animStatus');
-  status.textContent = 'Envoi de la tâche vidéo à Agnes…';
+  status.textContent = 'Envoi de la tâche vidéo à Agnes (2.5 Flash)…';
   $('downloadLink').classList.add('hidden');
   $('resultVideo').removeAttribute('src');
 
-  // Le prompt est CRUCIAL : il verrouille le fond et n'autorise que le mouvement demandé
+  // Prompt Cinemagraph : verrouille le fond et n'autorise que le mouvement demandé
   const videoPrompt = [
     'CINEMAGRAPH: static locked-off tripod camera, zero camera movement, no pan, no tilt, no zoom.',
     'The entire background, composition, lighting, and all static objects must remain perfectly frozen and identical to the input image.',
@@ -238,22 +239,17 @@ async function animateVideo() {
     'No text, no watermark, no subtitles.'
   ].join(' ');
 
-  // Calcul du nombre de frames (doit être 8n+1, max 441)
-  // Pour 10s à 24fps = 240 frames → on prend 241 (8*30+1) qui est valide
-  const fps = 24;
-  let numFrames = state.duration * fps;
-  // Ajuster au 8n+1 le plus proche
-  numFrames = Math.round((numFrames - 1) / 8) * 8 + 1;
-  if (numFrames > 441) numFrames = 441;
+  // Modèle 2.5 Flash : seconds est une string entre "4" et "12"
+  const seconds = String(Math.min(12, Math.max(4, state.duration)));
 
   const body = {
     model: VIDEO_MODEL,
     prompt: videoPrompt,
-    image: state.baseImageUrl, // l'image de base en data URL
-    num_frames: numFrames,
-    frame_rate: fps,
-    width: state.ratio === '1:1' ? 768 : 1152,
-    height: state.ratio === '1:1' ? 768 : 648
+    mode: 'img2video',
+    first_frame: state.baseImageUrl, // Base64 data URL accepté
+    seconds: seconds,
+    size: '720P', // Flash ne supporte que 720P
+    aspect_ratio: state.ratio
   };
 
   try {
@@ -278,11 +274,13 @@ async function animateVideo() {
 
     status.textContent = 'Tâche créée. Génération en cours (cela peut prendre 1–3 minutes)…';
 
-    // Polling
+    // Polling avec model_name requis pour le mode img2video [citation:2][citation:7]
     const maxAttempts = 120;
     for (let i = 0; i < maxAttempts; i++) {
       await sleep(5000);
-      const pollRes = await fetch(`${API_URL}/videos/${encodeURIComponent(videoId)}`, {
+      
+      const pollUrl = `${POLL_BASE}?video_id=${encodeURIComponent(videoId)}&model_name=${encodeURIComponent(VIDEO_MODEL)}`;
+      const pollRes = await fetch(pollUrl, {
         headers: { 'Authorization': `Bearer ${state.apiKey}` }
       });
 
@@ -300,7 +298,7 @@ async function animateVideo() {
         $('downloadLink').download = `lofi-cinemagraph-${Date.now()}.mp4`;
         $('downloadLink').textContent = '⬇ Télécharger la vidéo (.mp4)';
         $('downloadLink').classList.remove('hidden');
-        $('videoDuration').textContent = (numFrames / fps).toFixed(1) + 's';
+        $('videoDuration').textContent = seconds + 's';
         status.textContent = '✅ Vidéo prête !';
         showStep(3);
         $('resultVideo').play().catch(() => {});
