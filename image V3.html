@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LOFI-LOOP STUDIO · Générateur d'Ambiance</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Bibliothèque pour créer un vrai fichier MP4 -->
-<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/build/mp4-muxer.js"></script>
+<!-- Utilisation d'un CDN alternatif pour éviter le blocage de tracking -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mp4-muxer/5.2.1/mp4-muxer.min.js"></script>
 <style>
 :root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -171,31 +171,8 @@ function showStep(n) {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// CORRECTION CORS : On utilise un proxy public pour télécharger l'image
+// CORRECTION CORS DÉFINITIVE : On demande l'image en Base64 à l'API
 // ═════════════════════════════════════════════════════════════════════
-async function toDataUrl(url) {
-  if (url.startsWith('data:')) return url;
-  
-  // Le proxy va chercher l'image côté serveur et ajoute l'en-tête CORS
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  
-  try {
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error(`Proxy HTTP ${response.status}`);
-    
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (e) {
-    console.error("Erreur conversion image via proxy:", e);
-    return url; // Fallback (l'image s'affichera mais l'assemblage échouera)
-  }
-}
-
 async function generateSingleFrame(index, total) {
   const prompt = `${state.basePrompt}. Subtle variation frame ${index} of ${total}. Only animate: ${state.animElements}. Keep the exact same composition, lighting, camera angle and style. No text, no watermark.`;
 
@@ -205,7 +182,8 @@ async function generateSingleFrame(index, total) {
     n: 1,
     size: '1K',
     ratio: state.ratio,
-    extra_body: { response_format: 'url' }
+    // LA CLÉ EST ICI : on force le format Base64 au lieu d'une URL
+    extra_body: { response_format: 'b64_json' }
   };
 
   for (let attempt = 1; attempt <= 3; attempt++) {
@@ -229,11 +207,16 @@ async function generateSingleFrame(index, total) {
       }
 
       const data = await response.json();
-      const imageUrl = data.data?.[0]?.url || data.data?.[0]?.b64_json;
-      if (!imageUrl) throw new Error("Aucune URL d'image reçue");
+      // On récupère directement le Base64, sans avoir besoin de fetch l'image
+      const b64 = data.data?.[0]?.b64_json;
+      if (!b64) throw new Error("Aucune donnée Base64 reçue");
 
-      const dataUrl = await toDataUrl(imageUrl);
-      return { url: imageUrl, dataUrl: dataUrl, status: 'done' };
+      // On construit l'URL de données directement
+      const dataUrl = `data:image/png;base64,${b64}`;
+      
+      // On génère aussi une URL blob pour l'affichage dans la grille (optionnel)
+      // Mais dataUrl suffit pour l'affichage et le canvas
+      return { url: dataUrl, dataUrl: dataUrl, status: 'done' };
     } catch (error) {
       if (attempt === 3) return { url: null, dataUrl: null, status: 'error', error: error.message };
       await sleep(2000);
@@ -285,7 +268,7 @@ async function startGeneration() {
     toast("✅ Génération des images terminée !");
     $('btnAssemble').classList.remove('hidden');
   } else {
-    toast(`⚠️ Certaines images ont échoué (CORS). Vérifie la console.`);
+    toast(`⚠️ Certaines images ont échoué. Vérifie la console.`);
   }
 }
 
@@ -299,7 +282,7 @@ function renderGrid() {
   const grid = $('framesGrid');
   grid.innerHTML = state.images.map((img, i) => {
     if (img.status === 'done') return `<div class="cd pk"><div class="im"><img src="${img.url}" alt="Frame ${i+1}"></div><div class="lab" style="text-align:center">Frame ${i + 1}</div></div>`;
-    if (img.status === 'error') return `<div class="cd" style="border-color:var(--er)"><div class="im" style="color:var(--er)">✕</div><div class="lab" style="text-align:center;font-size:9px">Erreur CORS</div></div>`;
+    if (img.status === 'error') return `<div class="cd" style="border-color:var(--er)"><div class="im" style="color:var(--er)">✕</div><div class="lab" style="text-align:center;font-size:9px">Erreur</div></div>`;
     return `<div class="cd"><div class="im"><div class="sp"></div></div><div class="lab" style="text-align:center">Frame ${i + 1}…</div></div>`;
   }).join('');
 }
@@ -343,57 +326,47 @@ async function assembleVideo() {
 
   status.textContent = "Encodage MP4 en cours (ne ferme pas l'onglet)...";
 
-  // Initialisation du Muxer MP4
   let muxer = new Mp4Muxer.Muxer({
     target: new Mp4Muxer.ArrayBufferTarget(),
     video: { codec: 'avc', width: w, height: h },
     fastStart: 'in-memory'
   });
 
-  // Initialisation du VideoEncoder (H.264)
   let videoEncoder = new VideoEncoder({
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
     error: e => console.error('Erreur VideoEncoder:', e)
   });
 
   videoEncoder.configure({
-    codec: 'avc1.42001f', // H.264 Baseline Profile
+    codec: 'avc1.42001f',
     width: w,
     height: h,
     bitrate: 5_000_000,
     framerate: fps
   });
 
-  // Génération des frames
   for (let i = 0; i < loadedImages.length; i++) {
     if (videoEncoder.state === 'closed') break;
 
-    // Dessin sur le canvas
     ctx.drawImage(loadedImages[i], 0, 0, w, h);
 
-    // Création d'un VideoFrame à partir du canvas
     const frame = new VideoFrame(canvas, { 
       timestamp: (i * 1_000_000) / fps, 
       duration: 1_000_000 / fps 
     });
 
-    // Envoi au codec
     videoEncoder.encode(frame, { keyFrame: i % 60 === 0 });
     frame.close();
 
-    // Petite pause pour laisser le temps au processeur
     await sleep(10); 
 
-    // Mise à jour UI
     const pct = Math.round(((i + 1) / loadedImages.length) * 100);
     status.textContent = `Encodage MP4 : ${pct}%`;
   }
 
-  // Finalisation
   await videoEncoder.flush();
   muxer.finalize();
 
-  // Création du fichier final
   const { buffer } = muxer.target;
   const blob = new Blob([buffer], { type: 'video/mp4' });
   const url = URL.createObjectURL(blob);
@@ -403,7 +376,7 @@ async function assembleVideo() {
   btnDownload.textContent = "⬇ Télécharger la vidéo (.mp4)";
   btnDownload.classList.remove('hidden');
 
-  status.textContent = "✅ Vidéo MP4 prête ! (Lisible sur Windows)";
+  status.textContent = "✅ Vidéo MP4 prête !";
   toast("Vidéo MP4 générée avec succès !");
   
   videoEncoder.close();
