@@ -129,6 +129,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <script>
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
+// ⚠️ MODÈLE OBLIGATOIRE : 2.5-flash (v2.0 est retiré depuis le 25/09/2026)
 const VIDEO_MODEL = 'agnes-video-2.5-flash';
 const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
 
@@ -219,7 +220,7 @@ async function startGeneration() {
   }
 }
 
-// Génération de la vidéo Cinemagraph (Modèle 2.5 Flash)
+// Génération de la vidéo Cinemagraph (Modèle 2.5 Flash, mode keyframe)
 async function animateVideo() {
   if (!state.baseImageUrl) return toast('Pas d\'image de base');
   if (!state.apiKey) return toast('Clé API manquante');
@@ -242,13 +243,15 @@ async function animateVideo() {
   // Modèle 2.5 Flash : seconds est une string entre "4" et "12"
   const seconds = String(Math.min(12, Math.max(4, state.duration)));
 
+  // ⚠️ MODE CORRECT pour utiliser une image comme première frame : "keyframe"
+  // La documentation officielle indique first_frame pour ce mode.
   const body = {
     model: VIDEO_MODEL,
     prompt: videoPrompt,
-    mode: 'img2video',
-    first_frame: state.baseImageUrl, // Base64 data URL accepté
+    mode: 'keyframe',
+    first_frame: state.baseImageUrl,
     seconds: seconds,
-    size: '720P', // Flash ne supporte que 720P
+    size: '720P',
     aspect_ratio: state.ratio
   };
 
@@ -274,7 +277,7 @@ async function animateVideo() {
 
     status.textContent = 'Tâche créée. Génération en cours (cela peut prendre 1–3 minutes)…';
 
-    // Polling avec model_name requis pour le mode img2video [citation:2][citation:7]
+    // Polling avec model_name requis pour tous les modes sauf "text"
     const maxAttempts = 120;
     for (let i = 0; i < maxAttempts; i++) {
       await sleep(5000);
