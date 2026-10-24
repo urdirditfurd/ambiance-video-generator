@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LOFI-LOOP STUDIO · Générateur d'Ambiance</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Utilisation d'un CDN alternatif pour éviter le blocage de tracking -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mp4-muxer/5.2.1/mp4-muxer.min.js"></script>
+<script src="mp4-muxer.js"></script>
 <style>
 :root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -36,10 +35,11 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 .bar{height:6px;background:var(--ln);margin:16px 0;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--a);width:0;transition:width .4s}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center}#toast div{background:var(--a);color:#fff;font:12px var(--m);padding:10px 16px;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.5)}
 .preview-box{background:#000;border:1px solid var(--ln);border-radius:8px;overflow:hidden;margin:16px 0;position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
-.preview-box canvas{max-width:100%;max-height:100%}
+.preview-box canvas,.preview-box video{width:100%;height:100%;object-fit:contain;background:#000}
 .stats{display:flex;gap:24px;margin:16px 0;flex-wrap:wrap}
 .stats div{background:var(--p);padding:12px 16px;border-radius:6px;border:1px solid var(--ln);flex:1;min-width:120px;text-align:center}
 .stats b{display:block;font:600 24px Orbitron;color:var(--a);margin-top:4px}
+.status-line{font:13px var(--m);color:var(--b);min-height:1.4em;margin-top:8px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -54,11 +54,11 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
   <div id="step1" class="hero">
     <div class="lab">ÉTAPE 1 / 3</div>
     <h2>Configuration de la <b>scène</b></h2>
-    <p class="sub">Décris ton décor Lofi. L'IA générera une séquence d'images où seuls les éléments spécifiés bougent, créant une boucle parfaite pour une diffusion de 5h.</p>
-    
+    <p class="sub">Décris ton décor Lofi. L'IA génère une séquence d'images, puis cette page l'assemble en MP4 H.264 lisible dans le Lecteur Windows, Edge et Chrome. Ouvre cette page dans Microsoft Edge ou Google Chrome.</p>
+
     <label class="f">
       <span>🔑 Clé API Agnès (stockée localement)</span>
-      <input type="text" id="apiKey" placeholder="sk-..." value="">
+      <input type="text" id="apiKey" placeholder="sk-..." value="" autocomplete="off">
     </label>
 
     <label class="f">
@@ -100,7 +100,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     <div class="lab">ÉTAPE 2 / 3</div>
     <h2>Génération de la <b>séquence</b></h2>
     <p class="sub">L'IA crée chaque image en conservant la composition identique, en faisant évoluer uniquement les éléments animés. Ne ferme pas cette page.</p>
-    
+
     <div class="bar"><i id="progressBar"></i></div>
     <div class="stats">
       <div><span class="lab">Progression</span><b id="progText">0 / 0</b></div>
@@ -118,12 +118,13 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
   <div id="step3" class="hero hidden">
     <div class="lab">ÉTAPE 3 / 3</div>
     <h2>Assemblage et <b>Export</b></h2>
-    <p class="sub">La vidéo est créée directement dans votre navigateur. Le fichier est un vrai MP4 (H.264), lisible sur tous les appareils, y compris Windows.</p>
+    <p class="sub">La vidéo est créée dans le navigateur : MP4 H.264, image de début en tête de fichier, pour que Windows puisse la lire tout de suite.</p>
 
     <div class="preview-box">
       <canvas id="videoCanvas"></canvas>
-      <div id="assembleStatus" style="position:absolute;color:var(--a);font:14px var(--m)">Prêt à assembler</div>
+      <video id="resultVideo" class="hidden" controls loop playsinline></video>
     </div>
+    <div id="assembleStatus" class="status-line">Prêt à assembler</div>
 
     <div class="stats">
       <div><span class="lab">Durée de la boucle</span><b id="loopDuration">0s</b></div>
@@ -132,6 +133,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 
     <div class="ft">
       <button class="btn" onclick="showStep(1)">← Modifier les paramètres</button>
+      <button id="btnRetry" class="btn hidden" onclick="assembleVideo()">↻ Réessayer l'assemblage</button>
       <a id="downloadLink" class="big hidden" style="text-decoration:none;text-align:center">⬇ Télécharger la vidéo (.mp4)</a>
     </div>
   </div>
@@ -142,6 +144,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <script>
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
+const FPS = 24;
 
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
@@ -151,6 +154,7 @@ let state = {
   framesCount: 48,
   images: [],
   isGenerating: false,
+  assembling: false
 };
 
 document.getElementById('apiKey').value = state.apiKey;
@@ -161,7 +165,7 @@ const toast = msg => {
   const d = document.createElement('div');
   d.textContent = msg;
   $('toast').appendChild(d);
-  setTimeout(() => d.remove(), 5000);
+  setTimeout(() => d.remove(), 6000);
 };
 
 function showStep(n) {
@@ -170,19 +174,40 @@ function showStep(n) {
   $('step3').classList.toggle('hidden', n !== 3);
 }
 
-// ═════════════════════════════════════════════════════════════════════
-// CORRECTION CORS DÉFINITIVE : On demande l'image en Base64 à l'API
-// ═════════════════════════════════════════════════════════════════════
+function outputSize(ratio) {
+  if (ratio === '1:1') return [768, 768];
+  if (ratio === '16:10') return [1024, 640];
+  return [1024, 576];
+}
+
+function toDataUrl(raw) {
+  const value = String(raw || '').replace(/\s/g, '');
+  if (!value) return null;
+  if (value.startsWith('data:image/')) return value;
+  let mime = 'image/png';
+  if (value.startsWith('/9j')) mime = 'image/jpeg';
+  else if (value.startsWith('UklGR')) mime = 'image/webp';
+  else if (value.startsWith('iVBOR')) mime = 'image/png';
+  return `data:${mime};base64,${value}`;
+}
+
+async function blobToDataUrl(blob) {
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error('Lecture image impossible'));
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function generateSingleFrame(index, total) {
   const prompt = `${state.basePrompt}. Subtle variation frame ${index} of ${total}. Only animate: ${state.animElements}. Keep the exact same composition, lighting, camera angle and style. No text, no watermark.`;
-
   const body = {
     model: IMG_MODEL,
-    prompt: prompt,
+    prompt,
     n: 1,
     size: '1K',
     ratio: state.ratio,
-    // LA CLÉ EST ICI : on force le format Base64 au lieu d'une URL
     extra_body: { response_format: 'b64_json' }
   };
 
@@ -203,20 +228,19 @@ async function generateSingleFrame(index, total) {
           await sleep(response.status === 429 ? 15000 : 5000);
           continue;
         }
-        throw new Error(`HTTP ${response.status} — ${errText.slice(0, 100)}`);
+        throw new Error(`HTTP ${response.status} — ${errText.slice(0, 140)}`);
       }
 
       const data = await response.json();
-      // On récupère directement le Base64, sans avoir besoin de fetch l'image
-      const b64 = data.data?.[0]?.b64_json;
-      if (!b64) throw new Error("Aucune donnée Base64 reçue");
-
-      // On construit l'URL de données directement
-      const dataUrl = `data:image/png;base64,${b64}`;
-      
-      // On génère aussi une URL blob pour l'affichage dans la grille (optionnel)
-      // Mais dataUrl suffit pour l'affichage et le canvas
-      return { url: dataUrl, dataUrl: dataUrl, status: 'done' };
+      const item = data.data?.[0] || data.images?.[0] || {};
+      let dataUrl = toDataUrl(item.b64_json || item.b64 || item.base64);
+      if (!dataUrl && item.url) {
+        const imageResponse = await fetch(item.url);
+        if (!imageResponse.ok) throw new Error(`Image HTTP ${imageResponse.status}`);
+        dataUrl = await blobToDataUrl(await imageResponse.blob());
+      }
+      if (!dataUrl) throw new Error('Aucune image reçue');
+      return { url: dataUrl, dataUrl, status: 'done' };
     } catch (error) {
       if (attempt === 3) return { url: null, dataUrl: null, status: 'error', error: error.message };
       await sleep(2000);
@@ -226,170 +250,297 @@ async function generateSingleFrame(index, total) {
 
 async function startGeneration() {
   state.apiKey = $('apiKey').value.trim();
-  if (!state.apiKey) return toast("Veuillez entrer une clé API Agnès");
+  if (!state.apiKey) return toast('Veuillez entrer une clé API Agnès');
   localStorage.setItem('lofi_api_key', state.apiKey);
 
   state.basePrompt = $('basePrompt').value.trim();
   state.animElements = $('animElements').value.trim();
   state.ratio = $('ratio').value;
-  state.framesCount = parseInt($('framesCount').value);
+  state.framesCount = parseInt($('framesCount').value, 10);
 
-  if (!state.basePrompt) return toast("Veuillez décrire le décor principal");
-  if (!state.animElements) return toast("Veuillez préciser les éléments à animer");
+  if (!state.basePrompt) return toast('Veuillez décrire le décor principal');
+  if (!state.animElements) return toast('Veuillez préciser les éléments à animer');
 
   state.isGenerating = true;
-  state.images = Array(state.framesCount).fill(null).map(() => ({ status: 'pending' }));
-
+  state.images = Array.from({ length: state.framesCount }, () => ({ status: 'pending' }));
+  $('btnAssemble').classList.add('hidden');
   showStep(2);
   renderGrid();
 
   const startTime = Date.now();
-
   for (let i = 0; i < state.framesCount; i++) {
     if (!state.isGenerating) break;
-
     $('progText').textContent = `${i + 1} / ${state.framesCount}`;
     $('progressBar').style.width = `${((i + 1) / state.framesCount) * 100}%`;
-
     if (i > 0) {
       const avgTime = (Date.now() - startTime) / i;
       const remaining = Math.round((state.framesCount - i) * avgTime / 1000);
-      $('timeText').textContent = `~${Math.floor(remaining/60)}m ${remaining%60}s`;
+      $('timeText').textContent = `~${Math.floor(remaining / 60)}m ${remaining % 60}s`;
     }
-
     state.images[i] = await generateSingleFrame(i + 1, state.framesCount);
     renderGrid();
-
     if (i < state.framesCount - 1) await sleep(1200);
   }
 
   state.isGenerating = false;
-  if (state.images.every(img => img.status === 'done')) {
-    toast("✅ Génération des images terminée !");
+  const done = state.images.filter(img => img.status === 'done').length;
+  if (done === state.framesCount) {
+    toast('Génération des images terminée.');
+    $('btnAssemble').classList.remove('hidden');
+  } else if (done >= 12) {
+    toast(`${done} images prêtes. Les autres ont échoué, la boucle sera plus courte.`);
     $('btnAssemble').classList.remove('hidden');
   } else {
-    toast(`⚠️ Certaines images ont échoué. Vérifie la console.`);
+    toast('Pas assez d\'images valides. Regarde les cases en erreur, puis relance.');
   }
 }
 
 function cancelGeneration() {
   state.isGenerating = false;
-  toast("Génération annulée");
+  toast('Génération annulée');
   showStep(1);
 }
 
 function renderGrid() {
-  const grid = $('framesGrid');
-  grid.innerHTML = state.images.map((img, i) => {
-    if (img.status === 'done') return `<div class="cd pk"><div class="im"><img src="${img.url}" alt="Frame ${i+1}"></div><div class="lab" style="text-align:center">Frame ${i + 1}</div></div>`;
-    if (img.status === 'error') return `<div class="cd" style="border-color:var(--er)"><div class="im" style="color:var(--er)">✕</div><div class="lab" style="text-align:center;font-size:9px">Erreur</div></div>`;
+  $('framesGrid').innerHTML = state.images.map((img, i) => {
+    if (img.status === 'done') return `<div class="cd pk"><div class="im"><img src="${img.url}" alt="Frame ${i + 1}"></div><div class="lab" style="text-align:center">Frame ${i + 1}</div></div>`;
+    if (img.status === 'error') return `<div class="cd" style="border-color:var(--er)"><div class="im" style="color:var(--er)">✕</div><div class="lab" style="text-align:center;font-size:9px">${img.error || 'Erreur'}</div></div>`;
     return `<div class="cd"><div class="im"><div class="sp"></div></div><div class="lab" style="text-align:center">Frame ${i + 1}…</div></div>`;
   }).join('');
 }
 
-// ═════════════════════════════════════════════════════════════════════
-// ASSEMBLAGE VIDÉO EN MP4 (H.264) AVEC WEBCODECS
-// ═════════════════════════════════════════════════════════════════════
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Chargement impossible : ' + src));
+    document.head.appendChild(script);
+  });
+}
+
+async function ensureMuxer() {
+  if (typeof Mp4Muxer !== 'undefined' && Mp4Muxer.Muxer) return;
+  try { await loadScript('mp4-muxer.js'); } catch (e) { /* fichier local absent */ }
+  if (typeof Mp4Muxer !== 'undefined' && Mp4Muxer.Muxer) return;
+  await loadScript('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/build/mp4-muxer.js');
+  if (typeof Mp4Muxer === 'undefined' || !Mp4Muxer.Muxer) {
+    throw new Error('La bibliothèque mp4-muxer est absente. Garde mp4-muxer.js dans le même dossier que cette page.');
+  }
+}
+
+async function pickEncoderConfig(width, height) {
+  if (typeof VideoEncoder === 'undefined' || typeof VideoEncoder.isConfigSupported !== 'function') {
+    throw new Error('Ce navigateur ne sait pas encoder en H.264. Ouvre la page dans Microsoft Edge ou Google Chrome.');
+  }
+  const codecs = ['avc1.42E01f', 'avc1.4d001f', 'avc1.64001f', 'avc1.42001f'];
+  const accelerations = ['prefer-software', 'no-preference'];
+  for (const hardwareAcceleration of accelerations) {
+    for (const codec of codecs) {
+      const candidates = [
+        { codec, width, height, bitrate: 4_000_000, framerate: FPS, latencyMode: 'quality', hardwareAcceleration, avc: { format: 'avc' } },
+        { codec, width, height, bitrate: 4_000_000, framerate: FPS, latencyMode: 'quality', hardwareAcceleration }
+      ];
+      for (const config of candidates) {
+        try {
+          const support = await VideoEncoder.isConfigSupported(config);
+          if (support.supported) return support.config || config;
+        } catch (e) { /* configuration refusée */ }
+      }
+    }
+  }
+  throw new Error('Aucun encodeur H.264 utilisable. Mets Edge ou Chrome à jour, puis réessaie.');
+}
+
+function drawCover(ctx, image, width, height) {
+  const imageRatio = image.width / image.height;
+  const canvasRatio = width / height;
+  let dw, dh, dx, dy;
+  if (imageRatio > canvasRatio) {
+    dh = height;
+    dw = image.width * (height / image.height);
+    dx = (width - dw) / 2;
+    dy = 0;
+  } else {
+    dw = width;
+    dh = image.height * (width / image.width);
+    dx = 0;
+    dy = (height - dh) / 2;
+  }
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(image, dx, dy, dw, dh);
+}
+
+async function loadBitmap(dataUrl) {
+  const response = await fetch(dataUrl);
+  if (!response.ok) throw new Error('Image illisible');
+  const blob = await response.blob();
+  if (!blob.size) throw new Error('Image vide');
+  try {
+    return await createImageBitmap(blob);
+  } catch (e) {
+    return await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('Décodage image impossible'));
+      image.src = dataUrl;
+    });
+  }
+}
+
+function makeVideoFrame(canvas, timestamp, duration) {
+  try {
+    return new VideoFrame(canvas, { timestamp, duration, alpha: 'discard' });
+  } catch (e) {
+    return new VideoFrame(canvas, { timestamp, duration });
+  }
+}
+
 async function assembleVideo() {
+  if (state.assembling) return;
+  state.assembling = true;
   showStep(3);
+
   const canvas = $('videoCanvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: false });
   const status = $('assembleStatus');
   const btnDownload = $('downloadLink');
-
+  const resultVideo = $('resultVideo');
   btnDownload.classList.add('hidden');
+  $('btnRetry').classList.add('hidden');
+  resultVideo.classList.add('hidden');
+  canvas.classList.remove('hidden');
+  resultVideo.removeAttribute('src');
 
-  const [w, h] = state.ratio === '16:9' ? [1024, 576] : state.ratio === '1:1' ? [768, 768] : [1024, 640];
-  canvas.width = w;
-  canvas.height = h;
-
-  const fps = 24;
-  const totalFrames = state.framesCount;
-  
-  $('loopDuration').textContent = `${(totalFrames / fps).toFixed(1)}s`;
-  $('outputFormat').textContent = 'MP4 (H.264)';
-  status.textContent = "Chargement des images...";
-
+  const [width, height] = outputSize(state.ratio);
+  canvas.width = width;
+  canvas.height = height;
   const validImages = state.images.filter(img => img.status === 'done' && img.dataUrl);
-  if (validImages.length < 12) return toast("Pas assez d'images valides (min. 12)");
+  $('loopDuration').textContent = `${(validImages.length / FPS).toFixed(1)}s`;
+  $('outputFormat').textContent = 'MP4 (H.264)';
 
-  const loadedImages = await Promise.all(validImages.map(item => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = item.dataUrl;
-    });
-  })).then(imgs => imgs.filter(i => i !== null));
+  let bitmaps = [];
+  let videoEncoder = null;
+  try {
+    if (validImages.length < 12) {
+      throw new Error(`Pas assez d'images valides (${validImages.length}). Il en faut au moins 12.`);
+    }
 
-  if (loadedImages.length < 12) return toast("Erreur de chargement des images.");
+    status.textContent = 'Chargement de l\'assembleur MP4…';
+    await ensureMuxer();
 
-  status.textContent = "Encodage MP4 en cours (ne ferme pas l'onglet)...";
+    status.textContent = 'Vérification de l\'encodeur H.264…';
+    const config = await pickEncoderConfig(width, height);
+    $('outputFormat').textContent = config.codec;
 
-  let muxer = new Mp4Muxer.Muxer({
-    target: new Mp4Muxer.ArrayBufferTarget(),
-    video: { codec: 'avc', width: w, height: h },
-    fastStart: 'in-memory'
-  });
+    status.textContent = `Décodage des images (0 / ${validImages.length})…`;
+    for (let i = 0; i < validImages.length; i++) {
+      bitmaps.push(await loadBitmap(validImages[i].dataUrl));
+      if ((i + 1) % 4 === 0 || i === validImages.length - 1) {
+        status.textContent = `Décodage des images (${i + 1} / ${validImages.length})…`;
+        await sleep(0);
+      }
+    }
+    if (bitmaps.length < 12) throw new Error('Les images n\'ont pas pu être décodées.');
 
-  let videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-    error: e => console.error('Erreur VideoEncoder:', e)
-  });
+    drawCover(ctx, bitmaps[0], width, height);
+    status.textContent = 'Encodage MP4 : 0 %';
 
-  videoEncoder.configure({
-    codec: 'avc1.42001f',
-    width: w,
-    height: h,
-    bitrate: 5_000_000,
-    framerate: fps
-  });
-
-  for (let i = 0; i < loadedImages.length; i++) {
-    if (videoEncoder.state === 'closed') break;
-
-    ctx.drawImage(loadedImages[i], 0, 0, w, h);
-
-    const frame = new VideoFrame(canvas, { 
-      timestamp: (i * 1_000_000) / fps, 
-      duration: 1_000_000 / fps 
+    let chunkCount = 0;
+    let encoderError = null;
+    const muxer = new Mp4Muxer.Muxer({
+      target: new Mp4Muxer.ArrayBufferTarget(),
+      video: { codec: 'avc', width, height },
+      fastStart: 'in-memory',
+      firstTimestampBehavior: 'offset'
     });
 
-    videoEncoder.encode(frame, { keyFrame: i % 60 === 0 });
-    frame.close();
+    videoEncoder = new VideoEncoder({
+      output: (chunk, meta) => {
+        chunkCount += 1;
+        muxer.addVideoChunk(chunk, meta);
+      },
+      error: (error) => { encoderError = error; }
+    });
+    videoEncoder.configure(config);
 
-    await sleep(10); 
+    const frameDuration = Math.round(1_000_000 / FPS);
+    for (let i = 0; i < bitmaps.length; i++) {
+      if (encoderError) throw encoderError;
+      if (videoEncoder.state === 'closed') throw encoderError || new Error('Encodeur arrêté.');
 
-    const pct = Math.round(((i + 1) / loadedImages.length) * 100);
-    status.textContent = `Encodage MP4 : ${pct}%`;
+      drawCover(ctx, bitmaps[i], width, height);
+      const frame = makeVideoFrame(canvas, i * frameDuration, frameDuration);
+      videoEncoder.encode(frame, { keyFrame: i === 0 || i % FPS === 0 });
+      frame.close();
+
+      while (videoEncoder.encodeQueueSize > 4) {
+        await sleep(20);
+        if (encoderError) throw encoderError;
+      }
+      status.textContent = `Encodage MP4 : ${Math.round(((i + 1) / bitmaps.length) * 100)} %`;
+      if (i % 2 === 0) await sleep(0);
+    }
+
+    if (encoderError) throw encoderError;
+    status.textContent = 'Finalisation du fichier…';
+    await Promise.race([
+      videoEncoder.flush(),
+      sleep(90000).then(() => { throw new Error('L\'encodeur est resté bloqué. Réessaie : le mode logiciel sera choisi en premier.'); })
+    ]);
+    if (encoderError) throw encoderError;
+    if (videoEncoder.state !== 'closed') videoEncoder.close();
+    videoEncoder = null;
+    muxer.finalize();
+
+    if (chunkCount < bitmaps.length) {
+      throw new Error(`Encodeur incomplet : ${chunkCount} images écrites sur ${bitmaps.length}.`);
+    }
+
+    const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+    if (blob.size < 20000) {
+      throw new Error(`Fichier trop petit (${blob.size} octets). Windows ne pourra pas le lire.`);
+    }
+
+    const url = URL.createObjectURL(blob);
+    const mo = blob.size >= 1048576 ? `${(blob.size / 1048576).toFixed(1)} Mo` : `${Math.round(blob.size / 1024)} Ko`;
+    btnDownload.href = url;
+    btnDownload.download = 'lofi-loop.mp4';
+    btnDownload.textContent = `⬇ Télécharger la vidéo (${mo})`;
+    btnDownload.classList.remove('hidden');
+
+    resultVideo.src = url;
+    resultVideo.classList.remove('hidden');
+    canvas.classList.add('hidden');
+    status.textContent = `Vidéo prête · ${bitmaps.length} images · ${mo} · lisible sur Windows.`;
+    toast('Vidéo MP4 générée. Tu peux la lire ci-dessus avant de la télécharger.');
+    resultVideo.play().catch(() => {});
+  } catch (error) {
+    console.error(error);
+    status.textContent = error.message || 'Échec de l\'assemblage.';
+    $('btnRetry').classList.remove('hidden');
+    toast(status.textContent);
+    if (videoEncoder && videoEncoder.state !== 'closed') {
+      try { videoEncoder.close(); } catch (e) { /* déjà fermé */ }
+    }
+  } finally {
+    bitmaps.forEach(bitmap => { if (bitmap.close) bitmap.close(); });
+    state.assembling = false;
   }
-
-  await videoEncoder.flush();
-  muxer.finalize();
-
-  const { buffer } = muxer.target;
-  const blob = new Blob([buffer], { type: 'video/mp4' });
-  const url = URL.createObjectURL(blob);
-
-  btnDownload.href = url;
-  btnDownload.download = `lofi-loop-${Date.now()}.mp4`;
-  btnDownload.textContent = "⬇ Télécharger la vidéo (.mp4)";
-  btnDownload.classList.remove('hidden');
-
-  status.textContent = "✅ Vidéo MP4 prête !";
-  toast("Vidéo MP4 générée avec succès !");
-  
-  videoEncoder.close();
 }
 
 function resetApp() {
-  if (confirm("Recommencer une nouvelle génération ? Les images actuelles seront perdues.")) {
-    state.images = [];
-    $('downloadLink').classList.add('hidden');
-    $('btnAssemble').classList.add('hidden');
-    $('progressBar').style.width = '0%';
-    showStep(1);
-  }
+  if (!confirm('Recommencer une nouvelle génération ? Les images actuelles seront perdues.')) return;
+  state.images = [];
+  state.isGenerating = false;
+  $('downloadLink').classList.add('hidden');
+  $('btnAssemble').classList.add('hidden');
+  $('btnRetry').classList.add('hidden');
+  $('progressBar').style.width = '0%';
+  $('resultVideo').classList.add('hidden');
+  $('videoCanvas').classList.remove('hidden');
+  showStep(1);
 }
 </script>
 </body>
