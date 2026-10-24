@@ -103,15 +103,13 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 
 <div id="toast"></div>
 
-<!-- Bibliothèque MP4 Muxer intégrée -->
-<script>
-(function(){var e="undefined"!=typeof globalThis?globalThis:"undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{};function t(e,t){return e(t={exports:{}},t.exports),t.exports}var s=t((function(e){!function(t){if("object"==typeof e&&"undefined"!=typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).Mp4Muxer=t()}}((function(){return function e(t,s,n){function a(o,c){if(!s[o]){if(!t[o]){var h="function"==typeof require&&require;if(!c&&h)return h(o,!0);if(r)return r(o,!0);var l=new Error("Cannot find module '"+o+"'");throw l.code="MODULE_NOT_FOUND",l}var d=s[o]={exports:{}};t[o][0].call(d.exports,(function(e){return a(t[o][1][e]||e)}),d,d.exports,e,t,s,n)}return s[o].exports}for(var r="function"==typeof require&&require,o=0;o<n.length;o++)a(n[o]);return a}({1:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],2:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],3:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.FileSystemWritableFileStreamTarget=class{constructor(e,t){this.stream=e,this.chunkSize=t||null}reset(){this.stream.seek(0)}finalize(){}}},{}],4:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.CallbackTarget=class{constructor(e){this.callback=e,this.reset=()=>{},this.finalize=()=>{}}},{}],5:[function(e,t,s){"use strict";var n=this&&this.__awaiter||function(e,t,s,n){return new(s||(s=Promise))((function(a,r){function o(e){try{h(n.next(e))}catch(e){r(e)}}function c(e){try{h(n.throw(e))}catch(e){r(e)}}function h(e){var t;e.done?a(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,c)}h((n=n.apply(e,t||[])).next())}))};Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e,t){this.file=e,this.chunkSize=t||null,this.reset=()=>n(this,void 0,void 0,(function*(){yield this.file.truncate(0)})),this.finalize=()=>n(this,void 0,void 0,(function*(){yield this.file.close()}))}}},{}],6:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],7:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],8:[function(e,t,s){"use strict";function n(e){return e instanceof Uint8Array}Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}},s.Uint8ArrayTarget=class{constructor(){this.buffer=null}finalize(){}},s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},s.FileSystemWritableFileStreamTarget=class{constructor(e,t){this.stream=e,this.chunkSize=t||null}reset(){this.stream.seek(0)}finalize(){}},s.CallbackTarget=class{constructor(e){this.callback=e,this.reset=()=>{},this.finalize=()=>{}},s.isUint8Array=n},{}],9:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],10:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],11:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],12:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}},s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],13:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],14:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}],15:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.StreamTarget=class{constructor(e){this.stream=e,this.reset=()=>{},this.finalize=()=>{this.stream.close()}}},{}],16:[function(e,t,s){"use strict";Object.defineProperty(s,"__esModule",{value:!0}),s.ArrayBufferTarget=class{constructor(){this.buffer=null}finalize(){}}},{}]},{},[1])(1)}))}));
-</script>
+<!-- CHARGEMENT PROPRE DE LA BIBLIOTHÈQUE MP4 VIA CDN -->
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.min.js"></script>
 
 <script>
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
-const FPS = 24; // Fluidité de la vidéo finale
+const FPS = 24;
 
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
@@ -185,7 +183,6 @@ async function animateVideo() {
   const canvas = $('videoCanvas');
   const ctx = canvas.getContext('2d', { alpha: false });
   
-  // Définition de la résolution
   const [w, h] = state.ratio === '1:1' ? [768, 768] : [1024, 576];
   canvas.width = w; canvas.height = h;
 
@@ -194,13 +191,13 @@ async function animateVideo() {
   try {
     const imgBase = await loadImg(state.baseImage);
 
-    // 1. Préparer l'image source dans un canvas
+    // 1. Préparer l'image source
     const sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = w; sourceCanvas.height = h;
     const sourceCtx = sourceCanvas.getContext('2d');
     sourceCtx.drawImage(imgBase, 0, 0, w, h);
 
-    // 2. Créer un masque de flou pour concentrer l'animation au centre
+    // 2. Créer un masque de flou radial (centre animé, bords figés)
     const maskCanvas = document.createElement('canvas');
     maskCanvas.width = w; maskCanvas.height = h;
     const maskCtx = maskCanvas.getContext('2d');
@@ -210,7 +207,6 @@ async function animateVideo() {
     maskCtx.fillStyle = gradient;
     maskCtx.fillRect(0, 0, w, h);
 
-    // Récupérer les données du masque
     const maskData = maskCtx.getImageData(0, 0, w, h).data;
 
     // Configuration Encodage
@@ -218,7 +214,7 @@ async function animateVideo() {
     const frameDurationUs = Math.round(1_000_000 / FPS);
 
     if (typeof Mp4Muxer === 'undefined' || !Mp4Muxer.Muxer) {
-      throw new Error("Bibliothèque MP4 introuvable. Recharge la page.");
+      throw new Error("La bibliothèque MP4 n'a pas chargé. Vérifie ta connexion et recharge la page.");
     }
 
     const muxer = new Mp4Muxer.Muxer({
@@ -236,7 +232,6 @@ async function animateVideo() {
 
     status.textContent = "Encodage en cours...";
 
-    // Canvas temporaire pour manipuler les pixels de chaque frame
     const frameCanvas = document.createElement('canvas');
     frameCanvas.width = w; frameCanvas.height = h;
     const frameCtx = frameCanvas.getContext('2d');
@@ -244,15 +239,13 @@ async function animateVideo() {
     for (let frame = 0; frame < totalFrames; frame++) {
         const t = (frame / FPS);
         
-        // Dessiner l'image de base
         frameCtx.drawImage(sourceCanvas, 0, 0);
         
-        // Appliquer la déformation
         const imgData = frameCtx.getImageData(0, 0, w, h);
         const data = imgData.data;
         const originalData = sourceCtx.getImageData(0, 0, w, h).data;
         
-        // Amplitude de l'onde (très subtile pour l'effet Lofi)
+        // Amplitude de l'onde
         const waveAmp = 3; 
         const freqX = 0.02;
         const freqY = 0.02;
@@ -260,20 +253,17 @@ async function animateVideo() {
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
                 const idx = (y * w + x) * 4;
-                const alphaMask = maskData[idx + 3] / 255; // Intensité du masque (0 à 1)
+                const alphaMask = maskData[idx + 3] / 255;
 
                 if (alphaMask > 0.05) {
-                    // Calcul du décalage ondulatoire
                     const offsetX = Math.sin(y * freqX + t * 1.5) * waveAmp * alphaMask;
                     const offsetY = Math.cos(x * freqY + t * 1.2) * waveAmp * alphaMask;
 
-                    // Coordonnées source
                     const srcX = Math.floor(Math.max(0, Math.min(w - 1, x + offsetX)));
                     const srcY = Math.floor(Math.max(0, Math.min(h - 1, y + offsetY)));
                     
                     const srcIdx = (srcY * w + srcX) * 4;
 
-                    // Appliquer le décalage
                     data[idx] = originalData[srcIdx];
                     data[idx+1] = originalData[srcIdx+1];
                     data[idx+2] = originalData[srcIdx+2];
@@ -281,11 +271,8 @@ async function animateVideo() {
             }
         }
         frameCtx.putImageData(imgData, 0, 0);
-
-        // Dessiner sur le canvas final
         ctx.drawImage(frameCanvas, 0, 0);
 
-        // Encoder la frame
         const vf = new VideoFrame(canvas, { 
             timestamp: frame * frameDurationUs, 
             duration: frameDurationUs,
