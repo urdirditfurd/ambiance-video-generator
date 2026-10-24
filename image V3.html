@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LOFI-LOOP STUDIO · Cinemagraph</title>
+<title>LOFI-LOOP STUDIO · Cinemagraph Calques</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/build/mp4-muxer.js"></script>
 <style>
 :root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -25,20 +26,20 @@ button,.btn{font:600 12px var(--m);letter-spacing:.1em;text-transform:uppercase;
 button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a);color:#fff}button:disabled{opacity:.35;cursor:not-allowed}
 .big{background:var(--a);border-color:var(--a);color:#fff;padding:14px 28px;font-size:14px;letter-spacing:.16em}.big:hover:not(:disabled){background:#7c3aed;border-color:#7c3aed}
 .ft{display:flex;justify-content:space-between;gap:10px;margin-top:24px;flex-wrap:wrap;align-items:center}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center}#toast div{background:var(--a);color:#fff;font:12px var(--m);padding:10px 16px;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.5)}
 .preview-box{background:#000;border:1px solid var(--ln);border-radius:8px;overflow:hidden;margin:16px 0;position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
-.preview-box img,.preview-box video{width:100%;height:100%;object-fit:contain;background:#000}
+.preview-box canvas,.preview-box video{width:100%;height:100%;object-fit:contain;background:#000}
 .stats{display:flex;gap:24px;margin:16px 0;flex-wrap:wrap}
 .stats div{background:var(--p);padding:12px 16px;border-radius:6px;border:1px solid var(--ln);flex:1;min-width:120px;text-align:center}
 .stats b{display:block;font:600 24px Orbitron;color:var(--a);margin-top:4px}
 .status-line{font:13px var(--m);color:var(--b);min-height:1.4em;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center}#toast div{background:var(--a);color:#fff;font:12px var(--m);padding:10px 16px;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.5)}
 .hidden{display:none!important}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">LOFI<b>-LOOP</b><i>CINEMAGRAPH IA</i></div>
+  <div class="logo">LOFI<b>-LOOP</b><i>CALQUES ANIMÉS</i></div>
   <button class="btn" onclick="resetApp()">↺ Nouvelle session</button>
 </header>
 
@@ -46,21 +47,21 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
   <div id="step1" class="hero">
     <div class="lab">ÉTAPE 1 / 3</div>
     <h2>Configuration du <b>décor</b></h2>
-    <p class="sub">Décris ton décor Lofi. L'IA génère une image de base, puis l'anime en vidéo avec un fond figé et des éléments en mouvement (fumée, eau, pétales). Ouvre cette page dans Microsoft Edge ou Google Chrome.</p>
+    <p class="sub">L'IA génère un fond fixe, puis un "sprite" (élément animé). Le code assemble le tout pour créer un mouvement continu sans utiliser l'API vidéo.</p>
 
     <label class="f">
-      <span>🔑 Clé API Agnès (stockée localement)</span>
-      <input type="text" id="apiKey" placeholder="sk-..." value="" autocomplete="off">
+      <span>🔑 Clé API Agnès</span>
+      <input type="text" id="apiKey" placeholder="sk-..." autocomplete="off">
     </label>
 
     <label class="f">
-      <span>🎨 Décor principal (Prompt en anglais de préférence)</span>
-      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, raining outside the window, warm desk lamp, cat sleeping on a cushion, lofi hip hop aesthetic, highly detailed, 4k, studio ghibli style"></textarea>
+      <span>🎨 Décor principal (Fond)</span>
+      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, warm desk lamp, cat sleeping on a cushion, lofi hip hop aesthetic"></textarea>
     </label>
 
     <label class="f">
-      <span>✨ Éléments à animer (Ce qui doit bouger)</span>
-      <input type="text" id="animElements" placeholder="Ex: rain drops falling, steam rising from tea cup, cat breathing slowly">
+      <span>✨ Élément animé (Ce qui doit bouger)</span>
+      <input type="text" id="animPrompt" placeholder="Ex: A glowing steam rising from a tea cup, pure black background">
     </label>
 
     <div style="display:flex;gap:16px;flex-wrap:wrap">
@@ -75,51 +76,51 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
         <span>🎞️ Durée de la boucle</span>
         <select id="duration">
           <option value="5">5 secondes</option>
-          <option value="8" selected>8 secondes (recommandé)</option>
-          <option value="12">12 secondes (maximum Flash)</option>
+          <option value="10" selected>10 secondes</option>
         </select>
       </label>
     </div>
 
     <div class="ft">
       <span></span>
-      <button class="big" onclick="startGeneration()">✦ Générer l'image de base</button>
+      <button class="big" onclick="startGeneration()">✦ Générer le fond et l'élément</button>
     </div>
   </div>
 
   <div id="step2" class="hero hidden">
     <div class="lab">ÉTAPE 2 / 3</div>
-    <h2>Image de <b>base</b></h2>
-    <p class="sub">Vérifie que le décor te plaît. Si oui, lance l'animation. L'IA va figer ce décor et n'animer que les éléments demandés.</p>
+    <h2>Aperçu des <b>calques</b></h2>
+    <p class="sub">Le fond et l'élément animé sont prêts. Le code va maintenant les fusionner.</p>
 
-    <div class="preview-box">
-      <img id="baseImage" alt="Décor de base">
+    <div style="display:flex;gap:12px;">
+        <div style="flex:1; text-align:center;">
+            <div class="lab">Fond</div>
+            <img id="imgBase" style="width:100%; border:1px solid var(--ln); border-radius:4px;">
+        </div>
+        <div style="flex:1; text-align:center;">
+            <div class="lab">Élément animé (Noir = Transparent)</div>
+            <img id="imgAnim" style="width:100%; border:1px solid var(--ln); border-radius:4px; background:#000;">
+        </div>
     </div>
 
     <div class="ft">
-      <button class="btn" onclick="showStep(1)">← Modifier les paramètres</button>
-      <button class="big" onclick="animateVideo()">🎬 Animer ce décor</button>
+      <button class="btn" onclick="showStep(1)">← Modifier</button>
+      <button class="big" onclick="animateVideo()">🎬 Créer la vidéo</button>
     </div>
     <div id="animStatus" class="status-line"></div>
   </div>
 
   <div id="step3" class="hero hidden">
     <div class="lab">ÉTAPE 3 / 3</div>
-    <h2>Vidéo <b>Cinemagraph</b></h2>
-    <p class="sub">Fond figé, éléments en mouvement. La vidéo se lit en boucle ci-dessous.</p>
-
+    <h2>Vidéo <b>Finale</b></h2>
+    
     <div class="preview-box">
       <video id="resultVideo" controls loop playsinline></video>
     </div>
 
-    <div class="stats">
-      <div><span class="lab">Durée</span><b id="videoDuration">0s</b></div>
-      <div><span class="lab">Format</span><b>MP4 (H.264)</b></div>
-    </div>
-
     <div class="ft">
-      <button class="btn" onclick="showStep(2)">← Revenir à l'image</button>
-      <a id="downloadLink" class="big hidden" style="text-decoration:none;text-align:center">⬇ Télécharger la vidéo (.mp4)</a>
+      <button class="btn" onclick="showStep(2)">← Revenir</button>
+      <a id="downloadLink" class="big hidden" style="text-decoration:none;text-align:center">⬇ Télécharger (.mp4)</a>
     </div>
   </div>
 </main>
@@ -129,21 +130,15 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 <script>
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
-// ⚠️ MODÈLE OBLIGATOIRE : 2.5-flash (v2.0 est retiré depuis le 25/09/2026)
-const VIDEO_MODEL = 'agnes-video-2.5-flash';
-const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
+const FPS = 24;
 
 let state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
-  basePrompt: '',
-  animElements: '',
+  baseImage: null,
+  animImage: null,
   ratio: '16:9',
-  duration: 8,
-  baseImageUrl: null,
-  videoUrl: null
+  duration: 10
 };
-
-document.getElementById('apiKey').value = state.apiKey;
 
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -151,186 +146,172 @@ const toast = msg => {
   const d = document.createElement('div');
   d.textContent = msg;
   $('toast').appendChild(d);
-  setTimeout(() => d.remove(), 6000);
+  setTimeout(() => d.remove(), 5000);
 };
-
 function showStep(n) {
   $('step1').classList.toggle('hidden', n !== 1);
   $('step2').classList.toggle('hidden', n !== 2);
   $('step3').classList.toggle('hidden', n !== 3);
 }
 
-// Génération de l'image de base
-async function generateBaseImage() {
-  const prompt = `${state.basePrompt}. Lofi hip hop aesthetic, highly detailed, no text, no watermark.`;
+// Génération d'une image (retourne une dataURL)
+async function generateImage(prompt) {
   const body = {
-    model: IMG_MODEL,
-    prompt: prompt,
-    n: 1,
-    size: '1K',
-    ratio: state.ratio,
+    model: IMG_MODEL, prompt: prompt, n: 1, size: '1K', ratio: state.ratio,
     extra_body: { response_format: 'b64_json' }
   };
-
-  const response = await fetch(`${API_URL}/images/generations`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${state.apiKey}`
-    },
+  const res = await fetch(`${API_URL}/images/generations`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}` },
     body: JSON.stringify(body)
   });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Image HTTP ${response.status} — ${err.slice(0, 200)}`);
-  }
-
-  const data = await response.json();
-  const b64 = data.data?.[0]?.b64_json || data.data?.[0]?.base64;
-  if (!b64) throw new Error('Pas de données image reçues');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const b64 = data.data?.[0]?.b64_json;
+  if (!b64) throw new Error('Pas de données');
   return `data:image/png;base64,${b64}`;
 }
 
 async function startGeneration() {
   state.apiKey = $('apiKey').value.trim();
-  if (!state.apiKey) return toast('Veuillez entrer une clé API Agnès');
+  if (!state.apiKey) return toast('Clé API requise');
   localStorage.setItem('lofi_api_key', state.apiKey);
 
-  state.basePrompt = $('basePrompt').value.trim();
-  state.animElements = $('animElements').value.trim();
   state.ratio = $('ratio').value;
-  state.duration = parseInt($('duration').value, 10);
+  state.duration = parseInt($('duration').value);
+  const basePrompt = $('basePrompt').value.trim();
+  const animPrompt = $('animPrompt').value.trim();
 
-  if (!state.basePrompt) return toast('Veuillez décrire le décor principal');
-  if (!state.animElements) return toast('Veuillez préciser les éléments à animer');
+  if (!basePrompt || !animPrompt) return toast('Remplissez les deux champs');
 
   showStep(2);
-  $('baseImage').src = '';
+  $('animStatus').textContent = "Génération du fond fixe...";
   try {
-    toast('Génération de l\'image de base…');
-    const dataUrl = await generateBaseImage();
-    state.baseImageUrl = dataUrl;
-    $('baseImage').src = dataUrl;
-    toast('Image de base prête. Tu peux l\'animer.');
+    state.baseImage = await generateImage(basePrompt);
+    $('imgBase').src = state.baseImage;
+
+    $('animStatus').textContent = "Génération de l'élément animé sur fond noir...";
+    // On force un fond noir pour pouvoir utiliser la transparence
+    const fullAnimPrompt = `${animPrompt}, pure black background, isolated element, high contrast`;
+    state.animImage = await generateImage(fullAnimPrompt);
+    $('imgAnim').src = state.animImage;
+
+    $('animStatus').textContent = "Prêt !";
+    toast('Images générées avec succès');
   } catch (e) {
-    console.error(e);
-    toast('Erreur : ' + e.message);
-    showStep(1);
+    toast('Erreur: ' + e.message);
+    $('animStatus').textContent = "Erreur: " + e.message;
   }
 }
 
-// Génération de la vidéo Cinemagraph (Modèle 2.5 Flash, mode keyframe)
+// Assemblage MP4 avec canvas
 async function animateVideo() {
-  if (!state.baseImageUrl) return toast('Pas d\'image de base');
-  if (!state.apiKey) return toast('Clé API manquante');
-
-  const status = $('animStatus');
-  status.textContent = 'Envoi de la tâche vidéo à Agnes (2.5 Flash)…';
+  if (!state.baseImage || !state.animImage) return toast('Images manquantes');
+  
+  showStep(3);
   $('downloadLink').classList.add('hidden');
-  $('resultVideo').removeAttribute('src');
+  const status = $('assembleStatus');
+  status.textContent = "Préparation de l'animation...";
 
-  // Prompt Cinemagraph : verrouille le fond et n'autorise que le mouvement demandé
-  const videoPrompt = [
-    'CINEMAGRAPH: static locked-off tripod camera, zero camera movement, no pan, no tilt, no zoom.',
-    'The entire background, composition, lighting, and all static objects must remain perfectly frozen and identical to the input image.',
-    `ONLY the following elements move continuously in a seamless loop: ${state.animElements}.`,
-    'All other elements are completely still. No flicker, no shimmer, no background sliding.',
-    'Seamless looping motion, natural subtle movement, lofi hip hop aesthetic, cozy atmosphere.',
-    'No text, no watermark, no subtitles.'
-  ].join(' ');
+  const canvas = $('videoCanvas');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  
+  const [w, h] = state.ratio === '1:1' ? [768, 768] : [1024, 576];
+  canvas.width = w; canvas.height = h;
 
-  // Modèle 2.5 Flash : seconds est une string entre "4" et "12"
-  const seconds = String(Math.min(12, Math.max(4, state.duration)));
+  // Charge les images
+  const loadImg = (src) => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+  const imgBase = await loadImg(state.baseImage);
+  const imgAnim = await loadImg(state.animImage);
 
-  // ⚠️ MODE CORRECT pour utiliser une image comme première frame : "keyframe"
-  // La documentation officielle indique first_frame pour ce mode.
-  const body = {
-    model: VIDEO_MODEL,
-    prompt: videoPrompt,
-    mode: 'keyframe',
-    first_frame: state.baseImageUrl,
-    seconds: seconds,
-    size: '720P',
-    aspect_ratio: state.ratio
-  };
+  // Créer un canvas pour découper l'élément animé (retirer le noir)
+  const cutCanvas = document.createElement('canvas');
+  cutCanvas.width = w; cutCanvas.height = h;
+  const cutCtx = cutCanvas.getContext('2d');
+  cutCtx.drawImage(imgAnim, 0, 0, w, h);
+  const imgData = cutCtx.getImageData(0, 0, w, h);
+  const data = imgData.data;
 
-  try {
-    status.textContent = 'Création de la tâche vidéo…';
-    const createRes = await fetch(`${API_URL}/videos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (!createRes.ok) {
-      const err = await createRes.text();
-      throw new Error(`Création HTTP ${createRes.status} — ${err.slice(0, 300)}`);
+  // On retire les pixels noirs (seuil de tolérance)
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i] < 20 && data[i+1] < 20 && data[i+2] < 20) {
+      data[i+3] = 0; // Rend transparent
     }
-
-    const createData = await createRes.json();
-    const videoId = createData.video_id || createData.id || createData.task_id;
-    if (!videoId) throw new Error('Pas de video_id retourné');
-
-    status.textContent = 'Tâche créée. Génération en cours (cela peut prendre 1–3 minutes)…';
-
-    // Polling avec model_name requis pour tous les modes sauf "text"
-    const maxAttempts = 120;
-    for (let i = 0; i < maxAttempts; i++) {
-      await sleep(5000);
-      
-      const pollUrl = `${POLL_BASE}?video_id=${encodeURIComponent(videoId)}&model_name=${encodeURIComponent(VIDEO_MODEL)}`;
-      const pollRes = await fetch(pollUrl, {
-        headers: { 'Authorization': `Bearer ${state.apiKey}` }
-      });
-
-      if (!pollRes.ok) continue;
-      const pollData = await pollRes.json();
-      const s = pollData.status || 'unknown';
-
-      if (s === 'completed' || s === 'succeeded' || s === 'done') {
-        const url = pollData.url || (pollData.metadata && pollData.metadata.url) || (pollData.output && pollData.output.url);
-        if (!url) throw new Error('Vidéo terminée mais pas d\'URL');
-        state.videoUrl = url;
-
-        $('resultVideo').src = url;
-        $('downloadLink').href = url;
-        $('downloadLink').download = `lofi-cinemagraph-${Date.now()}.mp4`;
-        $('downloadLink').textContent = '⬇ Télécharger la vidéo (.mp4)';
-        $('downloadLink').classList.remove('hidden');
-        $('videoDuration').textContent = seconds + 's';
-        status.textContent = '✅ Vidéo prête !';
-        showStep(3);
-        $('resultVideo').play().catch(() => {});
-        return;
-      }
-
-      if (s === 'failed' || s === 'error') {
-        throw new Error('Génération échouée : ' + (pollData.error || 'inconnu'));
-      }
-
-      status.textContent = `Génération en cours… (${(i + 1) * 5}s)`;
-    }
-
-    throw new Error('Délai dépassé. La tâche est peut-être encore en cours.');
-  } catch (e) {
-    console.error(e);
-    status.textContent = 'Erreur : ' + e.message;
-    toast('Échec de l\'animation : ' + e.message.slice(0, 100));
   }
+  cutCtx.putImageData(imgData, 0, 0);
+
+  // Configuration de l'encodeur
+  const totalFrames = FPS * state.duration;
+  const frameDurationUs = Math.round(1_000_000 / FPS);
+
+  const muxer = new Mp4Muxer.Muxer({
+    target: new Mp4Muxer.ArrayBufferTarget(),
+    video: { codec: 'avc', width: w, height: h },
+    fastStart: 'in-memory'
+  });
+
+  const videoEncoder = new VideoEncoder({
+    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    error: e => console.error(e)
+  });
+
+  const config = { codec: 'avc1.42001f', width: w, height: h, bitrate: 5_000_000, framerate: FPS };
+  videoEncoder.configure(config);
+
+  status.textContent = "Encodage...";
+
+  for (let frame = 0; frame < totalFrames; frame++) {
+    // 1. Dessiner le fond (statique)
+    ctx.drawImage(imgBase, 0, 0, w, h);
+    
+    // 2. Animer l'overlay
+    // On crée un mouvement de va-et-vient horizontal et vertical très lent
+    const t = (frame / FPS); // Temps écoulé en secondes
+    const offsetX = Math.sin(t * 0.5) * 30; // Mouvement horizontal
+    const offsetY = Math.cos(t * 0.3) * 15 - (t * 5); // Mouvement vertical
+    
+    // Appliquer un léger zoom/boucle pour éviter les bords noirs
+    ctx.save();
+    ctx.globalAlpha = 0.8; // Opacité de l'élément
+    ctx.drawImage(cutCanvas, offsetX, offsetY, w, h);
+    ctx.restore();
+
+    // 3. Créer la frame
+    const vf = new VideoFrame(canvas, { 
+      timestamp: frame * frameDurationUs, 
+      duration: frameDurationUs,
+      alpha: 'discard' 
+    });
+    
+    videoEncoder.encode(vf, { keyFrame: frame % 60 === 0 });
+    vf.close();
+
+    // Progress
+    if (frame % 10 === 0) {
+      status.textContent = `Encodage... ${Math.round((frame/totalFrames)*100)}%`;
+      await sleep(1);
+    }
+  }
+
+  status.textContent = "Finalisation...";
+  await videoEncoder.flush();
+  muxer.finalize();
+
+  const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+  const url = URL.createObjectURL(blob);
+
+  $('resultVideo').src = url;
+  $('downloadLink').href = url;
+  $('downloadLink').download = `lofi-cinemagraph-${Date.now()}.mp4`;
+  $('downloadLink').classList.remove('hidden');
+  status.textContent = "✅ Vidéo prête !";
+  toast('Vidéo assemblée avec succès !');
 }
 
 function resetApp() {
-  if (!confirm('Recommencer ? L\'image et la vidéo actuelles seront perdues.')) return;
-  state.baseImageUrl = null;
-  state.videoUrl = null;
-  $('baseImage').src = '';
+  state.baseImage = null;
+  state.animImage = null;
   $('resultVideo').removeAttribute('src');
   $('downloadLink').classList.add('hidden');
-  $('animStatus').textContent = '';
   showStep(1);
 }
 </script>
