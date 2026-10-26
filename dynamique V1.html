@@ -39,6 +39,15 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 .progress-step.current{color:#fff;background:var(--a);border-color:var(--a)}
 .progress-index{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);font:600 12px Orbitron;flex-shrink:0}
 .progress-step.current .progress-index{background:rgba(255,255,255,.25)}
+/* Sélection des éléments à l'étape 1 */
+.elements-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:12px 0}
+.el-chip{display:flex;align-items:center;gap:8px;background:#0b0e14;border:1px solid var(--ln);border-radius:6px;padding:10px 12px;cursor:pointer;transition:all .15s;user-select:none}
+.el-chip:hover{border-color:var(--a);background:#111520}
+.el-chip.checked{border-color:var(--a);background:rgba(139,92,246,.15);box-shadow:0 0 0 1px var(--a)}
+.el-chip input{display:none}
+.el-chip .box{width:16px;height:16px;border:1.5px solid var(--ln);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0}
+.el-chip.checked .box{background:var(--a);border-color:var(--a)}
+.el-chip .name{font-size:13px;font-weight:600}
 .editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
 .stage-wrap{min-height:240px;background:#0b0e14;border:1px solid var(--ln);border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .stage{position:relative;background:#000;border-radius:6px;overflow:hidden;line-height:0;touch-action:none}
@@ -66,21 +75,13 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 .property-title{margin:0 0 8px;font:600 13px Orbitron;color:var(--a);letter-spacing:.05em}
 .check{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px}
 .muted{color:var(--dim);font-size:13px}
-.swatch-row{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
-.swatch{width:22px;height:22px;border-radius:4px;border:2px solid rgba(255,255,255,.15);cursor:pointer;transition:transform .12s}
-.swatch:hover{transform:scale(1.18);border-color:var(--a);z-index:2}
-.swatch.is-active{border-color:var(--a);box-shadow:0 0 0 2px rgba(139,92,246,.4)}
-.nuancier-header{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;font-size:12px}
-.nuancier-current{font-family:var(--m);font-size:11px;color:var(--dim);padding:2px 6px;background:#0b0e14;border-radius:3px;border:1px solid var(--ln)}
-.nuancier-free{display:flex;align-items:center;gap:6px;margin-top:4px;padding:4px 6px;background:#0b0e14;border-radius:4px;border:1px dashed var(--ln);font-size:11px}
-.nuancier-free input[type=color]{width:36px;height:22px;border:0;background:transparent;padding:0;cursor:pointer}
 .mascot-section{margin-top:12px;border-top:1px solid var(--ln);padding-top:10px}
 .mascot-list{display:flex;flex-wrap:wrap;gap:6px}
 .mascot-item{position:relative;width:52px;height:52px;border-radius:6px;border:1px solid var(--ln);background:#0b0e14;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .mascot-item img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
 .mascot-item:hover{border-color:var(--a)}
 .mascot-del{position:absolute;top:0;right:0;background:rgba(0,0,0,.75);color:#f87171;border:none;width:16px;height:16px;font-size:10px;cursor:pointer;border-radius:0 0 0 4px}
-.mascot-add{width:52px;height:52px;border-radius:6px;border:2px dashed var(--ln);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);font-size:.55rem;text-align:center;flex-direction:column;gap:2px}
+.mascot-add{width:52px;height:52px;border-radius:6px;border:2px dashed var(--ln);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);font-size:.55rem;text-align:center;flex-direction:column;gap:2px;position:relative}
 .mascot-add:hover{border-color:var(--a);color:var(--a)}
 .mascot-add input{display:none}
 .slider-block{background:#0b0e14;border:1px solid var(--ln);border-radius:6px;padding:10px;margin:12px 0}
@@ -90,6 +91,8 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 .gen-preview img{max-width:100%;max-height:100%;object-fit:contain}
 .gen-preview .sp{border:2px solid var(--a);border-top-color:transparent;border-radius:50%;animation:r 1s linear infinite;width:32px;height:32px}
 @keyframes r{to{transform:rotate(360deg)}}
+.auto-btn{background:var(--ok)!important;border-color:var(--ok)!important;color:#fff!important;width:100%;margin-top:6px}
+.auto-btn:hover{background:#059669!important;border-color:#059669!important}
 @media(max-width:900px){.editor-layout{grid-template-columns:1fr}.progress{grid-template-columns:repeat(2,1fr)}.progress-step span:last-child{display:none}}
 </style>
 </head>
@@ -107,22 +110,24 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     <button class="progress-step" data-step="4"><span class="progress-index">4</span><span>Export</span></button>
   </nav>
 
-  <!-- ÉTAPE 1 : Génération d'UNE image -->
+  <!-- ÉTAPE 1 -->
   <section id="step1" class="hero">
     <div class="lab">ÉTAPE 1 / 4</div>
     <h2>Génération du <b>décor</b> (1 image)</h2>
-    <p class="sub">L'IA génère <b>une seule image de fond</b> — le décor et les objets statiques. Les éléments animés (feu, pluie, fumée…) seront superposés en temps réel à l'étape 2 par le moteur canvas, garantissant une fluidité 60 FPS sans saccade.</p>
+    <p class="sub">L'IA génère <b>une seule image de fond</b>. Sélectionne ci-dessous les éléments animés que tu veux voir apparaître : l'IA réservera l'espace nécessaire (sans les dessiner), et le moteur canvas les superposera à l'étape 2 en temps réel (60 FPS, aucune saccade).</p>
 
     <label class="f"><span>🔑 Clé API Agnès (stockée localement)</span>
       <input type="text" id="apiKey" placeholder="sk-..." autocomplete="off">
     </label>
     <label class="f"><span>🎨 Description du décor (anglais recommandé)</span>
-      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, wooden table with a candle holder (empty), window showing rainy night (rain overlaid later), warm desk lamp turned off, cat cushion (empty), lofi hip hop aesthetic, highly detailed, 4k, studio ghibli style"></textarea>
+      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, wooden table, window with night sky, cat cushion, lofi hip hop aesthetic, highly detailed, 4k, studio ghibli style"></textarea>
     </label>
-    <label class="f"><span>✨ Éléments animés prévus (pour que le décor les accueille)</span>
-      <input type="text" id="animHint" placeholder="Ex: candle flame, rain outside window, dust in light, smoke from incense">
-    </label>
-    <div style="display:flex;gap:16px;flex-wrap:wrap">
+
+    <div class="lab" style="margin-top:16px">✨ Éléments animés à intégrer dans la scène</div>
+    <p class="sub" style="margin-bottom:8px;font-size:13px">Coche ceux que tu veux. L'IA préparera le décor pour les accueillir, puis ils seront auto-placés à l'étape 2.</p>
+    <div id="elementsPicker" class="elements-picker"></div>
+
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
       <label class="f" style="flex:1"><span>🖼️ Format</span>
         <select id="ratio">
           <option value="16:9">16:9 (Paysage)</option>
@@ -132,7 +137,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
       </label>
     </div>
     <div class="ft">
-      <span></span>
+      <span id="pickCount" class="muted" style="font-size:12px"></span>
       <button class="big" id="btnGenerate" onclick="generateBackground()">✦ Générer le décor</button>
     </div>
     <div id="genStatus" class="status-line"></div>
@@ -143,11 +148,11 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     </div>
   </section>
 
-  <!-- ÉTAPE 2 : Placement des effets -->
+  <!-- ÉTAPE 2 -->
   <section id="step2" class="hero hidden">
     <div class="lab">ÉTAPE 2 / 4</div>
     <h2>Placement des <b>effets animés</b></h2>
-    <p class="sub">Glisse une zone pour la déplacer. Les carrés aux coins la redimensionnent. Suppr retire l'élément sélectionné. Ctrl+D duplique.</p>
+    <p class="sub">Clique sur <b>« Auto-placer »</b> pour insérer automatiquement les effets cochés à l'étape 1 (emplacement, taille, couleur et vitesse cohérents). Tu peux ensuite ajuster chaque effet à la souris.</p>
     <div class="editor-layout">
       <div>
         <div id="stageWrap" class="stage-wrap">
@@ -164,13 +169,14 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
       </div>
       <aside class="side-panel">
         <section class="panel">
-          <h3>Éléments</h3>
-          <div class="list-actions">
+          <h3>Effets</h3>
+          <button class="btn auto-btn" id="btnAutoPlace" onclick="autoPlaceEffects()">✨ Auto-placer les effets cochés</button>
+          <div class="list-actions" style="margin-top:8px">
             <button onclick="hideAll()">Masquer tout</button>
             <button onclick="clearAll()">Vider</button>
           </div>
           <div id="elementList" class="element-list"></div>
-          <p class="lab" style="margin-top:8px">Ajouter un effet</p>
+          <p class="lab" style="margin-top:8px">Ajouter manuellement</p>
           <div id="addGrid" class="add-grid"></div>
           <div class="mascot-section">
             <p class="lab">Mascottes</p>
@@ -198,11 +204,11 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     </div>
   </section>
 
-  <!-- ÉTAPE 3 : Aperçu plein écran -->
+  <!-- ÉTAPE 3 -->
   <section id="step3" class="hero hidden">
     <div class="lab">ÉTAPE 3 / 4</div>
     <h2>Aperçu <b>temps réel</b></h2>
-    <p class="sub">C'est exactement le rendu du fichier exporté. Boucle infinie, 60 FPS, aucune saccade. Le slider de vitesse agit en direct.</p>
+    <p class="sub">C'est exactement le rendu du fichier exporté. Boucle infinie, 60 FPS, aucune saccade. Le slider agit en direct.</p>
     <div class="preview-box"><canvas id="previewCanvas"></canvas></div>
     <div class="slider-block">
       <label><span>⚡ Vitesse de l'animation</span><b id="speedOut2">1.00×</b></label>
@@ -214,7 +220,7 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
     </div>
   </section>
 
-  <!-- ÉTAPE 4 : Export -->
+  <!-- ÉTAPE 4 -->
   <section id="step4" class="hero hidden">
     <div class="lab">ÉTAPE 4 / 4</div>
     <h2>Export de l'<b>image dynamique</b></h2>
@@ -234,10 +240,9 @@ button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a)
 </main>
 
 <div id="toast"></div>
-<script src="mp4-muxer.js"></script>
 <script>
 /* =====================================================================
-   MOTEUR D'EFFETS — repris de la V10 (installLivingEffects)
+   MOTEUR D'EFFETS (repris V10)
    ===================================================================== */
 try {
 function installLivingEffects(global) {
@@ -250,27 +255,17 @@ function installLivingEffects(global) {
     const fallback = alpha === undefined ? "rgb(255,255,255)" : `rgba(255,255,255,${alpha})`;
     if (!hex || typeof hex !== "string") return fallback;
     if (hex.startsWith("rgb")) { if (alpha === undefined) return hex; const m = hex.match(/[\d.]+/g); if (!m || m.length < 3) return hex; return `rgba(${m[0]},${m[1]},${m[2]},${alpha})`; }
-    const h = hex.replace("#", "");
-    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-    const n = parseInt(full, 16);
-    if (!Number.isFinite(n)) return fallback;
-    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-    if (alpha === undefined) return `rgb(${r},${g},${b})`;
-    return `rgba(${r},${g},${b},${alpha})`;
+    const h = hex.replace("#", ""); const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h; const n = parseInt(full, 16);
+    if (!Number.isFinite(n)) return fallback; const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (alpha === undefined) return `rgb(${r},${g},${b})`; return `rgba(${r},${g},${b},${alpha})`;
   }
-  function toPx(value, total, fallbackFraction) {
-    const fb = (fallbackFraction == null ? 0 : fallbackFraction) * total;
-    if (value == null || value === "" || Number.isNaN(Number(value))) return fb;
-    const n = Number(value);
-    if (Math.abs(n) <= 1) return n * total;
-    return n;
-  }
+  function toPx(value, total, fallbackFraction) { const fb = (fallbackFraction == null ? 0 : fallbackFraction) * total; if (value == null || value === "" || Number.isNaN(Number(value))) return fb; const n = Number(value); if (Math.abs(n) <= 1) return n * total; return n; }
   function readEnabled(cfg) { return !cfg || cfg.enabled !== false; }
   function globalWind() { return Number(global.__wind || 0); }
 
   class AmbientLight {
     constructor(opts) { this.cfg = opts || {}; this.t = 0; this.current = this.cfg.intensity ?? 0.25; }
-    update(dt) { if (!readEnabled(this.cfg)) return; const speed = Number(this.cfg.pulse_speed ?? this.cfg.pulseSpeed ?? 0.45); this.t += dt * speed * 0.35; const pulse = 0.86 + 0.14 * Math.sin(this.t); this.current = (Number(this.cfg.intensity) || 0) * pulse; }
+    update(dt) { if (!readEnabled(this.cfg)) return; const speed = Number(this.cfg.pulse_speed ?? 0.45); this.t += dt * speed * 0.35; const pulse = 0.86 + 0.14 * Math.sin(this.t); this.current = (Number(this.cfg.intensity) || 0) * pulse; }
     draw(ctx, w, h) { if (!readEnabled(this.cfg) || this.current <= 0.001) return; const width = w || ctx.canvas.width; const height = h || ctx.canvas.height; ctx.save(); applyBlend(ctx, "soft-light"); ctx.fillStyle = parseColor(this.cfg.color || "#FFA500", this.current); ctx.fillRect(0, 0, width, height); ctx.restore(); }
   }
 
@@ -440,8 +435,7 @@ function installLivingEffects(global) {
       this._build();
     }
     _build() {
-      const s = this.scene;
-      this.viewWidth = this.canvas.width || 1280; this.viewHeight = this.canvas.height || 720;
+      const s = this.scene; this.viewWidth = this.canvas.width || 1280; this.viewHeight = this.canvas.height || 720;
       this.ambient = s.ambient_light ? new AmbientLight(s.ambient_light) : null;
       this.effects = [];
       const list = s.animated_elements || s.elements || [];
@@ -460,7 +454,7 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
 } catch (e) { console.error("Moteur d'effets :", e); }
 
 /* =====================================================================
-   ÉDITEUR — simplifié, repris de la V10
+   ÉDITEUR (repris V10)
    ===================================================================== */
 (function (root) {
   "use strict";
@@ -476,19 +470,8 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
   class VisualElement {
     constructor(config, canvas) { this.config = config; this.canvas = canvas; this.editor = null; }
     space() { if (this.editor && this.editor.viewWidth) return { w: this.editor.viewWidth, h: this.editor.viewHeight }; return { w: this.canvas.width || 1, h: this.canvas.height || 1 }; }
-    getBounds() {
-      const { w, h } = this.space(); const c = this.config;
-      if (c.type === "candle" || c.type === "ceiling_light") { const radius = c.radius == null ? 0.045 : Number(c.radius); const r = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius; const cx = toPx(c.position?.x ?? 0.5, w); const cy = toPx(c.position?.y ?? 0.5, h); return { x: cx - r, y: cy - r, width: r * 2, height: r * 2 }; }
-      if (c.region) return { x: toPx(c.region.x, w), y: toPx(c.region.y, h), width: Math.max(12, toPx(c.region.width, w)), height: Math.max(12, toPx(c.region.height, h)) };
-      return { x: toPx(c.position?.x ?? 0, w), y: toPx(c.position?.y ?? 0, h), width: Math.max(12, toPx(c.size?.width ?? 0.1, w)), height: Math.max(12, toPx(c.size?.height ?? 0.1, h)) };
-    }
-    setBounds(x, y, width, height) {
-      const { w, h } = this.space(); const bw = Math.max(16, width); const bh = Math.max(16, height); const c = this.config;
-      if (c.type === "candle" || c.type === "ceiling_light") { const r = Math.min(bw, bh) / 2; c.radius = r / Math.min(w, h); if (!c.position) c.position = { x: 0.5, y: 0.5 }; c.position.x = (x + bw / 2) / w; c.position.y = (y + bh / 2) / h; return; }
-      if (c.region) { c.region.x = x / w; c.region.y = y / h; c.region.width = bw / w; c.region.height = bh / h; return; }
-      if (!c.position) c.position = { x: 0, y: 0 }; if (!c.size) c.size = { width: 0.1, height: 0.1 };
-      c.position.x = x / w; c.position.y = y / h; c.size.width = bw / w; c.size.height = bh / h;
-    }
+    getBounds() { const { w, h } = this.space(); const c = this.config; if (c.type === "candle" || c.type === "ceiling_light") { const radius = c.radius == null ? 0.045 : Number(c.radius); const r = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius; const cx = toPx(c.position?.x ?? 0.5, w); const cy = toPx(c.position?.y ?? 0.5, h); return { x: cx - r, y: cy - r, width: r * 2, height: r * 2 }; } if (c.region) return { x: toPx(c.region.x, w), y: toPx(c.region.y, h), width: Math.max(12, toPx(c.region.width, w)), height: Math.max(12, toPx(c.region.height, h)) }; return { x: toPx(c.position?.x ?? 0, w), y: toPx(c.position?.y ?? 0, h), width: Math.max(12, toPx(c.size?.width ?? 0.1, w)), height: Math.max(12, toPx(c.size?.height ?? 0.1, h)) }; }
+    setBounds(x, y, width, height) { const { w, h } = this.space(); const bw = Math.max(16, width); const bh = Math.max(16, height); const c = this.config; if (c.type === "candle" || c.type === "ceiling_light") { const r = Math.min(bw, bh) / 2; c.radius = r / Math.min(w, h); if (!c.position) c.position = { x: 0.5, y: 0.5 }; c.position.x = (x + bw / 2) / w; c.position.y = (y + bh / 2) / h; return; } if (c.region) { c.region.x = x / w; c.region.y = y / h; c.region.width = bw / w; c.region.height = bh / h; return; } if (!c.position) c.position = { x: 0, y: 0 }; if (!c.size) c.size = { width: 0.1, height: 0.1 }; c.position.x = x / w; c.position.y = y / h; c.size.width = bw / w; c.size.height = bh / h; }
     containsPoint(x, y) { const b = this.getBounds(); const pad = 6; return x >= b.x - pad && x <= b.x + b.width + pad && y >= b.y - pad && y <= b.y + b.height + pad; }
     handles() { const b = this.getBounds(); return [{ name: "nw", x: b.x, y: b.y }, { name: "ne", x: b.x + b.width, y: b.y }, { name: "sw", x: b.x, y: b.y + b.height }, { name: "se", x: b.x + b.width, y: b.y + b.height }]; }
     hitHandle(x, y) { const slop = 12; const found = this.handles().find((h) => Math.abs(h.x - x) <= slop && Math.abs(h.y - y) <= slop); return found ? found.name : null; }
@@ -511,56 +494,72 @@ installLivingEffects(typeof window !== "undefined" ? window : globalThis);
     removeElement(id) { this.elements = this.elements.filter((el) => el.config.id !== id); this.effects.delete(id); if (this.selectedElement && this.selectedElement.config.id === id) this.selectedElement = null; if (typeof this.onChange === "function") this.onChange(); }
     selectElement(id) { this.selectedElement = this.elements.find((el) => el.config.id === id) || null; if (typeof this.onSelect === "function") this.onSelect(this.selectedElement); return this.selectedElement; }
     moveElement(id, dir) { const i = this.elements.findIndex((el) => el.config.id === id); const n = i + dir; if (i < 0 || n < 0 || n >= this.elements.length) return; const [item] = this.elements.splice(i, 1); this.elements.splice(n, 0, item); if (typeof this.onChange === "function") this.onChange(); }
-    handleMouseDown(x, y) {
-      if (this.selectedElement) { const h = this.selectedElement.hitHandle(x, y); if (h) { this.isDragging = true; this.dragMode = "resize"; this.activeHandle = h; this.dragOrigin = { x, y, bounds: this.selectedElement.getBounds() }; return true; } }
-      for (let i = this.elements.length - 1; i >= 0; i--) { const el = this.elements[i]; if (el.containsPoint(x, y)) { this.selectedElement = el; this.isDragging = true; this.dragMode = "move"; const b = el.getBounds(); this.dragOffset = { x: x - b.x, y: y - b.y }; if (typeof this.onSelect === "function") this.onSelect(el); return true; } }
-      this.selectedElement = null; if (typeof this.onSelect === "function") this.onSelect(null); return false;
-    }
-    handleMouseMove(x, y) {
-      if (!this.isDragging || !this.selectedElement) return;
-      if (this.dragMode === "resize" && this.dragOrigin) { const b = this.dragOrigin.bounds; const dx = x - this.dragOrigin.x; const dy = y - this.dragOrigin.y; let nx = b.x, ny = b.y, nw = b.width, nh = b.height; if (this.activeHandle.indexOf("e") !== -1) nw = b.width + dx; if (this.activeHandle.indexOf("s") !== -1) nh = b.height + dy; if (this.activeHandle.indexOf("w") !== -1) { nw = b.width - dx; nx = b.x + dx; } if (this.activeHandle.indexOf("n") !== -1) { nh = b.height - dy; ny = b.y + dy; } this.selectedElement.setBounds(nx, ny, nw, nh); return; }
-      const b = this.selectedElement.getBounds(); this.selectedElement.setBounds(x - this.dragOffset.x, y - this.dragOffset.y, b.width, b.height);
-    }
+    handleMouseDown(x, y) { if (this.selectedElement) { const h = this.selectedElement.hitHandle(x, y); if (h) { this.isDragging = true; this.dragMode = "resize"; this.activeHandle = h; this.dragOrigin = { x, y, bounds: this.selectedElement.getBounds() }; return true; } } for (let i = this.elements.length - 1; i >= 0; i--) { const el = this.elements[i]; if (el.containsPoint(x, y)) { this.selectedElement = el; this.isDragging = true; this.dragMode = "move"; const b = el.getBounds(); this.dragOffset = { x: x - b.x, y: y - b.y }; if (typeof this.onSelect === "function") this.onSelect(el); return true; } } this.selectedElement = null; if (typeof this.onSelect === "function") this.onSelect(null); return false; }
+    handleMouseMove(x, y) { if (!this.isDragging || !this.selectedElement) return; if (this.dragMode === "resize" && this.dragOrigin) { const b = this.dragOrigin.bounds; const dx = x - this.dragOrigin.x; const dy = y - this.dragOrigin.y; let nx = b.x, ny = b.y, nw = b.width, nh = b.height; if (this.activeHandle.indexOf("e") !== -1) nw = b.width + dx; if (this.activeHandle.indexOf("s") !== -1) nh = b.height + dy; if (this.activeHandle.indexOf("w") !== -1) { nw = b.width - dx; nx = b.x + dx; } if (this.activeHandle.indexOf("n") !== -1) { nh = b.height - dy; ny = b.y + dy; } this.selectedElement.setBounds(nx, ny, nw, nh); return; } const b = this.selectedElement.getBounds(); this.selectedElement.setBounds(x - this.dragOffset.x, y - this.dragOffset.y, b.width, b.height); }
     handleMouseUp() { const was = this.isDragging; this.isDragging = false; this.dragMode = null; this.activeHandle = null; this.dragOrigin = null; if (was && typeof this.onChange === "function") this.onChange(); }
     updateCursor(x, y) { if (!this.canvas) return; if (this.selectedElement && this.selectedElement.hitHandle(x, y)) { const n = this.selectedElement.hitHandle(x, y); this.canvas.style.cursor = (n === "nw" || n === "se") ? "nwse-resize" : "nesw-resize"; return; } const over = this.elements.some((el) => el.containsPoint(x, y)); this.canvas.style.cursor = over ? "grab" : "default"; }
     exportToJSON() { return { coords: "relative", elements: this.elements.map((el) => JSON.parse(JSON.stringify(el.getConfig()))) }; }
     importFromJSON(json) { this.clearElements(); const list = (json && (json.elements || json.animated_elements)) || []; list.forEach((config) => this.addElement(config)); }
     start() { if (this.running) return; this.running = true; this.last = performance.now(); const loop = (now) => { if (!this.running) return; const raw = Math.min(0.05, (now - this.last) / 1000); this.last = now; const dt = raw * (state.speedFactor || 1); this._paint(dt); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
     stop() { this.running = false; }
-    _paint(dt) {
-      const ctx = this.ctx; if (!ctx) return;
-      const w = this.viewWidth || this.canvas.width; const h = this.viewHeight || this.canvas.height; const dpr = this.dpr || 1;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h); ctx.globalCompositeOperation = "source-over";
-      if (this.image && this.image.naturalWidth) ctx.drawImage(this.image, 0, 0, w, h);
-      if (root.LivingEffects && typeof root.LivingEffects.setGlobalWind === "function") root.LivingEffects.setGlobalWind(this.wind);
-      this.elements.forEach((el) => {
-        const fx = this.effects.get(el.config.id);
-        if (el.config.enabled !== false && fx && !this._broken.has(el.config.id)) {
-          try { fx.cfg = el.config; if (fx.layout) fx.layout(w, h); if (dt) fx.update(dt); fx.draw(ctx, w, h); }
-          catch (err) { console.error(err); this._broken.add(el.config.id); }
-        }
-      });
-      if (this.ambient && this.ambient.enabled !== false && root.LivingEffects) {
-        if (!this._ambientFx) this._ambientFx = new root.LivingEffects.AmbientLight(this.ambient);
-        this._ambientFx.cfg = this.ambient; if (dt) this._ambientFx.update(dt); this._ambientFx.draw(ctx, w, h);
-      }
-      if (this.showZones) this.elements.forEach((el) => el.drawGuide(ctx, el === this.selectedElement));
-      else if (this.selectedElement) this.selectedElement.drawGuide(ctx, true);
-      if (this.selectedElement) this.selectedElement.drawSelectionHandles(ctx);
-    }
+    _paint(dt) { const ctx = this.ctx; if (!ctx) return; const w = this.viewWidth || this.canvas.width; const h = this.viewHeight || this.canvas.height; const dpr = this.dpr || 1; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h); ctx.globalCompositeOperation = "source-over"; if (this.image && this.image.naturalWidth) ctx.drawImage(this.image, 0, 0, w, h); if (root.LivingEffects && typeof root.LivingEffects.setGlobalWind === "function") root.LivingEffects.setGlobalWind(this.wind); this.elements.forEach((el) => { const fx = this.effects.get(el.config.id); if (el.config.enabled !== false && fx && !this._broken.has(el.config.id)) { try { fx.cfg = el.config; if (fx.layout) fx.layout(w, h); if (dt) fx.update(dt); fx.draw(ctx, w, h); } catch (err) { console.error(err); this._broken.add(el.config.id); } } }); if (this.ambient && this.ambient.enabled !== false && root.LivingEffects) { if (!this._ambientFx) this._ambientFx = new root.LivingEffects.AmbientLight(this.ambient); this._ambientFx.cfg = this.ambient; if (dt) this._ambientFx.update(dt); this._ambientFx.draw(ctx, w, h); } if (this.showZones) this.elements.forEach((el) => el.drawGuide(ctx, el === this.selectedElement)); else if (this.selectedElement) this.selectedElement.drawGuide(ctx, true); if (this.selectedElement) this.selectedElement.drawSelectionHandles(ctx); }
   }
   root.TYPE_META = TYPE_META; root.VisualElement = VisualElement; root.VisualEditor = VisualEditor;
 })(window);
 
 /* =====================================================================
-   APP — 4 étapes
+   APP
    ===================================================================== */
 const API_URL = 'https://apihub.agnes-ai.com/v1';
 const IMG_MODEL = 'agnes-image-2.1-flash';
 
+// Catalogue des éléments animés (checkbox étape 1 + mapping auto-place étape 2)
+const ELEMENT_CATALOG = [
+  { type: 'candle',        icon: '🕯️', label: 'Bougie',       hint: 'a lit candle flame floating above the candle wick (candle holder visible in scene, no flame drawn)' },
+  { type: 'fire',          icon: '🔥', label: 'Feu',          hint: 'a fireplace or campfire with empty logs ready for flames (no fire drawn, just glowing embers area)' },
+  { type: 'ceiling_light', icon: '💡', label: 'Plafonnier',   hint: 'a ceiling pendant lamp turned off, shade visible (no light glow drawn)' },
+  { type: 'smoke',         icon: '💨', label: 'Fumée',        hint: 'an incense stick or hot mug, no smoke drawn (empty air above for smoke to rise)' },
+  { type: 'window_light',  icon: '🌙', label: 'Lune',         hint: 'a window with night sky and moon visible (no light beams drawn)' },
+  { type: 'stars',         icon: '✨', label: 'Étoiles',      hint: 'a large open night sky area with no stars drawn (empty dark sky)' },
+  { type: 'water_cells',   icon: '💧', label: 'Caustiques',   hint: 'a calm water surface or pool (no ripples drawn, flat water)' },
+  { type: 'trees',         icon: '🍂', label: 'Feuilles',     hint: 'trees in the background with no falling leaves drawn (empty air for leaves)' },
+  { type: 'birds',         icon: '🐦', label: 'Oiseaux',      hint: 'an open sky area with no birds drawn (empty air)' },
+  { type: 'bubbles',       icon: '🔮', label: 'Bulles',       hint: 'a glass of sparkling drink or aquarium (no bubbles drawn)' },
+  { type: 'god_rays',      icon: '🌫️', label: 'Rayons',       hint: 'a window with soft light (no visible light rays drawn, they will be added)' },
+  { type: 'butterfly',     icon: '🦋', label: 'Papillon',     hint: 'flowers or garden area with no butterfly drawn (empty air for butterfly)' },
+  { type: 'grass',         icon: '🌾', label: 'Herbe',        hint: 'a grassy ground or field (no tall grass blades drawn, flat ground)' },
+  { type: 'dust',          icon: '✴️', label: 'Poussière',    hint: 'a warm lit room with soft light (no dust particles drawn)' },
+  { type: 'rain',          icon: '🌧️', label: 'Pluie',        hint: 'a window with rain-ready view or open rainy sky (no rain drops drawn)' },
+  { type: 'snow',          icon: '❄️', label: 'Neige',        hint: 'a winter scene with snow on ground (no falling snowflakes drawn)' },
+  { type: 'aurora',        icon: '🌌', label: 'Aurore',       hint: 'a wide night sky over a landscape (no aurora borealis drawn, empty sky)' }
+];
+
+// Mapping auto-place : position/taille/paramètres cohérents par type
+const AUTO_PLACE_CONFIG = {
+  candle:        { position: { x: 0.5, y: 0.62 }, radius: 0.05, flicker_speed: 3.2 },
+  fire:          { position: { x: 0.5, y: 0.72 }, size: { width: 0.14, height: 0.22 }, particle_count: 60, intensity: 0.9 },
+  ceiling_light: { position: { x: 0.5, y: 0.15 }, radius: 0.42, intensity: 0.55, flicker_speed: 1.4 },
+  smoke:         { position: { x: 0.5, y: 0.35 }, size: { width: 0.14, height: 0.4 }, count: 18, opacity: 0.28, speed: 0.5 },
+  window_light:  { position: { x: 0.72, y: 0.15 }, size: { width: 0.22, height: 0.38 }, shimmer_intensity: 0.25 },
+  stars:         { region: { x: 0.05, y: 0.04, width: 0.9, height: 0.22 }, count: 40, twinkle_speed: 1.5, starSize: 1 },
+  water_cells:   { position: { x: 0.02, y: 0.55 }, size: { width: 0.96, height: 0.4 }, wave_amplitude: 3.5, speed: 0.6 },
+  trees:         { region: { x: 0, y: 0.15, width: 1, height: 0.65 }, leafCount: 30, leafSize: 1, fall_speed: 0.35 },
+  birds:         { region: { x: 0.05, y: 0.08, width: 0.9, height: 0.35 }, count: 6, speed: 0.4, size: 1 },
+  bubbles:       { region: { x: 0.3, y: 0.4, width: 0.4, height: 0.5 }, count: 14, speed: 0.6, size: 1 },
+  god_rays:      { position: { x: 0.5, y: 0.1 }, region: { x: 0.1, y: 0, width: 0.8, height: 1 }, count: 4, intensity: 0.45, speed: 0.25 },
+  butterfly:     { position: { x: 0.4, y: 0.55 }, size: { width: 0.03, height: 0.03 }, speed: 0.6 },
+  grass:         { region: { x: 0, y: 0.72, width: 1, height: 0.28 }, count: 45, sway_amount: 3, sway_speed: 0.8 },
+  dust:          { region: { x: 0.15, y: 0.2, width: 0.7, height: 0.5 }, count: 20, opacity: 0.28, speed: 0.15 },
+  rain:          { region: { x: 0, y: 0, width: 1, height: 1 }, count: 80, opacity: 0.5, speed: 1, angle: -0.12 },
+  snow:          { region: { x: 0, y: 0, width: 1, height: 1 }, count: 60, opacity: 0.85, speed: 0.55, size: 1.5 },
+  aurora:        { region: { x: 0, y: 0, width: 1, height: 0.4 }, intensity: 0.7, speed: 0.35 }
+};
+
 const state = {
   apiKey: localStorage.getItem('lofi_api_key') || '',
-  basePrompt: '', animHint: '', ratio: '16:9',
+  basePrompt: '',
+  ratio: '16:9',
+  selectedElements: new Set(),   // <-- les cases cochées étape 1
   backgroundDataUrl: null,
   backgroundImg: null,
   speedFactor: 1,
@@ -572,7 +571,6 @@ const state = {
 };
 
 const $ = id => document.getElementById(id);
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const toast = msg => { const d = document.createElement('div'); d.textContent = msg; $('toast').appendChild(d); setTimeout(() => d.remove(), 5000); };
 
 function goStep(n) {
@@ -585,18 +583,51 @@ function goStep(n) {
   if (n === 4) updateStats();
 }
 
-/* ---------- ÉTAPE 1 : génération 1 image ---------- */
+/* ---------- ÉTAPE 1 : sélection éléments + génération ---------- */
+function renderElementsPicker() {
+  const grid = $('elementsPicker');
+  grid.innerHTML = ELEMENT_CATALOG.map(el => {
+    const checked = state.selectedElements.has(el.type) ? 'checked' : '';
+    return `<label class="el-chip ${checked}" data-type="${el.type}">
+      <input type="checkbox" ${checked ? 'checked' : ''}>
+      <span class="box">${checked ? '✓' : ''}</span>
+      <span class="name">${el.icon} ${el.label}</span>
+    </label>`;
+  }).join('');
+  grid.querySelectorAll('.el-chip').forEach(chip => {
+    const type = chip.dataset.type;
+    const input = chip.querySelector('input');
+    chip.addEventListener('click', (e) => {
+      // laisser le clic sur l'input natif ou le label gérer, mais on force le toggle
+      e.preventDefault();
+      if (state.selectedElements.has(type)) state.selectedElements.delete(type);
+      else state.selectedElements.add(type);
+      chip.classList.toggle('checked', state.selectedElements.has(type));
+      chip.querySelector('.box').textContent = state.selectedElements.has(type) ? '✓' : '';
+      updatePickCount();
+    });
+  });
+  updatePickCount();
+}
+function updatePickCount() {
+  const n = state.selectedElements.size;
+  $('pickCount').textContent = n === 0 ? 'Aucun élément sélectionné (décor vide possible)' : `${n} élément${n > 1 ? 's' : ''} sélectionné${n > 1 ? 's' : ''}`;
+}
+
 function outputSize(ratio) { if (ratio === '1:1') return [768, 768]; if (ratio === '16:10') return [1024, 640]; return [1024, 576]; }
 function toDataUrl(raw) { const v = String(raw || '').replace(/\s/g, ''); if (!v) return null; if (v.startsWith('data:image/')) return v; let mime = 'image/png'; if (v.startsWith('/9j')) mime = 'image/jpeg'; else if (v.startsWith('UklGR')) mime = 'image/webp'; else if (v.startsWith('iVBOR')) mime = 'image/png'; return `data:${mime};base64,${v}`; }
+function blobToDataUrl(blob) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); }); }
 
 async function generateBackground() {
   state.apiKey = $('apiKey').value.trim();
   if (!state.apiKey) return toast('Entre ta clé API Agnès');
   localStorage.setItem('lofi_api_key', state.apiKey);
   state.basePrompt = $('basePrompt').value.trim();
-  state.animHint = $('animHint').value.trim();
   state.ratio = $('ratio').value;
   if (!state.basePrompt) return toast('Décris le décor');
+  if (state.selectedElements.size === 0) {
+    if (!confirm('Aucun élément animé sélectionné. Générer quand même un décor sans animation ?')) return;
+  }
 
   const btn = $('btnGenerate');
   btn.disabled = true;
@@ -606,7 +637,11 @@ async function generateBackground() {
   preview.innerHTML = '<div class="sp"></div>';
   $('genContinueWrap').classList.add('hidden');
 
-  const prompt = `${state.basePrompt}. ${state.animHint ? `Reserve empty space for these animated overlays (do NOT draw them): ${state.animHint}.` : ''} Generate the BACKGROUND SCENE only, static. Do not include fire, rain, smoke, snow, stars, birds, dust, aurora, bubbles or animated particles — these will be overlaid programmatically. Photographic, highly detailed, cinematic lighting, no text, no watermark, no signature.`;
+  // Construire les hints à partir des éléments cochés
+  const hints = ELEMENT_CATALOG.filter(e => state.selectedElements.has(e.type)).map(e => e.hint);
+  const hintText = hints.length ? `Prepare the scene to receive these animated overlays (leave empty space / surfaces, but DO NOT draw the animated elements themselves): ${hints.join('; ')}.` : '';
+
+  const prompt = `${state.basePrompt}. ${hintText} Generate the STATIC BACKGROUND SCENE only. Do NOT draw any animated element (no flames, no rain, no snow, no smoke, no stars, no birds, no dust, no aurora, no bubbles, no light rays, no visible light glow from lamps). Photographic, cinematic lighting, highly detailed, 4K, no text, no watermark, no signature.`;
 
   try {
     const body = { model: IMG_MODEL, prompt, n: 1, size: '1K', ratio: state.ratio, extra_body: { response_format: 'b64_json' } };
@@ -619,7 +654,7 @@ async function generateBackground() {
     if (!dataUrl) throw new Error('Aucune image reçue');
     state.backgroundDataUrl = dataUrl;
     preview.innerHTML = `<img src="${dataUrl}" alt="Décor généré">`;
-    $('genStatus').textContent = 'Décor prêt. Tu peux passer aux effets animés.';
+    $('genStatus').textContent = 'Décor prêt. Passe à l\'étape 2 pour auto-placer les effets.';
     $('genContinueWrap').classList.remove('hidden');
     await loadBackgroundImage(dataUrl);
     toast('Décor généré.');
@@ -632,8 +667,6 @@ async function generateBackground() {
     btn.disabled = false;
   }
 }
-
-function blobToDataUrl(blob) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); }); }
 
 async function loadBackgroundImage(dataUrl) {
   return new Promise((resolve, reject) => {
@@ -677,28 +710,76 @@ function fitStage() {
 
 function buildAddGrid() {
   const grid = $('addGrid');
-  const entries = [
-    ['fire','🔥 Feu'],['candle','🕯️ Bougie'],['ceiling_light','💡 Plafonnier'],['smoke','💨 Fumée'],
-    ['window_light','🌙 Lune'],['stars','✨ Étoiles'],['water_cells','💧 Caustiques'],['trees','🍂 Feuilles'],
-    ['birds','🐦 Oiseaux'],['bubbles','🔮 Bulles'],['god_rays','🌫️ Rayons'],['butterfly','🦋 Papillon'],
-    ['grass','🌾 Herbe'],['dust','✴️ Poussière'],['rain','🌧️ Pluie'],['snow','❄️ Neige'],['aurora','🌌 Aurore']
-  ];
-  grid.innerHTML = entries.map(([k, l]) => `<button data-add="${k}">${l}</button>`).join('');
-  grid.addEventListener('click', (e) => { const b = e.target.closest('[data-add]'); if (!b) return; addEffect(b.dataset.add); });
+  grid.innerHTML = ELEMENT_CATALOG.map(el => `<button data-add="${el.type}">${el.icon} ${el.label}</button>`).join('');
+  grid.addEventListener('click', (e) => { const b = e.target.closest('[data-add]'); if (!b) return; addEffectManually(b.dataset.add); });
 }
 
-function addEffect(type) {
+/* --- AUTO-PLACEMENT --- */
+function autoPlaceEffects() {
   if (!state.editor) return toast('Génère d\'abord un décor');
-  const config = { type, enabled: true, position: { x: 0.4, y: 0.6 }, size: { width: 0.1, height: 0.1 }, speed: 0.6 };
-  if (type === 'fire') config.position = { x: 0.25, y: 0.6 };
-  if (type === 'candle') { config.radius = 0.06; delete config.size; }
-  if (type === 'ceiling_light') config.radius = 0.45;
-  if (type === 'water_cells') { config.position = { x: 0.02, y: 0.3 }; config.size = { width: 0.96, height: 0.65 }; }
-  if (type === 'grass') { config.region = { x: 0, y: 0.72, width: 1, height: 0.28 }; delete config.position; delete config.size; }
-  if (type === 'rain' || type === 'snow') { config.region = { x: 0, y: 0, width: 1, height: 1 }; delete config.position; delete config.size; }
-  const same = state.editor.elements.filter((el) => el.config.type === type).length;
-  if (config.position) { config.position.x = Math.min(0.9, (config.position.x || 0.4) + same * 0.05); config.position.y = Math.min(0.88, (config.position.y || 0.4) + (same % 3) * 0.05); }
-  const el = state.editor.addElement(config);
+  const types = Array.from(state.selectedElements);
+  if (types.length === 0) return toast('Aucun élément coché à l\'étape 1. Coche-en ou ajoute manuellement.');
+
+  // Vider les anciens effets pour éviter les doublons
+  const existing = state.editor.elements.map(e => e.config.type);
+  const toRemove = state.editor.elements.filter(e => types.includes(e.config.type));
+  toRemove.forEach(e => state.editor.removeElement(e.config.id));
+
+  let placed = 0;
+  types.forEach(type => {
+    const preset = AUTO_PLACE_CONFIG[type];
+    if (!preset) return;
+    // Mélanger le preset avec des variations cohérentes
+    const cfg = { type, enabled: true, ...JSON.parse(JSON.stringify(preset)) };
+    // Variations de couleur cohérentes
+    applyCoherentColors(cfg, type);
+    // Légères variations de position pour éviter la superposition
+    if (cfg.position && placed > 0) {
+      cfg.position.x = Math.min(0.9, cfg.position.x + (Math.random() - 0.5) * 0.06);
+      cfg.position.y = Math.min(0.9, cfg.position.y + (Math.random() - 0.5) * 0.04);
+    }
+    const el = state.editor.addElement(cfg);
+    placed++;
+  });
+
+  if (placed > 0) {
+    state.editor.selectElement(state.editor.elements[state.editor.elements.length - 1].config.id);
+    refreshElementList();
+    toast(`${placed} effet${placed > 1 ? 's' : ''} auto-placé${placed > 1 ? 's' : ''} (taille, couleur, vitesse cohérentes).`);
+  }
+}
+
+function applyCoherentColors(cfg, type) {
+  // Couleurs cohérentes par type d'effet
+  switch (type) {
+    case 'candle': cfg.flickerColor = '#FFD700'; break;
+    case 'fire': cfg.colors = ['#FF6B00', '#FFA500', '#FFD700']; break;
+    case 'ceiling_light': cfg.flickerColor = '#FFE0B0'; break;
+    case 'smoke': cfg.color = '#D9D3C7'; break;
+    case 'window_light': cfg.color = '#87CEEB'; break;
+    case 'stars': cfg.color = '#FFFFFF'; break;
+    case 'water_cells': cfg.causticColor = '#FFFFFF'; cfg.reflectionColor = '#FFE08A'; break;
+    case 'trees': cfg.color = '#C8B87A'; break;
+    case 'birds': cfg.color = '#1F1B14'; break;
+    case 'bubbles': cfg.color = '#C8E8FF'; break;
+    case 'god_rays': cfg.color = '#FFF4C8'; break;
+    case 'butterfly': cfg.color = '#3B9FC8'; cfg.wingColor = '#5AB8D8'; break;
+    case 'grass': cfg.color = '#5A8B3A'; break;
+    case 'dust': cfg.color = '#FFD700'; break;
+    case 'rain': cfg.color = '#A8C8E8'; break;
+    case 'snow': cfg.color = '#FFFFFF'; break;
+    case 'aurora': cfg.colors = ['#7DE3B5', '#8AB6F0', '#D08AE8']; break;
+  }
+}
+
+function addEffectManually(type) {
+  if (!state.editor) return toast('Génère d\'abord un décor');
+  const preset = AUTO_PLACE_CONFIG[type] || { position: { x: 0.4, y: 0.6 }, size: { width: 0.1, height: 0.1 } };
+  const cfg = { type, enabled: true, ...JSON.parse(JSON.stringify(preset)) };
+  applyCoherentColors(cfg, type);
+  const same = state.editor.elements.filter(e => e.config.type === type).length;
+  if (cfg.position) { cfg.position.x = Math.min(0.9, cfg.position.x + same * 0.04); cfg.position.y = Math.min(0.88, cfg.position.y + (same % 3) * 0.04); }
+  const el = state.editor.addElement(cfg);
   state.editor.selectElement(el.config.id);
   showPropertyPanel(el);
   refreshElementList();
@@ -706,7 +787,7 @@ function addEffect(type) {
 
 function refreshElementList() {
   const list = $('elementList'); if (!list) return;
-  if (!state.editor || !state.editor.elements.length) { list.innerHTML = '<p class="muted">Aucun effet posé.</p>'; return; }
+  if (!state.editor || !state.editor.elements.length) { list.innerHTML = '<p class="muted">Aucun effet posé. Clique sur « Auto-placer ».</p>'; return; }
   const selId = state.editor.selectedElement && state.editor.selectedElement.config.id;
   list.innerHTML = state.editor.elements.map((el) => {
     const meta = window.TYPE_META[el.config.type] || { icon: '•', label: el.config.type };
@@ -722,7 +803,7 @@ function refreshElementList() {
   }).join('');
 }
 
-$('elementList') && $('elementList').addEventListener('click', (e) => {
+$('elementList').addEventListener('click', (e) => {
   if (!state.editor) return;
   const id = e.target.dataset.id; if (!id) return;
   const action = e.target.dataset.action;
@@ -740,10 +821,7 @@ function showPropertyPanel(el) {
   const rows = [];
   rows.push(`<p class="property-title">${meta.icon} ${meta.label}</p>`);
   rows.push(`<label class="check"><input type="checkbox" data-k="enabled" ${c.enabled !== false ? 'checked' : ''}> Visible</label>`);
-  const rangeRow = (k, label, min, max, step) => {
-    const v = pathGet(c, k); if (v == null) return '';
-    return `<div class="property-row"><label>${label}</label><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${v}"></div>`;
-  };
+  const rangeRow = (k, label, min, max, step) => { const v = pathGet(c, k); if (v == null) return ''; return `<div class="property-row"><label>${label}</label><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${v}"></div>`; };
   if (c.position) { rows.push(rangeRow('position.x', 'X', 0, 1, 0.01)); rows.push(rangeRow('position.y', 'Y', 0, 1, 0.01)); }
   if (c.size) { rows.push(rangeRow('size.width', 'Largeur', 0.02, 1, 0.01)); rows.push(rangeRow('size.height', 'Hauteur', 0.02, 1, 0.01)); }
   if (c.region) { rows.push(rangeRow('region.x', 'Zone X', 0, 1, 0.01)); rows.push(rangeRow('region.y', 'Zone Y', 0, 1, 0.01)); rows.push(rangeRow('region.width', 'Zone largeur', 0.05, 1, 0.01)); rows.push(rangeRow('region.height', 'Zone hauteur', 0.05, 1, 0.01)); }
@@ -776,7 +854,7 @@ function hidePropertyPanel() { $('propertyPanel').style.display = 'none'; $('pro
 function pathGet(o, p) { return p.split('.').reduce((a, k) => a == null ? a : a[k], o); }
 
 /* Canvas interactions */
-$('editorCanvas') && $('editorCanvas').addEventListener('pointerdown', (e) => {
+$('editorCanvas').addEventListener('pointerdown', (e) => {
   if (!state.editor) return;
   const p = canvasPoint(e); state.editor.handleMouseDown(p.x, p.y);
   if (state.editor.selectedElement) showPropertyPanel(state.editor.selectedElement); else hidePropertyPanel();
@@ -806,7 +884,7 @@ function canvasPoint(e) {
   });
 });
 
-/* Speed slider */
+/* Speed sliders */
 function bindSpeed(id, outId) {
   const el = $(id); if (!el) return;
   el.addEventListener('input', () => {
@@ -829,7 +907,7 @@ function renderMascots() {
   list.innerHTML = state.mascots.map(m => `<div class="mascot-item" data-src="${m.src}" title="Cliquer pour ajouter"><img src="${m.src}" alt=""><button class="mascot-del" data-id="${m.id}">×</button></div>`).join('') +
     `<div class="mascot-add" id="mascotAddBtn">➕<input type="file" id="mascotUpload" accept="image/*" multiple></div>`;
 }
-$('mascotList') && $('mascotList').addEventListener('click', (e) => {
+$('mascotList').addEventListener('click', (e) => {
   if (e.target.closest('#mascotAddBtn')) { $('mascotUpload')?.click(); return; }
   const del = e.target.closest('.mascot-del'); if (del) { state.mascots = state.mascots.filter(m => m.id !== del.dataset.id); renderMascots(); return; }
   const item = e.target.closest('.mascot-item'); if (item) {
@@ -838,21 +916,18 @@ $('mascotList') && $('mascotList').addEventListener('click', (e) => {
     state.editor.selectElement(el.config.id); showPropertyPanel(el); refreshElementList();
   }
 });
-$('mascotList') && $('mascotList').addEventListener('change', async (e) => {
+$('mascotList').addEventListener('change', async (e) => {
   if (e.target.id !== 'mascotUpload') return;
   const files = e.target.files; if (!files) return;
   for (const f of files) { if (!f.type.startsWith('image/')) continue; const src = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); }); state.mascots.push({ id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2), src }); }
   renderMascots();
 });
 
-/* ---------- ÉTAPE 3 : aperçu plein écran ---------- */
+/* ---------- ÉTAPE 3 : aperçu ---------- */
 function startPreview() {
   if (!state.backgroundImg) return;
   const canvas = $('previewCanvas');
-  const ratio = state.backgroundImg.naturalWidth / state.backgroundImg.naturalHeight;
-  const maxW = canvas.parentElement.clientWidth; const w = maxW; const h = Math.round(w / ratio);
   canvas.width = state.backgroundImg.naturalWidth; canvas.height = state.backgroundImg.naturalHeight;
-  canvas.style.width = '100%'; canvas.style.height = '100%';
   if (state.previewPlayer) state.previewPlayer.stop();
   const scene = { ambient_light: state.ambient, elements: state.editor ? state.editor.exportToJSON().elements : [] };
   state.previewPlayer = new window.LivingEffects.ScenePlayer(canvas, scene, state.backgroundImg, state.speedFactor);
@@ -878,7 +953,7 @@ function buildStandaloneHTML() {
 <style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#wrap{min-height:100%;display:flex;align-items:center;justify-content:center}#stage{position:relative;line-height:0}#bg{display:block;width:100%;height:100%}#fx{position:absolute;inset:0;width:100%;height:100%}#ctrl{position:fixed;right:14px;bottom:14px;background:rgba(0,0,0,.55);color:#fff;padding:8px 12px;border-radius:8px;font:12px system-ui;backdrop-filter:blur(6px);display:flex;gap:8px;align-items:center;opacity:.35;transition:opacity .2s}#ctrl:hover{opacity:1}#ctrl input{width:120px;accent-color:#8b5cf6}#ctrl b{min-width:38px;text-align:right}</style></head>
 <body><div id="wrap"><div id="stage"><img id="bg" alt="" src="${state.backgroundDataUrl}"><canvas id="fx"></canvas></div></div>
 <div id="ctrl"><span>Vitesse</span><input id="sp" type="range" min="0.1" max="3" step="0.05" value="${state.speedFactor}"><b id="spv">${state.speedFactor.toFixed(2)}×</b></div>
-<script>${safeEngine.replace(/^try\s*{/, '').replace(/}\s*catch\s*\(e\)\s*{[^}]*}$/, '')}<\/script>
+<script>${safeEngine}<\/script>
 <script>
 const scene = ${json};
 if (scene.wind != null && window.LivingEffects) window.LivingEffects.setGlobalWind(scene.wind);
@@ -921,7 +996,6 @@ function exportJson() {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-/* ---------- reset ---------- */
 function resetApp() {
   if (!confirm('Recommencer ? La scène actuelle sera perdue.')) return;
   location.reload();
@@ -930,6 +1004,7 @@ function resetApp() {
 /* ---------- boot ---------- */
 window.addEventListener('DOMContentLoaded', () => {
   $('apiKey').value = state.apiKey;
+  renderElementsPicker();
   buildAddGrid();
   renderMascots();
   document.querySelectorAll('.progress-step').forEach((btn) => btn.addEventListener('click', () => goStep(Number(btn.dataset.step))));
