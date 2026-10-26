@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lofi-Loop Studio · Image dynamique</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1219;--p:#1a1f2e;--ink:#e2e8f0;--dim:#94a3b8;--ln:#2d3748;--a:#8b5cf6;--b:#f59e0b;--ok:#10b981;--er:#ef4444;--m:'Share Tech Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.5 Rajdhani,system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh;padding-bottom:70px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(var(--ln) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,var(--ln) 1px,transparent 1px) 0 0/40px 40px;opacity:.3}
+header{position:sticky;top:0;z-index:20;background:rgba(15,18,25,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--ln);padding:12px 18px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.logo{font:800 20px Orbitron;letter-spacing:.1em}.logo b{color:var(--a)}.logo i{display:block;font:10px var(--m);letter-spacing:.3em;color:var(--dim);font-style:normal}
+main{max-width:1180px;margin:0 auto;padding:24px 16px}
+.hero{background:var(--p);border:1px solid var(--ln);padding:24px;margin-bottom:20px;position:relative;border-radius:8px}
+.hero::before{content:"";position:absolute;top:-1px;left:-1px;width:16px;height:16px;border-top:2px solid var(--a);border-left:2px solid var(--a);border-radius:4px 0 0 0}
+.lab{font:11px var(--m);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+h2{font:600 28px Orbitron;letter-spacing:.04em;margin:0 0 12px}h2 b{color:var(--a)}
+p.sub{color:var(--dim);margin-bottom:16px;max-width:780px;font-size:15px}
+textarea,input[type=text],input[type=number],select{width:100%;font:13px var(--m);padding:10px;border:1px solid var(--ln);background:#0b0e14;color:var(--ink);outline:0;border-radius:4px}
+textarea:focus,input:focus,select:focus{border-color:var(--a);background:#111520}textarea{resize:vertical;min-height:80px;margin-bottom:12px}
+label.f{display:block;margin:12px 0}label.f span{display:block}
+button,.btn{font:600 12px var(--m);letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--ln);background:var(--p);color:var(--ink);cursor:pointer;border-radius:4px;transition:all .2s}
+button:hover:not(:disabled),.btn:hover{background:var(--a);border-color:var(--a);color:#fff}button:disabled{opacity:.35;cursor:not-allowed}
+.big{background:var(--a);border-color:var(--a);color:#fff;padding:14px 28px;font-size:14px;letter-spacing:.16em}.big:hover:not(:disabled){background:#7c3aed;border-color:#7c3aed}
+.ft{display:flex;justify-content:space-between;gap:10px;margin-top:24px;flex-wrap:wrap;align-items:center}
+.stats{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}
+.stats div{background:var(--p);padding:12px 16px;border-radius:6px;border:1px solid var(--ln);flex:1;min-width:120px;text-align:center}
+.stats b{display:block;font:600 20px Orbitron;color:var(--a);margin-top:4px}
+.status-line{font:13px var(--m);color:var(--b);min-height:1.4em;margin-top:8px}
+.hidden{display:none!important}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center}#toast div{background:var(--a);color:#fff;font:12px var(--m);padding:10px 16px;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.preview-box{background:#000;border:1px solid var(--ln);border-radius:8px;overflow:hidden;margin:16px 0;position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+.preview-box canvas{width:100%;height:100%;object-fit:contain;background:#000}
+.progress{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.progress-step{display:flex;align-items:center;gap:8px;background:var(--p);border:1px solid var(--ln);border-radius:6px;padding:10px 12px;color:var(--dim);cursor:pointer;font-size:13px;text-align:left}
+.progress-step.active{color:var(--ink);border-color:var(--a);background:rgba(139,92,246,.12)}
+.progress-step.current{color:#fff;background:var(--a);border-color:var(--a)}
+.progress-index{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);font:600 12px Orbitron;flex-shrink:0}
+.progress-step.current .progress-index{background:rgba(255,255,255,.25)}
+.editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.stage-wrap{min-height:240px;background:#0b0e14;border:1px solid var(--ln);border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{position:relative;background:#000;border-radius:6px;overflow:hidden;line-height:0;touch-action:none}
+#backgroundImage{display:none}
+#editorCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.side-panel .panel{background:var(--p);border:1px solid var(--ln);border-radius:8px;padding:14px;margin-bottom:12px}
+.side-panel h3{font:600 14px Orbitron;letter-spacing:.06em;margin-bottom:10px;color:var(--a);text-transform:uppercase}
+.element-list{display:grid;gap:4px;margin-bottom:10px;max-height:220px;overflow-y:auto}
+.element-item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 4px 4px 8px;border-radius:6px;background:rgba(255,255,255,.03);font-size:13px}
+.element-item.is-selected{outline:1px solid var(--a);background:rgba(139,92,246,.12)}
+.element-item.is-off{opacity:.4}
+.element-name{background:none;border:0;padding:4px 0;text-align:left;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-size:13px;cursor:pointer}
+.element-actions{display:flex;gap:2px}
+.element-actions button{width:22px;height:22px;padding:0;border-radius:4px;font-size:11px;background:rgba(255,255,255,.05);border:1px solid var(--ln)}
+.add-grid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.add-grid button{padding:6px 9px;font-size:12px;background:rgba(255,255,255,.05);border:1px solid var(--ln);border-radius:4px;color:var(--ink);letter-spacing:0;text-transform:none}
+.add-grid button:hover{background:var(--a);border-color:var(--a)}
+.list-actions{display:flex;gap:6px;margin-bottom:8px}
+.list-actions button{flex:1;padding:6px;font-size:11px}
+.property-row{display:grid;gap:3px;margin-bottom:8px}
+.property-row label{display:flex;justify-content:space-between;gap:6px;color:var(--dim);font-size:12px}
+.property-row input[type=range]{width:100%;accent-color:var(--a)}
+.property-row input[type=color]{width:100%;height:30px;border:0;background:transparent;padding:0;border-radius:4px;cursor:pointer}
+.property-row input[type=text],.property-row select{width:100%;background:#0b0e14;border:1px solid var(--ln);border-radius:4px;padding:6px;font-size:12px;color:var(--ink)}
+.property-title{margin:0 0 8px;font:600 13px Orbitron;color:var(--a);letter-spacing:.05em}
+.check{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px}
+.muted{color:var(--dim);font-size:13px}
+.swatch-row{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.swatch{width:22px;height:22px;border-radius:4px;border:2px solid rgba(255,255,255,.15);cursor:pointer;transition:transform .12s}
+.swatch:hover{transform:scale(1.18);border-color:var(--a);z-index:2}
+.swatch.is-active{border-color:var(--a);box-shadow:0 0 0 2px rgba(139,92,246,.4)}
+.nuancier-header{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;font-size:12px}
+.nuancier-current{font-family:var(--m);font-size:11px;color:var(--dim);padding:2px 6px;background:#0b0e14;border-radius:3px;border:1px solid var(--ln)}
+.nuancier-free{display:flex;align-items:center;gap:6px;margin-top:4px;padding:4px 6px;background:#0b0e14;border-radius:4px;border:1px dashed var(--ln);font-size:11px}
+.nuancier-free input[type=color]{width:36px;height:22px;border:0;background:transparent;padding:0;cursor:pointer}
+.mascot-section{margin-top:12px;border-top:1px solid var(--ln);padding-top:10px}
+.mascot-list{display:flex;flex-wrap:wrap;gap:6px}
+.mascot-item{position:relative;width:52px;height:52px;border-radius:6px;border:1px solid var(--ln);background:#0b0e14;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mascot-item img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.mascot-item:hover{border-color:var(--a)}
+.mascot-del{position:absolute;top:0;right:0;background:rgba(0,0,0,.75);color:#f87171;border:none;width:16px;height:16px;font-size:10px;cursor:pointer;border-radius:0 0 0 4px}
+.mascot-add{width:52px;height:52px;border-radius:6px;border:2px dashed var(--ln);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);font-size:.55rem;text-align:center;flex-direction:column;gap:2px}
+.mascot-add:hover{border-color:var(--a);color:var(--a)}
+.mascot-add input{display:none}
+.slider-block{background:#0b0e14;border:1px solid var(--ln);border-radius:6px;padding:10px;margin:12px 0}
+.slider-block label{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:6px}
+.slider-block input[type=range]{width:100%;accent-color:var(--a)}
+.gen-preview{background:#000;border:1px solid var(--ln);border-radius:8px;overflow:hidden;margin:16px 0;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative}
+.gen-preview img{max-width:100%;max-height:100%;object-fit:contain}
+.gen-preview .sp{border:2px solid var(--a);border-top-color:transparent;border-radius:50%;animation:r 1s linear infinite;width:32px;height:32px}
+@keyframes r{to{transform:rotate(360deg)}}
+@media(max-width:900px){.editor-layout{grid-template-columns:1fr}.progress{grid-template-columns:repeat(2,1fr)}.progress-step span:last-child{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">LOFI<b>-LOOP</b><i>IMAGE DYNAMIQUE · CANVAS 60 FPS</i></div>
+  <button class="btn" onclick="resetApp()">↺ Nouvelle session</button>
+</header>
+
+<main>
+  <nav class="progress" id="progressNav">
+    <button class="progress-step current" data-step="1"><span class="progress-index">1</span><span>Décor IA</span></button>
+    <button class="progress-step" data-step="2"><span class="progress-index">2</span><span>Effets animés</span></button>
+    <button class="progress-step" data-step="3"><span class="progress-index">3</span><span>Aperçu</span></button>
+    <button class="progress-step" data-step="4"><span class="progress-index">4</span><span>Export</span></button>
+  </nav>
+
+  <!-- ÉTAPE 1 : Génération d'UNE image -->
+  <section id="step1" class="hero">
+    <div class="lab">ÉTAPE 1 / 4</div>
+    <h2>Génération du <b>décor</b> (1 image)</h2>
+    <p class="sub">L'IA génère <b>une seule image de fond</b> — le décor et les objets statiques. Les éléments animés (feu, pluie, fumée…) seront superposés en temps réel à l'étape 2 par le moteur canvas, garantissant une fluidité 60 FPS sans saccade.</p>
+
+    <label class="f"><span>🔑 Clé API Agnès (stockée localement)</span>
+      <input type="text" id="apiKey" placeholder="sk-..." autocomplete="off">
+    </label>
+    <label class="f"><span>🎨 Description du décor (anglais recommandé)</span>
+      <textarea id="basePrompt" placeholder="Ex: Cozy japanese room at night, wooden table with a candle holder (empty), window showing rainy night (rain overlaid later), warm desk lamp turned off, cat cushion (empty), lofi hip hop aesthetic, highly detailed, 4k, studio ghibli style"></textarea>
+    </label>
+    <label class="f"><span>✨ Éléments animés prévus (pour que le décor les accueille)</span>
+      <input type="text" id="animHint" placeholder="Ex: candle flame, rain outside window, dust in light, smoke from incense">
+    </label>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <label class="f" style="flex:1"><span>🖼️ Format</span>
+        <select id="ratio">
+          <option value="16:9">16:9 (Paysage)</option>
+          <option value="16:10">16:10 (Large)</option>
+          <option value="1:1">1:1 (Carré)</option>
+        </select>
+      </label>
+    </div>
+    <div class="ft">
+      <span></span>
+      <button class="big" id="btnGenerate" onclick="generateBackground()">✦ Générer le décor</button>
+    </div>
+    <div id="genStatus" class="status-line"></div>
+    <div id="genPreview" class="gen-preview hidden"></div>
+    <div class="ft hidden" id="genContinueWrap">
+      <button class="btn" onclick="generateBackground()">↻ Regénérer</button>
+      <button class="big" onclick="goStep(2)">Continuer vers les effets →</button>
+    </div>
+  </section>
+
+  <!-- ÉTAPE 2 : Placement des effets -->
+  <section id="step2" class="hero hidden">
+    <div class="lab">ÉTAPE 2 / 4</div>
+    <h2>Placement des <b>effets animés</b></h2>
+    <p class="sub">Glisse une zone pour la déplacer. Les carrés aux coins la redimensionnent. Suppr retire l'élément sélectionné. Ctrl+D duplique.</p>
+    <div class="editor-layout">
+      <div>
+        <div id="stageWrap" class="stage-wrap">
+          <div id="stage" class="stage">
+            <img id="backgroundImage" alt="Décor" hidden>
+            <canvas id="editorCanvas"></canvas>
+          </div>
+        </div>
+        <div class="slider-block">
+          <label><span>⚡ Vitesse globale de l'animation</span><b id="speedOut">1.00×</b></label>
+          <input id="speedSlider" type="range" min="0.1" max="3" step="0.05" value="1">
+          <p class="muted" style="margin-top:6px;font-size:11px">Le slider agit sur le delta-time. À 0.25× l'animation reste parfaitement fluide (aucune saccade, contrairement à un MP4 ralenti).</p>
+        </div>
+      </div>
+      <aside class="side-panel">
+        <section class="panel">
+          <h3>Éléments</h3>
+          <div class="list-actions">
+            <button onclick="hideAll()">Masquer tout</button>
+            <button onclick="clearAll()">Vider</button>
+          </div>
+          <div id="elementList" class="element-list"></div>
+          <p class="lab" style="margin-top:8px">Ajouter un effet</p>
+          <div id="addGrid" class="add-grid"></div>
+          <div class="mascot-section">
+            <p class="lab">Mascottes</p>
+            <div id="mascotList" class="mascot-list"></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h3>Propriétés</h3>
+          <p id="propertyEmpty" class="muted">Sélectionne un élément.</p>
+          <div id="propertyPanel" style="display:none"></div>
+        </section>
+        <section class="panel">
+          <h3>Ambiance & vent</h3>
+          <label class="check"><input id="ambientEnabled" type="checkbox" checked> Voile coloré</label>
+          <div class="property-row"><label>Couleur</label><input id="ambientColor" type="color" value="#FFA500"></div>
+          <div class="property-row"><label>Intensité <output id="ambientIntensityOut">18 %</output></label><input id="ambientIntensity" type="range" min="0" max="0.55" step="0.01" value="0.18"></div>
+          <div class="property-row"><label>Respiration</label><input id="ambientPulse" type="range" min="0.05" max="1.2" step="0.05" value="0.4"></div>
+          <div class="property-row"><label>Vent global <output id="windOut">0 %</output></label><input id="windSlider" type="range" min="-1" max="1" step="0.05" value="0"></div>
+        </section>
+      </aside>
+    </div>
+    <div class="ft">
+      <button class="btn" onclick="goStep(1)">← Décor</button>
+      <button class="big" onclick="goStep(3)">Aperçu →</button>
+    </div>
+  </section>
+
+  <!-- ÉTAPE 3 : Aperçu plein écran -->
+  <section id="step3" class="hero hidden">
+    <div class="lab">ÉTAPE 3 / 4</div>
+    <h2>Aperçu <b>temps réel</b></h2>
+    <p class="sub">C'est exactement le rendu du fichier exporté. Boucle infinie, 60 FPS, aucune saccade. Le slider de vitesse agit en direct.</p>
+    <div class="preview-box"><canvas id="previewCanvas"></canvas></div>
+    <div class="slider-block">
+      <label><span>⚡ Vitesse de l'animation</span><b id="speedOut2">1.00×</b></label>
+      <input id="speedSlider2" type="range" min="0.1" max="3" step="0.05" value="1">
+    </div>
+    <div class="ft">
+      <button class="btn" onclick="goStep(2)">← Effets</button>
+      <button class="big" onclick="goStep(4)">Export →</button>
+    </div>
+  </section>
+
+  <!-- ÉTAPE 4 : Export -->
+  <section id="step4" class="hero hidden">
+    <div class="lab">ÉTAPE 4 / 4</div>
+    <h2>Export de l'<b>image dynamique</b></h2>
+    <p class="sub">Un fichier HTML autonome : image de fond + moteur d'effets + réglages, sans dépendance. S'ouvre dans n'importe quel navigateur, boucle à 60 FPS, avec un slider de vitesse intégré.</p>
+    <div class="stats">
+      <div><span class="lab">Effets posés</span><b id="statEffects">0</b></div>
+      <div><span class="lab">Vitesse</span><b id="statSpeed">1.00×</b></div>
+      <div><span class="lab">Format</span><b id="statFormat">16:9</b></div>
+    </div>
+    <div class="ft">
+      <button class="btn" onclick="goStep(3)">← Aperçu</button>
+      <button class="big" onclick="exportStandalone()">⬇ Télécharger l'image dynamique (.html)</button>
+      <button class="btn" onclick="exportJson()">⬇ Scène (.json)</button>
+    </div>
+    <div id="exportStatus" class="status-line"></div>
+  </section>
+</main>
+
+<div id="toast"></div>
+<script src="mp4-muxer.js"></script>
+<script>
+/* =====================================================================
+   MOTEUR D'EFFETS — repris de la V10 (installLivingEffects)
+   ===================================================================== */
+try {
+function installLivingEffects(global) {
+  "use strict";
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function smoothNoise(t) { const i = Math.floor(t); const f = t - i; const u = f * f * (3 - 2 * f); const n0 = Math.sin(i * 127.1) * 43758.5453; const n1 = Math.sin((i + 1) * 127.1) * 43758.5453; return lerp(n0 - Math.floor(n0), n1 - Math.floor(n1), u); }
+  function applyBlend(ctx, mode) { const map = { normal: "source-over", screen: "screen", overlay: "overlay", lighter: "lighter", multiply: "multiply", soft_light: "soft-light" }; ctx.globalCompositeOperation = map[mode] || mode || "source-over"; }
+  function parseColor(hex, alpha) {
+    const fallback = alpha === undefined ? "rgb(255,255,255)" : `rgba(255,255,255,${alpha})`;
+    if (!hex || typeof hex !== "string") return fallback;
+    if (hex.startsWith("rgb")) { if (alpha === undefined) return hex; const m = hex.match(/[\d.]+/g); if (!m || m.length < 3) return hex; return `rgba(${m[0]},${m[1]},${m[2]},${alpha})`; }
+    const h = hex.replace("#", "");
+    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+    const n = parseInt(full, 16);
+    if (!Number.isFinite(n)) return fallback;
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (alpha === undefined) return `rgb(${r},${g},${b})`;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  function toPx(value, total, fallbackFraction) {
+    const fb = (fallbackFraction == null ? 0 : fallbackFraction) * total;
+    if (value == null || value === "" || Number.isNaN(Number(value))) return fb;
+    const n = Number(value);
+    if (Math.abs(n) <= 1) return n * total;
+    return n;
+  }
+  function readEnabled(cfg) { return !cfg || cfg.enabled !== false; }
+  function globalWind() { return Number(global.__wind || 0); }
+
+  class AmbientLight {
+    constructor(opts) { this.cfg = opts || {}; this.t = 0; this.current = this.cfg.intensity ?? 0.25; }
+    update(dt) { if (!readEnabled(this.cfg)) return; const speed = Number(this.cfg.pulse_speed ?? this.cfg.pulseSpeed ?? 0.45); this.t += dt * speed * 0.35; const pulse = 0.86 + 0.14 * Math.sin(this.t); this.current = (Number(this.cfg.intensity) || 0) * pulse; }
+    draw(ctx, w, h) { if (!readEnabled(this.cfg) || this.current <= 0.001) return; const width = w || ctx.canvas.width; const height = h || ctx.canvas.height; ctx.save(); applyBlend(ctx, "soft-light"); ctx.fillStyle = parseColor(this.cfg.color || "#FFA500", this.current); ctx.fillRect(0, 0, width, height); ctx.restore(); }
+  }
+
+  class CapybaraEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "capybara"; this.t = Math.random() * 10; this.ready = false; this.img = null; this.imgSrc = this.cfg.imageSrc || ""; if (this.imgSrc) this.loadImage(); else this.ready = true; }
+    loadImage() { this.img = new Image(); this.img.crossOrigin = "Anonymous"; this.img.onload = () => { this.ready = true; }; this.img.onerror = () => {}; this.img.src = this.imgSrc; }
+    update(dt) { if (!readEnabled(this.cfg)) return; if (this.cfg.imageSrc !== this.imgSrc) { this.imgSrc = this.cfg.imageSrc; if (this.imgSrc) this.loadImage(); } this.t += dt * Number(this.cfg.speed ?? 0.6); }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const size = this.cfg.size || {}; this.x = toPx(pos.x, w, 0.4); this.y = toPx(pos.y, h, 0.7); this.w = Math.max(30, toPx(size.width, w, 0.15)); this.h = Math.max(30, toPx(size.height, h, 0.12)); this.frameW = w; this.frameH = h; this.aspectRatio = (this.img && this.img.naturalWidth) ? this.img.naturalWidth / this.img.naturalHeight : 1; }
+    draw(ctx) { if (!readEnabled(this.cfg)) return; const breathe = 1 + Math.sin(this.t * 2) * 0.03; const floatY = Math.sin(this.t * 1.5) * 4; ctx.save(); applyBlend(ctx, "source-over"); const cx = this.x + this.w * 0.5; const cy = this.y + this.h * 0.5 + floatY; ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.beginPath(); ctx.ellipse(cx, this.y + this.h * 0.9, this.w * 0.5, this.h * 0.1, 0, 0, Math.PI * 2); ctx.fill(); if (this.ready && this.img && this.img.complete) { const drawW = this.w * breathe; const drawH = (this.w / this.aspectRatio) * breathe; ctx.drawImage(this.img, cx - drawW / 2, cy - drawH / 2, drawW, drawH); } else { ctx.fillStyle = "#A67B5B"; ctx.beginPath(); ctx.ellipse(cx, cy, this.w * 0.4, this.h * 0.4, 0, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }
+  }
+
+  class FireEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "fire"; this.particles = []; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const size = this.cfg.size || {}; this.x = toPx(pos.x, w, 0.3); this.y = toPx(pos.y, h, 0.6); this.w = Math.max(8, toPx(size.width, w, 0.08)); this.h = Math.max(8, toPx(size.height, h, 0.16)); const count = clamp(Math.round(Number(this.cfg.particle_count) || 50), 1, 240); if (this.particles.length !== count) { this.particles = []; for (let i = 0; i < count; i++) this.particles.push(this._spawn(true)); } this.ready = true; }
+    _spawn(randomV) { const intensity = Number(this.cfg.intensity ?? 0.8); return { u: 0.5 + (Math.random() - 0.5) * 0.5, v: randomV ? 0.2 + Math.random() * 0.8 : 0.82 + Math.random() * 0.16, vu: (Math.random() - 0.5) * 0.08, vv: -(0.28 + Math.random() * 0.45) * (0.55 + intensity * 0.55), life: 0.5 + Math.random() * 0.9, age: randomV ? Math.random() * 0.7 : 0, size: 0.07 + Math.random() * 0.2 }; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const wind = globalWind(); for (let i = 0; i < this.particles.length; i++) { const p = this.particles[i]; p.age += dt; p.u += p.vu * dt + wind * 0.02 * dt; p.v += p.vv * dt; p.vu += (Math.random() - 0.5) * 0.25 * dt; p.vv -= 0.08 * dt; if (p.age >= p.life || p.v < -0.08) this.particles[i] = this._spawn(false); } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const intensity = clamp(Number(this.cfg.intensity ?? 0.8), 0, 1.5); const colors = Array.isArray(this.cfg.colors) && this.cfg.colors.length ? this.cfg.colors : ["#FF6B00","#FFA500","#FFD700"]; ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen"); const gx = this.x + this.w * 0.5; const gy = this.y + this.h * 0.86; const glow = ctx.createRadialGradient(gx, gy, 2, gx, gy, this.w * 0.85); glow.addColorStop(0, parseColor(colors[0], 0.55 * intensity)); glow.addColorStop(0.5, parseColor(colors[1] || colors[0], 0.2 * intensity)); glow.addColorStop(1, parseColor(colors[2] || colors[0], 0)); ctx.fillStyle = glow; ctx.fillRect(this.x - this.w * 0.3, this.y - this.h * 0.05, this.w * 1.6, this.h * 1.15); for (let i = 0; i < this.particles.length; i++) { const p = this.particles[i]; const t = p.age / p.life; const alpha = (1 - t) * (0.35 + 0.6 * intensity); const r = Math.max(1.5, p.size * this.w * (1 - t * 0.45)); const px = this.x + p.u * this.w; const py = this.y + p.v * this.h; const color = colors[i % colors.length]; const g = ctx.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, parseColor("#FFF6D8", alpha * 0.85)); g.addColorStop(0.35, parseColor(color, alpha)); g.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }
+  }
+
+  class CandleEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "candle"; this.t = Math.random() * 40; this.bright = 1; this.flicker = 1; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; this.x = toPx(pos.x, w, 0.5); this.y = toPx(pos.y, h, 0.55); const radius = this.cfg.radius == null ? 0.045 : Number(this.cfg.radius); this.radius = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius; this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const speed = Number(this.cfg.flicker_speed ?? 3.2); this.t += dt * speed; const n1 = smoothNoise(this.t * 1.7); const n2 = smoothNoise(this.t * 3.1 + 20); const n3 = smoothNoise(this.t * 0.7 + 40); this.bright = 0.55 + 0.45 * (0.5 * n1 + 0.3 * n2 + 0.2 * n3); this.flicker = 0.85 + 0.15 * Math.sin(this.t * 11.3) * Math.sin(this.t * 7.1 + 0.4); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.flickerColor || this.cfg.color || "#FFD700"; const b = this.bright * this.flicker; ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen"); const r = Math.max(4, this.radius * (0.9 + 0.2 * b)); const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r); g.addColorStop(0, parseColor(color, 0.7 * b)); g.addColorStop(0.25, parseColor(color, 0.4 * b)); g.addColorStop(0.6, parseColor(color, 0.12 * b)); g.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fill(); const coreR = r * (0.2 + 0.06 * b); const core = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, coreR); core.addColorStop(0, parseColor("#FFF8E4", 0.95 * b)); core.addColorStop(0.6, parseColor(color, 0.4 * b)); core.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = core; ctx.beginPath(); ctx.arc(this.x, this.y - coreR * 0.15, coreR, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+  }
+
+  class CeilingLightEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "ceiling_light"; this.t = Math.random() * 20; this.bright = 1; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; this.x = toPx(pos.x, w, 0.5); this.y = toPx(pos.y, h, 0.1); const radius = this.cfg.radius == null ? 0.45 : Number(this.cfg.radius); this.radius = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius; this.frameW = w; this.frameH = h; this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const speed = Number(this.cfg.flicker_speed ?? 1.4); this.t += dt * speed; const n1 = smoothNoise(this.t * 0.9); const n2 = smoothNoise(this.t * 2.3 + 5); const pulse = 0.65 + 0.35 * (0.6 * n1 + 0.4 * n2); const micro = 0.9 + 0.1 * Math.sin(this.t * 5.7 + 0.3) * Math.sin(this.t * 3.1 + 1.2); this.bright = pulse * micro; }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.flickerColor || this.cfg.color || "#FFE0B0"; const intensity = clamp(Number(this.cfg.intensity ?? 0.55), 0, 1.6); const b = this.bright * intensity; const r = Math.max(20, this.radius * (0.95 + 0.08 * b)); ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen"); const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r); g.addColorStop(0, parseColor(color, 0.42 * b)); g.addColorStop(0.35, parseColor(color, 0.22 * b)); g.addColorStop(0.7, parseColor(color, 0.08 * b)); g.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+  }
+
+  class WindowLightEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "window_light"; this.t = Math.random() * 10; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const size = this.cfg.size || {}; this.x = toPx(pos.x, w, 0.68); this.y = toPx(pos.y, h, 0.08); this.w = Math.max(8, toPx(size.width, w, 0.2)); this.h = Math.max(8, toPx(size.height, h, 0.4)); this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * 0.35; }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#87CEEB"; const shimmer = Number(this.cfg.shimmer_intensity ?? 0.22); const n = smoothNoise(this.t); const alpha = shimmer * (0.55 + 0.45 * n); ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "overlay"); const g = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.h); g.addColorStop(0, parseColor(color, alpha * 1.15)); g.addColorStop(0.55, parseColor(color, alpha * 0.4)); g.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = g; ctx.fillRect(this.x, this.y, this.w, this.h); ctx.restore(); }
+  }
+
+  class SmokeEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "smoke"; this.particles = []; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const size = this.cfg.size || {}; this.x = toPx(pos.x, w, 0.3); this.y = toPx(pos.y, h, 0.2); this.bw = Math.max(12, toPx(size.width, w, 0.14)); this.bh = Math.max(12, toPx(size.height, h, 0.4)); const count = clamp(Math.round(Number(this.cfg.count) || 16), 4, 80); if (this.particles.length !== count) { this.particles = []; for (let i = 0; i < count; i++) this.particles.push(this._spawn(true)); } this.ready = true; }
+    _spawn(random) { return { u: (Math.random() - 0.5) * 0.35, v: random ? -Math.random() * 0.85 : 0.05, vu: (Math.random() - 0.5) * 0.05, grow: 0.15 + Math.random() * 0.25, life: 3.2 + Math.random() * 3.4, age: random ? Math.random() * 3 : 0, size: 0.12 + Math.random() * 0.2, phase: Math.random() * Math.PI * 2 }; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const speed = Number(this.cfg.speed ?? 0.5); const dir = this.cfg.direction === "down" ? 1 : -1; const wind = globalWind(); for (let i = 0; i < this.particles.length; i++) { const p = this.particles[i]; p.age += dt; p.u += p.vu * dt * speed + wind * 0.03 * dt; p.v += dir * (0.12 + Math.random() * 0.05) * speed * dt; p.vu += (Math.random() - 0.5) * 0.02 * dt + Math.sin(p.age * 1.4 + p.phase) * 0.01 * dt; p.size += p.grow * dt * 0.15; if (p.age >= p.life) this.particles[i] = this._spawn(false); } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#D9D3C7"; const opacity = clamp(Number(this.cfg.opacity ?? 0.3), 0, 1); const originX = this.x + this.bw * 0.5; const originY = this.cfg.direction === "down" ? this.y : this.y + this.bh; ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "normal"); for (const p of this.particles) { const t = p.age / p.life; const fadeIn = t < 0.15 ? t / 0.15 : 1; const a = opacity * (1 - t) * fadeIn; const px = originX + p.u * this.bw; const py = originY + p.v * this.bh; const r = Math.max(4, p.size * this.bw); const g = ctx.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, parseColor(color, a)); g.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }
+  }
+
+  class StarsEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "stars"; this.stars = []; this.meteors = []; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0.05, y: 0.04, width: 0.9, height: 0.24 }; this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0); this.rw = Math.max(8, toPx(region.width, w, 0.9)); this.rh = Math.max(8, toPx(region.height, h, 0.24)); const count = clamp(Math.round(Number(this.cfg.count) || 30), 0, 200); if (this.stars.length !== count) { this.stars = []; for (let i = 0; i < count; i++) this.stars.push({ u: Math.random(), v: Math.random(), size: 0.7 + Math.random() * 1.7, phase: Math.random() * Math.PI * 2, speed: 0.35 + Math.random() * 1.1, base: 0.28 + Math.random() * 0.55, cross: Math.random() > 0.55 }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.twinkle_speed ?? 1.5); if (Math.random() < 0.002) this.meteors.push({ u: Math.random(), v: Math.random() * 0.5, vu: 0.35 + Math.random() * 0.35, vv: 0.12 + Math.random() * 0.15, age: 0, life: 1.2 + Math.random() * 0.6 }); this.meteors = this.meteors.filter((m) => { m.age += dt; m.u += m.vu * dt; m.v += m.vv * dt; return m.age < m.life; }); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#FFFFFF"; const sizeMul = Number(this.cfg.starSize ?? 1.0); ctx.save(); applyBlend(ctx, "screen"); for (const s of this.stars) { const a = s.base * (0.4 + 0.6 * (0.5 + 0.5 * Math.sin(this.t * s.speed + s.phase))); const x = this.rx + s.u * this.rw; const y = this.ry + s.v * this.rh; const r = s.size * sizeMul; ctx.fillStyle = parseColor(color, clamp(a, 0, 1)); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); if (s.cross) { ctx.strokeStyle = parseColor(color, a * 0.55); ctx.lineWidth = 0.6 * sizeMul; ctx.beginPath(); ctx.moveTo(x - r * 2.4, y); ctx.lineTo(x + r * 2.4, y); ctx.moveTo(x, y - r * 2.4); ctx.lineTo(x, y + r * 2.4); ctx.stroke(); } } for (const m of this.meteors) { const life = m.age / m.life; const a = (1 - life) * 0.9; const x = this.rx + m.u * this.rw; const y = this.ry + m.v * this.rh; const trailX = x - m.vu * 0.28 * this.rw; const trailY = y - m.vv * 0.28 * this.rh; const grad = ctx.createLinearGradient(trailX, trailY, x, y); grad.addColorStop(0, parseColor("#FFFFFF", 0)); grad.addColorStop(1, parseColor("#FFFFFF", a)); ctx.strokeStyle = grad; ctx.lineWidth = 1.6 * sizeMul; ctx.beginPath(); ctx.moveTo(trailX, trailY); ctx.lineTo(x, y); ctx.stroke(); } ctx.restore(); }
+  }
+
+  class WaterCellsEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "water_cells"; this.t = 0; this.ready = false; this.ripples = []; this.sparkles = []; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const size = this.cfg.size || {}; this.x = toPx(pos.x, w, 0.02); this.y = toPx(pos.y, h, 0.3); this.bw = Math.max(40, toPx(size.width, w, 0.96)); this.bh = Math.max(40, toPx(size.height, h, 0.65)); this.frameW = w; this.frameH = h; if (this.ripples.length === 0) { for (let i = 0; i < 12; i++) this.ripples.push({ yPos: Math.random(), amp: 2 + Math.random() * 4, freq1: 0.5 + Math.random() * 1.5, freq2: 1.2 + Math.random() * 2.0, speed1: 0.2 + Math.random() * 0.4, speed2: 0.4 + Math.random() * 0.6, phase: Math.random() * Math.PI * 2, width: 0.5 + Math.random() * 1.5, opacity: 0.1 + Math.random() * 0.25 }); for (let i = 0; i < 20; i++) this.sparkles.push({ u: Math.random(), v: Math.random(), size: 0.5 + Math.random() * 2.5, phase: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 1.5 }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.8); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const rippleColor = this.cfg.causticColor || "#FFFFFF"; const sparkleColor = this.cfg.reflectionColor || "#FFE08A"; const ampBase = Number(this.cfg.wave_amplitude ?? 3.5); const t = this.t; ctx.save(); ctx.beginPath(); ctx.rect(this.x, this.y, this.bw, this.bh); ctx.clip(); applyBlend(ctx, "screen"); ctx.lineCap = "round"; for (const rip of this.ripples) { ctx.strokeStyle = parseColor(rippleColor, rip.opacity); ctx.lineWidth = rip.width; ctx.beginPath(); const yBase = this.y + rip.yPos * this.bh; const step = 4; let first = true; for (let i = 0; i <= this.bw; i += step) { const px = this.x + i; const wave1 = Math.sin(i * 0.01 * rip.freq1 - t * rip.speed1 + rip.phase) * (rip.amp * ampBase * 0.5); const wave2 = Math.cos(i * 0.02 * rip.freq2 + t * rip.speed2 + rip.phase) * (rip.amp * ampBase * 0.2); const py = yBase + wave1 + wave2; if (first) { ctx.moveTo(px, py); first = false; } else ctx.lineTo(px, py); } ctx.stroke(); } for (const sp of this.sparkles) { const spX = this.x + sp.u * this.bw + Math.sin(t * 0.2 + sp.phase) * 8; const spY = this.y + sp.v * this.bh + Math.cos(t * 0.15 + sp.phase) * 4; const alpha = 0.3 + 0.7 * Math.max(0, Math.sin(t * sp.speed + sp.phase)); const size = sp.size * (0.8 + 0.4 * Math.sin(t * 2 + sp.phase)); const grad = ctx.createRadialGradient(spX, spY, 0, spX, spY, size * 3); grad.addColorStop(0, parseColor(sparkleColor, alpha * 0.9)); grad.addColorStop(0.3, parseColor(sparkleColor, alpha * 0.4)); grad.addColorStop(1, parseColor(sparkleColor, 0)); ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(spX, spY, size * 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }
+  }
+
+  class TreesEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "trees"; this.t = 0; this.leaves = []; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0, y: 0.18, width: 1, height: 0.62 }; this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0.18); this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 0.6)); this.frameW = w; this.frameH = h; const leafCount = clamp(Math.round(Number(this.cfg.leafCount) || 28), 4, 200); if (this.leaves.length !== leafCount) { this.leaves = []; for (let i = 0; i < leafCount; i++) this.leaves.push({ u: Math.random(), v: Math.random(), phase: Math.random() * Math.PI * 2, size: 3 + Math.random() * 6, tilt: Math.random() * Math.PI, tiltSpeed: (Math.random() - 0.5) * 1.4, swayPhase: Math.random() * Math.PI * 2, fallSpeed: 0.4 + Math.random() * 0.6, colorIndex: Math.floor(Math.random() * 4) }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const fallSpeed = Number(this.cfg.fall_speed ?? 0.35); const wind = globalWind(); this.t += dt; for (const leaf of this.leaves) { leaf.v += dt * fallSpeed * leaf.fallSpeed; leaf.u += Math.sin(this.t * 1.3 + leaf.swayPhase) * dt * 0.05 + wind * 0.06 * dt; leaf.tilt += dt * leaf.tiltSpeed; if (leaf.v > 1.02) { leaf.v = -0.02; leaf.u = Math.random(); } if (leaf.u > 1.02) leaf.u = -0.02; if (leaf.u < -0.02) leaf.u = 1.02; } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const baseColor = this.cfg.color || "#C8B87A"; const leafSizeMul = Number(this.cfg.leafSize ?? 1.0); ctx.save(); ctx.beginPath(); ctx.rect(this.rx, this.ry, this.rw, this.rh); ctx.clip(); for (const leaf of this.leaves) { const x = this.rx + leaf.u * this.rw; const y = this.ry + leaf.v * this.rh; const sz = leaf.size * leafSizeMul; ctx.save(); ctx.translate(x, y); ctx.rotate(leaf.tilt); ctx.fillStyle = parseColor(baseColor, 0.85); ctx.beginPath(); ctx.ellipse(0, 0, sz, sz * 0.45, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } ctx.restore(); }
+  }
+
+  class BirdsEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "birds"; this.birds = []; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0.05, y: 0.08, width: 0.9, height: 0.35 }; this.rx = toPx(region.x, w, 0.05); this.ry = toPx(region.y, h, 0.08); this.rw = Math.max(40, toPx(region.width, w, 0.9)); this.rh = Math.max(40, toPx(region.height, h, 0.35)); const count = clamp(Math.round(Number(this.cfg.count) || 6), 1, 20); if (this.birds.length !== count) { this.birds = []; for (let i = 0; i < count; i++) this.birds.push(this._spawn(true)); } this.ready = true; }
+    _spawn(random) { return { u: random ? Math.random() : -0.15, v: 0.15 + Math.random() * 0.7, dir: Math.random() > 0.5 ? 1 : -1, speed: 0.4 + Math.random() * 0.5, wingPhase: Math.random() * Math.PI * 2, size: 0.7 + Math.random() * 0.8, vAmp: 0.03 + Math.random() * 0.06, phase: Math.random() * Math.PI * 2 }; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt; const baseSpeed = Number(this.cfg.speed ?? 0.4); const wind = globalWind(); for (let i = 0; i < this.birds.length; i++) { const b = this.birds[i]; b.u += b.dir * dt * baseSpeed * b.speed * 0.35; b.wingPhase += dt * 12; if (b.u > 1.15 || b.u < -0.15) this.birds[i] = this._spawn(false); if (wind) b.u += wind * 0.05 * dt; } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#1F1B14"; const sizeMul = Number(this.cfg.size ?? 1.0); ctx.save(); applyBlend(ctx, "source-over"); for (const b of this.birds) { const x = this.rx + b.u * this.rw; const y = this.ry + (b.v + Math.sin(this.t * 0.6 + b.phase) * b.vAmp) * this.rh; const flap = Math.sin(b.wingPhase); const wingSpan = (6 + 4 * Math.abs(flap)) * b.size * sizeMul; const wingY = 3 * flap * b.size * sizeMul; ctx.fillStyle = parseColor(color, 0.9); ctx.beginPath(); ctx.moveTo(x - wingSpan * 0.5, y + wingY); ctx.quadraticCurveTo(x - wingSpan * 0.25, y - 3 * b.size * sizeMul, x, y); ctx.quadraticCurveTo(x + wingSpan * 0.25, y - 3 * b.size * sizeMul, x + wingSpan * 0.5, y + wingY); ctx.lineTo(x + wingSpan * 0.35, y + 2 * b.size * sizeMul); ctx.closePath(); ctx.fill(); } ctx.restore(); }
+  }
+
+  class BubblesEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "bubbles"; this.bubbles = []; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0.2, y: 0.4, width: 0.6, height: 0.5 }; this.rx = toPx(region.x, w, 0.2); this.ry = toPx(region.y, h, 0.4); this.rw = Math.max(20, toPx(region.width, w, 0.6)); this.rh = Math.max(20, toPx(region.height, h, 0.5)); const count = clamp(Math.round(Number(this.cfg.count) || 14), 2, 60); if (this.bubbles.length !== count) { this.bubbles = []; for (let i = 0; i < count; i++) this.bubbles.push(this._spawn(true)); } this.ready = true; }
+    _spawn(random) { return { u: Math.random(), v: random ? Math.random() : 1.05, r: 2 + Math.random() * 6, speed: 0.15 + Math.random() * 0.35, wobble: Math.random() * Math.PI * 2, phase: Math.random() * Math.PI * 2 }; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const speed = Number(this.cfg.speed ?? 0.6); this.t += dt; for (let i = 0; i < this.bubbles.length; i++) { const b = this.bubbles[i]; b.v -= dt * speed * b.speed; b.u += Math.sin(this.t * 1.5 + b.wobble) * dt * 0.02; if (b.v < -0.05) this.bubbles[i] = this._spawn(false); } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#C8E8FF"; const sizeMul = Number(this.cfg.size ?? 1.0); ctx.save(); applyBlend(ctx, "screen"); for (const b of this.bubbles) { const x = this.rx + b.u * this.rw; const y = this.ry + b.v * this.rh; const r = b.r * sizeMul; ctx.strokeStyle = parseColor(color, 0.7); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke(); } ctx.restore(); }
+  }
+
+  class GodRaysEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "god_rays"; this.t = 0; this.ready = false; this.rays = []; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const region = this.cfg.region || { x: 0.1, y: 0, width: 0.8, height: 1 }; this.sx = toPx(pos.x, w, 0.5); this.sy = toPx(pos.y, h, 0.1); this.rx = toPx(region.x, w, 0.1); this.ry = toPx(region.y, h, 0); this.rw = Math.max(20, toPx(region.width, w, 0.8)); this.rh = Math.max(20, toPx(region.height, h, 1)); const count = clamp(Math.round(Number(this.cfg.count) || 4), 1, 12); if (this.rays.length !== count) { this.rays = []; for (let i = 0; i < count; i++) this.rays.push({ angle: (i / count) * Math.PI * 0.8 - Math.PI * 0.4, width: 0.15 + Math.random() * 0.15, phase: Math.random() * Math.PI * 2, speed: 0.2 + Math.random() * 0.3 }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.25); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#FFF4C8"; const intensity = Number(this.cfg.intensity ?? 0.45); ctx.save(); applyBlend(ctx, "screen"); ctx.beginPath(); ctx.rect(this.rx, this.ry, this.rw, this.rh); ctx.clip(); for (const r of this.rays) { const a = intensity * (0.35 + 0.4 * (0.5 + 0.5 * Math.sin(this.t + r.phase))); ctx.save(); ctx.translate(this.sx, this.sy); ctx.rotate(r.angle); const g = ctx.createLinearGradient(0, 0, this.rh * 1.5, 0); g.addColorStop(0, parseColor(color, a)); g.addColorStop(0.6, parseColor(color, a * 0.3)); g.addColorStop(1, parseColor(color, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(this.rh * 1.5, -this.rh * 1.5 * r.width); ctx.lineTo(this.rh * 1.5, this.rh * 1.5 * r.width); ctx.lineTo(0, 8); ctx.closePath(); ctx.fill(); ctx.restore(); } ctx.restore(); }
+  }
+
+  class ButterflyEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "butterfly"; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const pos = this.cfg.position || {}; const size = this.cfg.size || {}; this.x = toPx(pos.x, w, 0.3); this.y = toPx(pos.y, h, 0.5); this.w = Math.max(5, toPx(size.width, w, 0.03)); this.h = Math.max(5, toPx(size.height, h, 0.03)); this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.6); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#3B9FC8"; const wingColor = this.cfg.wingColor || "#5AB8D8"; const cx = this.x + Math.sin(this.t * 1.1) * this.w * 0.6; const cy = this.y + Math.cos(this.t * 0.9) * this.h * 0.4; const flap = Math.abs(Math.sin(this.t * 8)); const W = this.w * (0.4 + 0.6 * flap); const H = this.h; ctx.save(); applyBlend(ctx, "source-over"); ctx.translate(cx, cy); for (const side of [-1, 1]) { ctx.save(); ctx.scale(side, 1); ctx.fillStyle = parseColor(wingColor, 0.96); ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(W * 0.4, -H * 1.1, W * 1.2, -H * 0.9, W * 1.05, -H * 0.35); ctx.bezierCurveTo(W * 1.0, -H * 0.1, W * 0.7, -H * 0.05, W * 0.3, 0); ctx.closePath(); ctx.fill(); ctx.restore(); } ctx.fillStyle = parseColor(color, 0.95); ctx.beginPath(); ctx.ellipse(0, H * 0.05, W * 0.045, H * 0.55, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+  }
+
+  class GrassEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "grass"; this.t = 0; this.blades = []; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0, y: 0.72, width: 1, height: 0.28 }; this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0.72); this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 0.28)); const count = clamp(Math.round(Number(this.cfg.count) || 40), 4, 200); if (this.blades.length !== count) { this.blades = []; for (let i = 0; i < count; i++) this.blades.push({ u: Math.random(), height: 0.4 + Math.random() * 0.6, phase: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 0.8, thickness: 1 + Math.random() * 1.5, curve: (Math.random() - 0.5) * 0.5, tint: Math.random() }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.sway_speed ?? 0.8); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#5A8B3A"; const amp = Number(this.cfg.sway_amount ?? 3); const wind = globalWind(); ctx.save(); ctx.lineCap = "round"; for (const b of this.blades) { const x = this.rx + b.u * this.rw; const baseY = this.ry + this.rh; const h = this.rh * b.height; const sway = Math.sin(this.t * b.speed + b.phase) * amp + wind * 6; ctx.strokeStyle = parseColor(color, 0.95); ctx.lineWidth = b.thickness; ctx.beginPath(); ctx.moveTo(x, baseY); ctx.quadraticCurveTo(x + sway * 0.5 + b.curve, baseY - h * 0.6, x + sway, baseY - h); ctx.stroke(); } ctx.restore(); }
+  }
+
+  class DustParticlesEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "dust"; this.particles = []; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0.15, y: 0.2, width: 0.7, height: 0.5 }; this.rx = toPx(region.x, w, 0.1); this.ry = toPx(region.y, h, 0.2); this.rw = Math.max(8, toPx(region.width, w, 0.7)); this.rh = Math.max(8, toPx(region.height, h, 0.5)); const count = clamp(Math.round(Number(this.cfg.count) || 18), 0, 160); if (this.particles.length !== count) { this.particles = []; for (let i = 0; i < count; i++) this.particles.push({ u: Math.random(), v: Math.random(), vu: (Math.random() - 0.5) * 0.35, vv: (Math.random() - 0.5) * 0.22, size: 0.8 + Math.random() * 1.8, phase: Math.random() * Math.PI * 2 }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const speed = Number(this.cfg.speed ?? 0.15); this.t += dt; const wind = globalWind(); const drift = 0.2 + speed; for (const p of this.particles) { p.vu += (Math.random() - 0.5) * dt; p.vv += (Math.random() - 0.5) * dt; p.vu *= 0.995; p.vv *= 0.995; p.u += p.vu * drift * dt + Math.sin(this.t * 0.35 + p.phase) * 0.04 * dt + wind * 0.05 * dt; p.v += p.vv * drift * dt + Math.cos(this.t * 0.28 + p.phase) * 0.03 * dt; if (p.u < 0) p.u += 1; if (p.u > 1) p.u -= 1; if (p.v < 0) p.v += 1; if (p.v > 1) p.v -= 1; } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#FFD700"; const opacity = clamp(Number(this.cfg.opacity ?? 0.28), 0, 1); ctx.save(); applyBlend(ctx, "screen"); for (const p of this.particles) { const a = opacity * (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(this.t * 0.8 + p.phase))); const x = this.rx + p.u * this.rw; const y = this.ry + p.v * this.rh; ctx.fillStyle = parseColor(color, clamp(a, 0, 1)); ctx.beginPath(); ctx.arc(x, y, p.size, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }
+  }
+
+  class RainEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "rain"; this.drops = []; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0, y: 0, width: 1, height: 1 }; this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0); this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 1)); const count = clamp(Math.round(Number(this.cfg.count) || 60), 0, 300); if (this.drops.length !== count) { this.drops = []; for (let i = 0; i < count; i++) this.drops.push({ u: Math.random(), v: Math.random(), len: 8 + Math.random() * 18, speed: 0.6 + Math.random() * 0.9 }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt; const speed = Number(this.cfg.speed ?? 1.0); const wind = globalWind(); for (const d of this.drops) { d.v += dt * speed * d.speed * 1.8; d.u += dt * speed * 0.35 * (wind * 1.2 + 0.12); if (d.v > 1.02) { d.v = -0.02; d.u = Math.random(); } if (d.u > 1.02) d.u = -0.02; if (d.u < -0.02) d.u = 1.02; } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#A8C8E8"; const opacity = clamp(Number(this.cfg.opacity ?? 0.55), 0, 1); const angle = Number(this.cfg.angle ?? -0.12) + globalWind() * 0.15; ctx.save(); applyBlend(ctx, "screen"); ctx.strokeStyle = parseColor(color, opacity); ctx.lineWidth = 1; ctx.lineCap = "round"; for (const d of this.drops) { const x = this.rx + d.u * this.rw; const y = this.ry + d.v * this.rh; const dx = Math.sin(angle) * d.len; const dy = Math.cos(angle) * d.len; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy); ctx.stroke(); } ctx.restore(); }
+  }
+
+  class SnowEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "snow"; this.flakes = []; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0, y: 0, width: 1, height: 1 }; this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0); this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 1)); const count = clamp(Math.round(Number(this.cfg.count) || 40), 0, 250); if (this.flakes.length !== count) { this.flakes = []; for (let i = 0; i < count; i++) this.flakes.push({ u: Math.random(), v: Math.random(), size: 1 + Math.random() * 3, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.5 }); } this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; const speed = Number(this.cfg.speed ?? 0.55); this.t += dt; const wind = globalWind(); for (const f of this.flakes) { f.v += dt * speed * f.speed * 0.4; f.u += Math.sin(this.t * 0.9 + f.phase) * dt * 0.04 + wind * 0.04 * dt; if (f.v > 1.02) { f.v = -0.02; f.u = Math.random(); } if (f.u > 1.02) f.u = -0.02; if (f.u < -0.02) f.u = 1.02; } }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const color = this.cfg.color || "#FFFFFF"; const opacity = clamp(Number(this.cfg.opacity ?? 0.85), 0, 1); ctx.save(); applyBlend(ctx, "screen"); for (const f of this.flakes) { const x = this.rx + f.u * this.rw; const y = this.ry + f.v * this.rh; const a = opacity * (0.5 + 0.5 * Math.sin(this.t * 1.2 + f.phase)); const r = Number(f.size) * (this.cfg.size ?? 1.5); ctx.fillStyle = parseColor(color, a); ctx.beginPath(); ctx.arc(x, y, Math.max(0.8, r), 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }
+  }
+
+  class AuroraEffect {
+    constructor(opts) { this.cfg = opts || {}; this.kind = "aurora"; this.t = 0; this.ready = false; }
+    layout(w, h) { if (!(w > 0) || !(h > 0)) return; const region = this.cfg.region || { x: 0, y: 0, width: 1, height: 0.45 }; this.rx = toPx(region.x, w, 0); this.ry = toPx(region.y, h, 0); this.rw = Math.max(8, toPx(region.width, w, 1)); this.rh = Math.max(8, toPx(region.height, h, 0.45)); this.ready = true; }
+    update(dt) { if (!this.ready || !readEnabled(this.cfg)) return; this.t += dt * Number(this.cfg.speed ?? 0.35); }
+    draw(ctx) { if (!this.ready || !readEnabled(this.cfg)) return; const colors = Array.isArray(this.cfg.colors) && this.cfg.colors.length ? this.cfg.colors : ["#7DE3B5","#8AB6F0","#D08AE8"]; const intensity = Number(this.cfg.intensity ?? 0.7); ctx.save(); applyBlend(ctx, this.cfg.blend_mode || "screen"); for (let layer = 0; layer < 3; layer++) { const color = colors[layer % colors.length]; const baseY = this.ry + this.rh * (0.2 + layer * 0.22); const layerOffset = layer * 0.8; const path = new Path2D(); path.moveTo(this.rx, baseY); const step = Math.max(6, this.rw / 60); for (let x = 0; x <= this.rw; x += step) { const wave1 = Math.sin((x / this.rw) * 5.5 + this.t * 1.4 + layerOffset) * this.rh * 0.18; const wave2 = Math.sin((x / this.rw) * 11 + this.t * 2.2 + layerOffset * 0.7) * this.rh * 0.08; path.lineTo(this.rx + x, baseY + wave1 + wave2); } path.lineTo(this.rx + this.rw, this.ry + this.rh); path.lineTo(this.rx, this.ry + this.rh); path.closePath(); const grad = ctx.createLinearGradient(this.rx, baseY - this.rh * 0.3, this.rx, this.ry + this.rh); grad.addColorStop(0, parseColor(color, 0.05 * intensity)); grad.addColorStop(0.5, parseColor(color, 0.22 * intensity)); grad.addColorStop(1, parseColor(color, 0.02 * intensity)); ctx.fillStyle = grad; ctx.fill(path); } ctx.restore(); }
+  }
+
+  function createEffect(el) {
+    if (!el) return null;
+    switch (el.type) {
+      case "capybara": return new CapybaraEffect(el);
+      case "fire": return new FireEffect(el);
+      case "candle": return new CandleEffect(el);
+      case "ceiling_light": return new CeilingLightEffect(el);
+      case "window_light": return new WindowLightEffect(el);
+      case "smoke": return new SmokeEffect(el);
+      case "stars": return new StarsEffect(el);
+      case "dust": return new DustParticlesEffect(el);
+      case "water_cells": return new WaterCellsEffect(el);
+      case "trees": return new TreesEffect(el);
+      case "birds": return new BirdsEffect(el);
+      case "bubbles": return new BubblesEffect(el);
+      case "god_rays": return new GodRaysEffect(el);
+      case "butterfly": return new ButterflyEffect(el);
+      case "grass": return new GrassEffect(el);
+      case "rain": return new RainEffect(el);
+      case "snow": return new SnowEffect(el);
+      case "aurora": return new AuroraEffect(el);
+      default: return null;
+    }
+  }
+
+  class ScenePlayer {
+    constructor(canvas, scene, backgroundImage, speedFactor) {
+      this.canvas = canvas; this.ctx = canvas.getContext("2d");
+      this.scene = scene || {}; this.bg = backgroundImage || null;
+      this.effects = []; this.ambient = null; this.running = false; this.last = 0;
+      this.speedFactor = speedFactor || 1;
+      this.viewWidth = canvas.width; this.viewHeight = canvas.height;
+      this._build();
+    }
+    _build() {
+      const s = this.scene;
+      this.viewWidth = this.canvas.width || 1280; this.viewHeight = this.canvas.height || 720;
+      this.ambient = s.ambient_light ? new AmbientLight(s.ambient_light) : null;
+      this.effects = [];
+      const list = s.animated_elements || s.elements || [];
+      list.forEach((el) => { if (el.enabled === false) return; const fx = createEffect(el); if (!fx) return; if (fx.layout) fx.layout(this.viewWidth, this.viewHeight); this.effects.push(fx); });
+    }
+    resize(w, h) { if (!(w > 0) || !(h > 0)) return; this.viewWidth = w; this.viewHeight = h; if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; } this.effects.forEach((fx) => { if (fx.layout) fx.layout(w, h); }); }
+    start() { if (this.running) return; this.running = true; this.last = performance.now(); const loop = (now) => { if (!this.running) return; const raw = Math.min(0.05, (now - this.last) / 1000); this.last = now; const dt = raw * this.speedFactor; this.update(dt); this.draw(); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+    stop() { this.running = false; }
+    update(dt) { if (this.ambient) this.ambient.update(dt); this.effects.forEach((fx) => fx.update(dt)); }
+    draw() { const ctx = this.ctx; const w = this.viewWidth; const h = this.viewHeight; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); ctx.globalCompositeOperation = "source-over"; if (this.bg && this.bg.naturalWidth) ctx.drawImage(this.bg, 0, 0, w, h); this.effects.forEach((fx) => { try { fx.draw(ctx, w, h); } catch (err) { console.error(err); } }); if (this.ambient) this.ambient.draw(ctx, w, h); }
+  }
+
+  global.LivingEffects = { AmbientLight, ScenePlayer, createEffect, parseColor, applyBlend, setGlobalWind: (w) => { global.__wind = w; } };
+}
+installLivingEffects(typeof window !== "undefined" ? window : globalThis);
+} catch (e) { console.error("Moteur d'effets :", e); }
+
+/* =====================================================================
+   ÉDITEUR — simplifié, repris de la V10
+   ===================================================================== */
+(function (root) {
+  "use strict";
+  const TYPE_META = {
+    capybara: { icon: "🦫", label: "Mascotte" }, fire: { icon: "🔥", label: "Feu" }, candle: { icon: "🕯️", label: "Bougie" },
+    ceiling_light: { icon: "💡", label: "Plafonnier" }, smoke: { icon: "💨", label: "Fumée" }, window_light: { icon: "🌙", label: "Lune" },
+    stars: { icon: "✨", label: "Étoiles" }, water_cells: { icon: "💧", label: "Caustiques" }, trees: { icon: "🍂", label: "Feuilles" },
+    birds: { icon: "🐦", label: "Oiseaux" }, bubbles: { icon: "🔮", label: "Bulles" }, god_rays: { icon: "🌫️", label: "Rayons" },
+    butterfly: { icon: "🦋", label: "Papillon" }, grass: { icon: "🌾", label: "Herbe" }, dust: { icon: "✴️", label: "Poussière" },
+    rain: { icon: "🌧️", label: "Pluie" }, snow: { icon: "❄️", label: "Neige" }, aurora: { icon: "🌌", label: "Aurore" }
+  };
+  function toPx(v, total) { if (v == null || Number.isNaN(Number(v))) return 0; const n = Number(v); return Math.abs(n) <= 1 ? n * total : n; }
+  class VisualElement {
+    constructor(config, canvas) { this.config = config; this.canvas = canvas; this.editor = null; }
+    space() { if (this.editor && this.editor.viewWidth) return { w: this.editor.viewWidth, h: this.editor.viewHeight }; return { w: this.canvas.width || 1, h: this.canvas.height || 1 }; }
+    getBounds() {
+      const { w, h } = this.space(); const c = this.config;
+      if (c.type === "candle" || c.type === "ceiling_light") { const radius = c.radius == null ? 0.045 : Number(c.radius); const r = Math.abs(radius) <= 1 ? radius * Math.min(w, h) : radius; const cx = toPx(c.position?.x ?? 0.5, w); const cy = toPx(c.position?.y ?? 0.5, h); return { x: cx - r, y: cy - r, width: r * 2, height: r * 2 }; }
+      if (c.region) return { x: toPx(c.region.x, w), y: toPx(c.region.y, h), width: Math.max(12, toPx(c.region.width, w)), height: Math.max(12, toPx(c.region.height, h)) };
+      return { x: toPx(c.position?.x ?? 0, w), y: toPx(c.position?.y ?? 0, h), width: Math.max(12, toPx(c.size?.width ?? 0.1, w)), height: Math.max(12, toPx(c.size?.height ?? 0.1, h)) };
+    }
+    setBounds(x, y, width, height) {
+      const { w, h } = this.space(); const bw = Math.max(16, width); const bh = Math.max(16, height); const c = this.config;
+      if (c.type === "candle" || c.type === "ceiling_light") { const r = Math.min(bw, bh) / 2; c.radius = r / Math.min(w, h); if (!c.position) c.position = { x: 0.5, y: 0.5 }; c.position.x = (x + bw / 2) / w; c.position.y = (y + bh / 2) / h; return; }
+      if (c.region) { c.region.x = x / w; c.region.y = y / h; c.region.width = bw / w; c.region.height = bh / h; return; }
+      if (!c.position) c.position = { x: 0, y: 0 }; if (!c.size) c.size = { width: 0.1, height: 0.1 };
+      c.position.x = x / w; c.position.y = y / h; c.size.width = bw / w; c.size.height = bh / h;
+    }
+    containsPoint(x, y) { const b = this.getBounds(); const pad = 6; return x >= b.x - pad && x <= b.x + b.width + pad && y >= b.y - pad && y <= b.y + b.height + pad; }
+    handles() { const b = this.getBounds(); return [{ name: "nw", x: b.x, y: b.y }, { name: "ne", x: b.x + b.width, y: b.y }, { name: "sw", x: b.x, y: b.y + b.height }, { name: "se", x: b.x + b.width, y: b.y + b.height }]; }
+    hitHandle(x, y) { const slop = 12; const found = this.handles().find((h) => Math.abs(h.x - x) <= slop && Math.abs(h.y - y) <= slop); return found ? found.name : null; }
+    drawGuide(ctx, selected) { const b = this.getBounds(); const meta = TYPE_META[this.config.type] || { icon: "•", label: this.config.type }; ctx.save(); ctx.globalCompositeOperation = "source-over"; if (this.config.enabled === false) ctx.globalAlpha = 0.45; ctx.strokeStyle = selected ? "#f0a05a" : "rgba(255,244,230,0.55)"; ctx.lineWidth = selected ? 1.5 : 1; ctx.setLineDash(selected ? [] : [5, 4]); ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.width, b.height); ctx.setLineDash([]); const text = `${meta.icon} ${meta.label}`; ctx.font = "12px Segoe UI, sans-serif"; const tw = ctx.measureText(text).width; const lx = b.x; const ly = Math.max(0, b.y - 20); ctx.fillStyle = selected ? "rgba(240,160,90,0.92)" : "rgba(20,16,12,0.72)"; ctx.fillRect(lx, ly, tw + 12, 18); ctx.fillStyle = selected ? "#1a120c" : "#fff8ef"; ctx.fillText(text, lx + 6, ly + 13); ctx.restore(); }
+    drawSelectionHandles(ctx) { const size = 9; ctx.save(); ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff8ef"; ctx.strokeStyle = "#e39a45"; ctx.lineWidth = 1.5; this.handles().forEach((h) => { ctx.fillRect(h.x - size / 2, h.y - size / 2, size, size); ctx.strokeRect(h.x - size / 2, h.y - size / 2, size, size); }); ctx.restore(); }
+    getConfig() { return this.config; }
+  }
+  class VisualEditor {
+    constructor(canvas, imageElement) {
+      this.canvas = canvas; this.ctx = canvas.getContext("2d"); this.image = imageElement;
+      this.elements = []; this.effects = new Map(); this.selectedElement = null;
+      this.isDragging = false; this.dragMode = null; this.activeHandle = null; this.dragOffset = { x: 0, y: 0 }; this.dragOrigin = null; this.showZones = true;
+      this.running = false; this.last = 0; this.viewWidth = canvas.width || 1; this.viewHeight = canvas.height || 1; this.dpr = 1;
+      this.onSelect = null; this.onChange = null; this._broken = new Set(); this.ambient = null; this._ambientFx = null; this.wind = 0;
+    }
+    addElement(cfg) { const config = JSON.parse(JSON.stringify(cfg)); if (!config.id) config.id = `el_${Date.now().toString(36)}_${Math.floor(Math.random() * 9999)}`; const el = new VisualElement(config, this.canvas); el.editor = this; this.elements.push(el); this._mountEffect(el); return el; }
+    duplicateElement(id) { const el = this.elements.find((e) => e.config.id === id); if (!el) return null; const copy = JSON.parse(JSON.stringify(el.config)); copy.id = `${copy.type}_${Date.now().toString(36)}_${Math.floor(Math.random() * 9999)}`; if (copy.position) { copy.position.x = Math.min(0.92, (copy.position.x || 0.4) + 0.04); copy.position.y = Math.min(0.92, (copy.position.y || 0.4) + 0.04); } return this.addElement(copy); }
+    _mountEffect(el) { if (!root.LivingEffects) return null; const fx = root.LivingEffects.createEffect(el.config); if (!fx) return null; this.effects.set(el.config.id, fx); return fx; }
+    clearElements() { this.elements = []; this.effects.clear(); this.selectedElement = null; this._broken.clear(); }
+    removeElement(id) { this.elements = this.elements.filter((el) => el.config.id !== id); this.effects.delete(id); if (this.selectedElement && this.selectedElement.config.id === id) this.selectedElement = null; if (typeof this.onChange === "function") this.onChange(); }
+    selectElement(id) { this.selectedElement = this.elements.find((el) => el.config.id === id) || null; if (typeof this.onSelect === "function") this.onSelect(this.selectedElement); return this.selectedElement; }
+    moveElement(id, dir) { const i = this.elements.findIndex((el) => el.config.id === id); const n = i + dir; if (i < 0 || n < 0 || n >= this.elements.length) return; const [item] = this.elements.splice(i, 1); this.elements.splice(n, 0, item); if (typeof this.onChange === "function") this.onChange(); }
+    handleMouseDown(x, y) {
+      if (this.selectedElement) { const h = this.selectedElement.hitHandle(x, y); if (h) { this.isDragging = true; this.dragMode = "resize"; this.activeHandle = h; this.dragOrigin = { x, y, bounds: this.selectedElement.getBounds() }; return true; } }
+      for (let i = this.elements.length - 1; i >= 0; i--) { const el = this.elements[i]; if (el.containsPoint(x, y)) { this.selectedElement = el; this.isDragging = true; this.dragMode = "move"; const b = el.getBounds(); this.dragOffset = { x: x - b.x, y: y - b.y }; if (typeof this.onSelect === "function") this.onSelect(el); return true; } }
+      this.selectedElement = null; if (typeof this.onSelect === "function") this.onSelect(null); return false;
+    }
+    handleMouseMove(x, y) {
+      if (!this.isDragging || !this.selectedElement) return;
+      if (this.dragMode === "resize" && this.dragOrigin) { const b = this.dragOrigin.bounds; const dx = x - this.dragOrigin.x; const dy = y - this.dragOrigin.y; let nx = b.x, ny = b.y, nw = b.width, nh = b.height; if (this.activeHandle.indexOf("e") !== -1) nw = b.width + dx; if (this.activeHandle.indexOf("s") !== -1) nh = b.height + dy; if (this.activeHandle.indexOf("w") !== -1) { nw = b.width - dx; nx = b.x + dx; } if (this.activeHandle.indexOf("n") !== -1) { nh = b.height - dy; ny = b.y + dy; } this.selectedElement.setBounds(nx, ny, nw, nh); return; }
+      const b = this.selectedElement.getBounds(); this.selectedElement.setBounds(x - this.dragOffset.x, y - this.dragOffset.y, b.width, b.height);
+    }
+    handleMouseUp() { const was = this.isDragging; this.isDragging = false; this.dragMode = null; this.activeHandle = null; this.dragOrigin = null; if (was && typeof this.onChange === "function") this.onChange(); }
+    updateCursor(x, y) { if (!this.canvas) return; if (this.selectedElement && this.selectedElement.hitHandle(x, y)) { const n = this.selectedElement.hitHandle(x, y); this.canvas.style.cursor = (n === "nw" || n === "se") ? "nwse-resize" : "nesw-resize"; return; } const over = this.elements.some((el) => el.containsPoint(x, y)); this.canvas.style.cursor = over ? "grab" : "default"; }
+    exportToJSON() { return { coords: "relative", elements: this.elements.map((el) => JSON.parse(JSON.stringify(el.getConfig()))) }; }
+    importFromJSON(json) { this.clearElements(); const list = (json && (json.elements || json.animated_elements)) || []; list.forEach((config) => this.addElement(config)); }
+    start() { if (this.running) return; this.running = true; this.last = performance.now(); const loop = (now) => { if (!this.running) return; const raw = Math.min(0.05, (now - this.last) / 1000); this.last = now; const dt = raw * (state.speedFactor || 1); this._paint(dt); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+    stop() { this.running = false; }
+    _paint(dt) {
+      const ctx = this.ctx; if (!ctx) return;
+      const w = this.viewWidth || this.canvas.width; const h = this.viewHeight || this.canvas.height; const dpr = this.dpr || 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h); ctx.globalCompositeOperation = "source-over";
+      if (this.image && this.image.naturalWidth) ctx.drawImage(this.image, 0, 0, w, h);
+      if (root.LivingEffects && typeof root.LivingEffects.setGlobalWind === "function") root.LivingEffects.setGlobalWind(this.wind);
+      this.elements.forEach((el) => {
+        const fx = this.effects.get(el.config.id);
+        if (el.config.enabled !== false && fx && !this._broken.has(el.config.id)) {
+          try { fx.cfg = el.config; if (fx.layout) fx.layout(w, h); if (dt) fx.update(dt); fx.draw(ctx, w, h); }
+          catch (err) { console.error(err); this._broken.add(el.config.id); }
+        }
+      });
+      if (this.ambient && this.ambient.enabled !== false && root.LivingEffects) {
+        if (!this._ambientFx) this._ambientFx = new root.LivingEffects.AmbientLight(this.ambient);
+        this._ambientFx.cfg = this.ambient; if (dt) this._ambientFx.update(dt); this._ambientFx.draw(ctx, w, h);
+      }
+      if (this.showZones) this.elements.forEach((el) => el.drawGuide(ctx, el === this.selectedElement));
+      else if (this.selectedElement) this.selectedElement.drawGuide(ctx, true);
+      if (this.selectedElement) this.selectedElement.drawSelectionHandles(ctx);
+    }
+  }
+  root.TYPE_META = TYPE_META; root.VisualElement = VisualElement; root.VisualEditor = VisualEditor;
+})(window);
+
+/* =====================================================================
+   APP — 4 étapes
+   ===================================================================== */
+const API_URL = 'https://apihub.agnes-ai.com/v1';
+const IMG_MODEL = 'agnes-image-2.1-flash';
+
+const state = {
+  apiKey: localStorage.getItem('lofi_api_key') || '',
+  basePrompt: '', animHint: '', ratio: '16:9',
+  backgroundDataUrl: null,
+  backgroundImg: null,
+  speedFactor: 1,
+  ambient: { enabled: true, color: '#FFA500', intensity: 0.18, pulse_speed: 0.4 },
+  wind: 0,
+  mascots: [],
+  editor: null,
+  previewPlayer: null
+};
+
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const toast = msg => { const d = document.createElement('div'); d.textContent = msg; $('toast').appendChild(d); setTimeout(() => d.remove(), 5000); };
+
+function goStep(n) {
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  $(`step${n}`).classList.remove('hidden');
+  document.querySelectorAll('.progress-step').forEach((el, i) => { el.classList.toggle('active', i < n); el.classList.toggle('current', i === n - 1); });
+  if (n === 2) { requestAnimationFrame(() => { fitStage(); if (state.editor && !document.hidden) state.editor.start(); }); }
+  else if (state.editor) state.editor.stop();
+  if (n === 3) startPreview();
+  if (n === 4) updateStats();
+}
+
+/* ---------- ÉTAPE 1 : génération 1 image ---------- */
+function outputSize(ratio) { if (ratio === '1:1') return [768, 768]; if (ratio === '16:10') return [1024, 640]; return [1024, 576]; }
+function toDataUrl(raw) { const v = String(raw || '').replace(/\s/g, ''); if (!v) return null; if (v.startsWith('data:image/')) return v; let mime = 'image/png'; if (v.startsWith('/9j')) mime = 'image/jpeg'; else if (v.startsWith('UklGR')) mime = 'image/webp'; else if (v.startsWith('iVBOR')) mime = 'image/png'; return `data:${mime};base64,${v}`; }
+
+async function generateBackground() {
+  state.apiKey = $('apiKey').value.trim();
+  if (!state.apiKey) return toast('Entre ta clé API Agnès');
+  localStorage.setItem('lofi_api_key', state.apiKey);
+  state.basePrompt = $('basePrompt').value.trim();
+  state.animHint = $('animHint').value.trim();
+  state.ratio = $('ratio').value;
+  if (!state.basePrompt) return toast('Décris le décor');
+
+  const btn = $('btnGenerate');
+  btn.disabled = true;
+  $('genStatus').textContent = 'Génération de l\'image de fond…';
+  const preview = $('genPreview');
+  preview.classList.remove('hidden');
+  preview.innerHTML = '<div class="sp"></div>';
+  $('genContinueWrap').classList.add('hidden');
+
+  const prompt = `${state.basePrompt}. ${state.animHint ? `Reserve empty space for these animated overlays (do NOT draw them): ${state.animHint}.` : ''} Generate the BACKGROUND SCENE only, static. Do not include fire, rain, smoke, snow, stars, birds, dust, aurora, bubbles or animated particles — these will be overlaid programmatically. Photographic, highly detailed, cinematic lighting, no text, no watermark, no signature.`;
+
+  try {
+    const body = { model: IMG_MODEL, prompt, n: 1, size: '1K', ratio: state.ratio, extra_body: { response_format: 'b64_json' } };
+    const response = await fetch(`${API_URL}/images/generations`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}` }, body: JSON.stringify(body) });
+    if (!response.ok) { const t = await response.text(); throw new Error(`HTTP ${response.status} — ${t.slice(0, 160)}`); }
+    const data = await response.json();
+    const item = data.data?.[0] || data.images?.[0] || {};
+    let dataUrl = toDataUrl(item.b64_json || item.b64 || item.base64);
+    if (!dataUrl && item.url) { const r = await fetch(item.url); if (!r.ok) throw new Error('Image HTTP ' + r.status); dataUrl = await blobToDataUrl(await r.blob()); }
+    if (!dataUrl) throw new Error('Aucune image reçue');
+    state.backgroundDataUrl = dataUrl;
+    preview.innerHTML = `<img src="${dataUrl}" alt="Décor généré">`;
+    $('genStatus').textContent = 'Décor prêt. Tu peux passer aux effets animés.';
+    $('genContinueWrap').classList.remove('hidden');
+    await loadBackgroundImage(dataUrl);
+    toast('Décor généré.');
+  } catch (err) {
+    console.error(err);
+    preview.classList.add('hidden');
+    $('genStatus').textContent = 'Erreur : ' + err.message;
+    toast('Échec de la génération');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function blobToDataUrl(blob) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); }); }
+
+async function loadBackgroundImage(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      state.backgroundImg = img;
+      const bg = $('backgroundImage'); bg.src = dataUrl; bg.hidden = false; bg.style.display = 'block';
+      const canvas = $('editorCanvas');
+      if (!state.editor) {
+        state.editor = new VisualEditor(canvas, img);
+        state.editor.showZones = true;
+        state.editor.onSelect = (el) => { if (el) showPropertyPanel(el); else hidePropertyPanel(); refreshElementList(); };
+        state.editor.onChange = () => {};
+        state.editor.ambient = state.ambient;
+        state.editor.wind = state.wind;
+      } else { state.editor.image = img; }
+      fitStage(); resolve(img);
+    };
+    img.onerror = () => reject(new Error('Image invalide'));
+    img.src = dataUrl;
+  });
+}
+
+/* ---------- ÉTAPE 2 : éditeur ---------- */
+function fitStage() {
+  const wrap = $('stageWrap'); const stage = $('stage'); const bg = $('backgroundImage'); const canvas = $('editorCanvas');
+  if (!state.backgroundImg || !wrap) return;
+  const maxW = wrap.clientWidth - 16; const maxH = Math.max(240, window.innerHeight - 320);
+  if (maxW < 40) return;
+  const scale = Math.min(maxW / state.backgroundImg.naturalWidth, maxH / state.backgroundImg.naturalHeight);
+  const w = Math.max(2, Math.round(state.backgroundImg.naturalWidth * scale));
+  const h = Math.max(2, Math.round(state.backgroundImg.naturalHeight * scale));
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  stage.style.width = w + 'px'; stage.style.height = h + 'px';
+  bg.style.width = w + 'px'; bg.style.height = h + 'px';
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+  const bw = Math.round(w * dpr); const bh = Math.round(h * dpr);
+  if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
+  if (state.editor) { state.editor.viewWidth = w; state.editor.viewHeight = h; state.editor.dpr = dpr; }
+}
+
+function buildAddGrid() {
+  const grid = $('addGrid');
+  const entries = [
+    ['fire','🔥 Feu'],['candle','🕯️ Bougie'],['ceiling_light','💡 Plafonnier'],['smoke','💨 Fumée'],
+    ['window_light','🌙 Lune'],['stars','✨ Étoiles'],['water_cells','💧 Caustiques'],['trees','🍂 Feuilles'],
+    ['birds','🐦 Oiseaux'],['bubbles','🔮 Bulles'],['god_rays','🌫️ Rayons'],['butterfly','🦋 Papillon'],
+    ['grass','🌾 Herbe'],['dust','✴️ Poussière'],['rain','🌧️ Pluie'],['snow','❄️ Neige'],['aurora','🌌 Aurore']
+  ];
+  grid.innerHTML = entries.map(([k, l]) => `<button data-add="${k}">${l}</button>`).join('');
+  grid.addEventListener('click', (e) => { const b = e.target.closest('[data-add]'); if (!b) return; addEffect(b.dataset.add); });
+}
+
+function addEffect(type) {
+  if (!state.editor) return toast('Génère d\'abord un décor');
+  const config = { type, enabled: true, position: { x: 0.4, y: 0.6 }, size: { width: 0.1, height: 0.1 }, speed: 0.6 };
+  if (type === 'fire') config.position = { x: 0.25, y: 0.6 };
+  if (type === 'candle') { config.radius = 0.06; delete config.size; }
+  if (type === 'ceiling_light') config.radius = 0.45;
+  if (type === 'water_cells') { config.position = { x: 0.02, y: 0.3 }; config.size = { width: 0.96, height: 0.65 }; }
+  if (type === 'grass') { config.region = { x: 0, y: 0.72, width: 1, height: 0.28 }; delete config.position; delete config.size; }
+  if (type === 'rain' || type === 'snow') { config.region = { x: 0, y: 0, width: 1, height: 1 }; delete config.position; delete config.size; }
+  const same = state.editor.elements.filter((el) => el.config.type === type).length;
+  if (config.position) { config.position.x = Math.min(0.9, (config.position.x || 0.4) + same * 0.05); config.position.y = Math.min(0.88, (config.position.y || 0.4) + (same % 3) * 0.05); }
+  const el = state.editor.addElement(config);
+  state.editor.selectElement(el.config.id);
+  showPropertyPanel(el);
+  refreshElementList();
+}
+
+function refreshElementList() {
+  const list = $('elementList'); if (!list) return;
+  if (!state.editor || !state.editor.elements.length) { list.innerHTML = '<p class="muted">Aucun effet posé.</p>'; return; }
+  const selId = state.editor.selectedElement && state.editor.selectedElement.config.id;
+  list.innerHTML = state.editor.elements.map((el) => {
+    const meta = window.TYPE_META[el.config.type] || { icon: '•', label: el.config.type };
+    const cls = 'element-item' + (el.config.id === selId ? ' is-selected' : '') + (el.config.enabled === false ? ' is-off' : '');
+    return `<div class="${cls}" data-id="${el.config.id}">
+      <button class="element-name" data-id="${el.config.id}">${meta.icon} ${meta.label}</button>
+      <div class="element-actions">
+        <button data-action="toggle" data-id="${el.config.id}">${el.config.enabled === false ? '○' : '●'}</button>
+        <button data-action="duplicate" data-id="${el.config.id}">⧉</button>
+        <button data-action="delete" data-id="${el.config.id}">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+$('elementList') && $('elementList').addEventListener('click', (e) => {
+  if (!state.editor) return;
+  const id = e.target.dataset.id; if (!id) return;
+  const action = e.target.dataset.action;
+  if (!action) { state.editor.selectElement(id); return; }
+  if (action === 'delete') { state.editor.removeElement(id); hidePropertyPanel(); }
+  else if (action === 'toggle') { const el = state.editor.elements.find(x => x.config.id === id); if (el) el.config.enabled = !el.config.enabled; }
+  else if (action === 'duplicate') { const el = state.editor.duplicateElement(id); if (el) { state.editor.selectElement(el.config.id); showPropertyPanel(el); } }
+  refreshElementList();
+});
+
+function showPropertyPanel(el) {
+  const panel = $('propertyPanel'); $('propertyEmpty').style.display = 'none';
+  panel.style.display = 'block';
+  const c = el.config; const meta = window.TYPE_META[c.type] || { label: c.type, icon: '' };
+  const rows = [];
+  rows.push(`<p class="property-title">${meta.icon} ${meta.label}</p>`);
+  rows.push(`<label class="check"><input type="checkbox" data-k="enabled" ${c.enabled !== false ? 'checked' : ''}> Visible</label>`);
+  const rangeRow = (k, label, min, max, step) => {
+    const v = pathGet(c, k); if (v == null) return '';
+    return `<div class="property-row"><label>${label}</label><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${v}"></div>`;
+  };
+  if (c.position) { rows.push(rangeRow('position.x', 'X', 0, 1, 0.01)); rows.push(rangeRow('position.y', 'Y', 0, 1, 0.01)); }
+  if (c.size) { rows.push(rangeRow('size.width', 'Largeur', 0.02, 1, 0.01)); rows.push(rangeRow('size.height', 'Hauteur', 0.02, 1, 0.01)); }
+  if (c.region) { rows.push(rangeRow('region.x', 'Zone X', 0, 1, 0.01)); rows.push(rangeRow('region.y', 'Zone Y', 0, 1, 0.01)); rows.push(rangeRow('region.width', 'Zone largeur', 0.05, 1, 0.01)); rows.push(rangeRow('region.height', 'Zone hauteur', 0.05, 1, 0.01)); }
+  if (c.radius != null) rows.push(rangeRow('radius', 'Rayon', 0.015, 0.7, 0.005));
+  if (c.speed != null) rows.push(rangeRow('speed', 'Vitesse', 0.05, 2.5, 0.05));
+  if (c.intensity != null) rows.push(rangeRow('intensity', 'Intensité', 0, 1.6, 0.02));
+  if (c.opacity != null) rows.push(rangeRow('opacity', 'Opacité', 0, 1, 0.02));
+  if (c.count != null) rows.push(rangeRow('count', 'Nombre', 0, 260, 1));
+  if (c.particle_count != null) rows.push(rangeRow('particle_count', 'Particules', 5, 240, 1));
+  if (c.sway_amount != null) rows.push(rangeRow('sway_amount', 'Amplitude', 0, 12, 0.5));
+  const colorKey = c.flickerColor ? 'flickerColor' : (c.wingColor ? 'wingColor' : (c.color ? 'color' : null));
+  if (colorKey) rows.push(`<div class="property-row"><label>Couleur</label><input type="color" data-k="${colorKey}" value="${c[colorKey] || '#FFFFFF'}"></div>`);
+  rows.push(`<button class="btn" style="width:100%;margin-top:8px" data-dup="${c.id}">⧉ Dupliquer</button>`);
+  rows.push(`<button class="btn" style="width:100%;margin-top:4px;background:transparent;color:#ffb0a8;border-color:#ef4444" data-del="${c.id}">Supprimer</button>`);
+  panel.innerHTML = rows.join('');
+  panel.querySelectorAll('input').forEach((inp) => {
+    inp.addEventListener('input', (ev) => {
+      const k = ev.target.dataset.k; if (!k) return;
+      let v = ev.target.value; if (ev.target.type === 'range') v = parseFloat(v); else if (ev.target.type === 'checkbox') v = ev.target.checked;
+      if (k === 'position.x' || k === 'position.y') { if (!c.position) c.position = {}; c.position[k.split('.')[1]] = v; }
+      else if (k === 'size.width' || k === 'size.height') { if (!c.size) c.size = {}; c.size[k.split('.')[1]] = v; }
+      else if (k.startsWith('region.')) { if (!c.region) c.region = {}; c.region[k.split('.')[1]] = v; }
+      else c[k] = v;
+    });
+  });
+  panel.querySelector('[data-del]')?.addEventListener('click', () => { state.editor.removeElement(c.id); hidePropertyPanel(); refreshElementList(); });
+  panel.querySelector('[data-dup]')?.addEventListener('click', () => { const d = state.editor.duplicateElement(c.id); if (d) { state.editor.selectElement(d.config.id); showPropertyPanel(d); refreshElementList(); } });
+}
+function hidePropertyPanel() { $('propertyPanel').style.display = 'none'; $('propertyEmpty').style.display = 'block'; }
+function pathGet(o, p) { return p.split('.').reduce((a, k) => a == null ? a : a[k], o); }
+
+/* Canvas interactions */
+$('editorCanvas') && $('editorCanvas').addEventListener('pointerdown', (e) => {
+  if (!state.editor) return;
+  const p = canvasPoint(e); state.editor.handleMouseDown(p.x, p.y);
+  if (state.editor.selectedElement) showPropertyPanel(state.editor.selectedElement); else hidePropertyPanel();
+  refreshElementList();
+  try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+});
+window.addEventListener('pointermove', (e) => {
+  if (!state.editor || e.target?.id !== 'editorCanvas') return;
+  const p = canvasPoint(e); state.editor.handleMouseMove(p.x, p.y);
+});
+window.addEventListener('pointerup', () => { if (state.editor) state.editor.handleMouseUp(); });
+function canvasPoint(e) {
+  const c = $('editorCanvas'); const rect = c.getBoundingClientRect();
+  const vw = state.editor.viewWidth; const vh = state.editor.viewHeight;
+  return { x: (e.clientX - rect.left) * (vw / rect.width), y: (e.clientY - rect.top) * (vh / rect.height) };
+}
+
+/* Ambient & wind */
+['ambientEnabled','ambientColor','ambientIntensity','ambientPulse','windSlider'].forEach((id) => {
+  const el = $(id); if (!el) return;
+  el.addEventListener('input', () => {
+    state.ambient = { enabled: $('ambientEnabled').checked, color: $('ambientColor').value, intensity: parseFloat($('ambientIntensity').value), pulse_speed: parseFloat($('ambientPulse').value) };
+    $('ambientIntensityOut').textContent = Math.round(state.ambient.intensity * 100) + ' %';
+    state.wind = parseFloat($('windSlider').value) || 0;
+    $('windOut').textContent = Math.round(state.wind * 100) + ' %';
+    if (state.editor) { state.editor.ambient = state.ambient; state.editor.wind = state.wind; }
+  });
+});
+
+/* Speed slider */
+function bindSpeed(id, outId) {
+  const el = $(id); if (!el) return;
+  el.addEventListener('input', () => {
+    state.speedFactor = parseFloat(el.value);
+    $(outId).textContent = state.speedFactor.toFixed(2) + '×';
+    $('speedSlider').value = state.speedFactor; $('speedSlider2').value = state.speedFactor;
+    $('speedOut').textContent = state.speedFactor.toFixed(2) + '×'; $('speedOut2').textContent = state.speedFactor.toFixed(2) + '×';
+  });
+}
+bindSpeed('speedSlider', 'speedOut');
+bindSpeed('speedSlider2', 'speedOut2');
+
+/* Hide / clear */
+function hideAll() { if (!state.editor) return; state.editor.elements.forEach(el => el.config.enabled = false); refreshElementList(); }
+function clearAll() { if (!state.editor) return; if (!confirm('Supprimer tous les effets ?')) return; state.editor.clearElements(); hidePropertyPanel(); refreshElementList(); }
+
+/* Mascottes */
+function renderMascots() {
+  const list = $('mascotList'); if (!list) return;
+  list.innerHTML = state.mascots.map(m => `<div class="mascot-item" data-src="${m.src}" title="Cliquer pour ajouter"><img src="${m.src}" alt=""><button class="mascot-del" data-id="${m.id}">×</button></div>`).join('') +
+    `<div class="mascot-add" id="mascotAddBtn">➕<input type="file" id="mascotUpload" accept="image/*" multiple></div>`;
+}
+$('mascotList') && $('mascotList').addEventListener('click', (e) => {
+  if (e.target.closest('#mascotAddBtn')) { $('mascotUpload')?.click(); return; }
+  const del = e.target.closest('.mascot-del'); if (del) { state.mascots = state.mascots.filter(m => m.id !== del.dataset.id); renderMascots(); return; }
+  const item = e.target.closest('.mascot-item'); if (item) {
+    if (!state.editor) return toast('Génère d\'abord un décor');
+    const el = state.editor.addElement({ type: 'capybara', enabled: true, position: { x: 0.5, y: 0.5 }, size: { width: 0.2, height: 0.2 }, imageSrc: item.dataset.src, speed: 0.6 });
+    state.editor.selectElement(el.config.id); showPropertyPanel(el); refreshElementList();
+  }
+});
+$('mascotList') && $('mascotList').addEventListener('change', async (e) => {
+  if (e.target.id !== 'mascotUpload') return;
+  const files = e.target.files; if (!files) return;
+  for (const f of files) { if (!f.type.startsWith('image/')) continue; const src = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); }); state.mascots.push({ id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2), src }); }
+  renderMascots();
+});
+
+/* ---------- ÉTAPE 3 : aperçu plein écran ---------- */
+function startPreview() {
+  if (!state.backgroundImg) return;
+  const canvas = $('previewCanvas');
+  const ratio = state.backgroundImg.naturalWidth / state.backgroundImg.naturalHeight;
+  const maxW = canvas.parentElement.clientWidth; const w = maxW; const h = Math.round(w / ratio);
+  canvas.width = state.backgroundImg.naturalWidth; canvas.height = state.backgroundImg.naturalHeight;
+  canvas.style.width = '100%'; canvas.style.height = '100%';
+  if (state.previewPlayer) state.previewPlayer.stop();
+  const scene = { ambient_light: state.ambient, elements: state.editor ? state.editor.exportToJSON().elements : [] };
+  state.previewPlayer = new window.LivingEffects.ScenePlayer(canvas, scene, state.backgroundImg, state.speedFactor);
+  state.previewPlayer.start();
+}
+
+/* ---------- ÉTAPE 4 : export ---------- */
+function updateStats() {
+  $('statEffects').textContent = state.editor ? state.editor.elements.length : 0;
+  $('statSpeed').textContent = state.speedFactor.toFixed(2) + '×';
+  $('statFormat').textContent = state.ratio;
+}
+
+function buildStandaloneHTML() {
+  if (!state.backgroundDataUrl) throw new Error('Aucun décor.');
+  const engineSrc = installLivingEffects.toString();
+  const scene = { ambient_light: state.ambient, wind: state.wind, speed: state.speedFactor, elements: state.editor ? state.editor.exportToJSON().elements : [] };
+  const json = JSON.stringify(scene).replace(/</g, '\\u003c');
+  const safeEngine = engineSrc.replace(/<\/script/gi, '<\\/script');
+  return `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Image dynamique</title>
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#wrap{min-height:100%;display:flex;align-items:center;justify-content:center}#stage{position:relative;line-height:0}#bg{display:block;width:100%;height:100%}#fx{position:absolute;inset:0;width:100%;height:100%}#ctrl{position:fixed;right:14px;bottom:14px;background:rgba(0,0,0,.55);color:#fff;padding:8px 12px;border-radius:8px;font:12px system-ui;backdrop-filter:blur(6px);display:flex;gap:8px;align-items:center;opacity:.35;transition:opacity .2s}#ctrl:hover{opacity:1}#ctrl input{width:120px;accent-color:#8b5cf6}#ctrl b{min-width:38px;text-align:right}</style></head>
+<body><div id="wrap"><div id="stage"><img id="bg" alt="" src="${state.backgroundDataUrl}"><canvas id="fx"></canvas></div></div>
+<div id="ctrl"><span>Vitesse</span><input id="sp" type="range" min="0.1" max="3" step="0.05" value="${state.speedFactor}"><b id="spv">${state.speedFactor.toFixed(2)}×</b></div>
+<script>${safeEngine.replace(/^try\s*{/, '').replace(/}\s*catch\s*\(e\)\s*{[^}]*}$/, '')}<\/script>
+<script>
+const scene = ${json};
+if (scene.wind != null && window.LivingEffects) window.LivingEffects.setGlobalWind(scene.wind);
+const img = document.getElementById('bg'), canvas = document.getElementById('fx');
+let player = null;
+function fit() {
+  const nw = img.naturalWidth || 1280, nh = img.naturalHeight || 720;
+  const scale = Math.min(window.innerWidth / nw, window.innerHeight / nh);
+  const w = Math.max(2, Math.round(nw * scale)), h = Math.max(2, Math.round(nh * scale));
+  const stage = document.getElementById('stage');
+  stage.style.width = w + 'px'; stage.style.height = h + 'px';
+  if (!player) { canvas.width = w; canvas.height = h; player = new LivingEffects.ScenePlayer(canvas, scene, img, scene.speed || 1); player.start(); }
+  else player.resize(w, h);
+}
+const sp = document.getElementById('sp'), spv = document.getElementById('spv');
+sp.addEventListener('input', () => { const v = parseFloat(sp.value); spv.textContent = v.toFixed(2) + '×'; if (player) player.speedFactor = v; });
+document.addEventListener('visibilitychange', () => { if (!player) return; if (document.hidden) player.stop(); else player.start(); });
+if (img.complete && img.naturalWidth) fit(); else img.onload = fit;
+window.addEventListener('resize', fit);
+<\/script>
+</body></html>`;
+}
+
+function exportStandalone() {
+  try {
+    const html = buildStandaloneHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'image-dynamique.html'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    $('exportStatus').textContent = 'Fichier HTML téléchargé (' + Math.round(blob.size / 1024) + ' Ko). Ouvre-le dans n\'importe quel navigateur.';
+    toast('Image dynamique téléchargée');
+  } catch (err) { console.error(err); $('exportStatus').textContent = 'Erreur : ' + err.message; }
+}
+function exportJson() {
+  const scene = { ambient_light: state.ambient, wind: state.wind, speed: state.speedFactor, elements: state.editor ? state.editor.exportToJSON().elements : [] };
+  const blob = new Blob([JSON.stringify(scene, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'scene.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+/* ---------- reset ---------- */
+function resetApp() {
+  if (!confirm('Recommencer ? La scène actuelle sera perdue.')) return;
+  location.reload();
+}
+
+/* ---------- boot ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  $('apiKey').value = state.apiKey;
+  buildAddGrid();
+  renderMascots();
+  document.querySelectorAll('.progress-step').forEach((btn) => btn.addEventListener('click', () => goStep(Number(btn.dataset.step))));
+  window.addEventListener('resize', () => { if (!$('step2').classList.contains('hidden')) fitStage(); });
+});
+</script>
+</body>
+</html>
